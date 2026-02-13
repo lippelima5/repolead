@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum role {
+  owner
+  admin
+  user
+  viewer
+}
+
+enum plan_status {
+  active
+  trialing
+  pending
+  inactive
+  canceled
+  expired
+}
+
+enum invite_status {
+  pending
+  accepted
+  revoked
+  expired
+}
+
+model user {
+  id                            Int                @id @default(autoincrement())
+  name                          String?
+  email                         String             @unique
+  password                      String
+  avatar                        String?
+  role                          role               @default(user)
+  suspended_at                  DateTime?
+  suspended_reason              String?
+  reset_token                   String?
+  reset_token_expires_at        DateTime?
+  verified_at                   DateTime?
+  verification_token            String?
+  verification_token_expires_at DateTime?
+  workspace_active_id           Int?
+  workspaces                    workspace_user[]
+  invites_sent                  workspace_invite[] @relation("workspace_invite_invited_by")
+  invites_accepted              workspace_invite[] @relation("workspace_invite_accepted_by")
+  created_at                    DateTime           @default(now())
+  updated_at                    DateTime           @updatedAt
+}
+
+model workspace {
+  id                     Int                @id @default(autoincrement())
+  name                   String
+  description            String?
+  users                  workspace_user[]
+  plan_status            plan_status        @default(trialing)
+  plan_expires_at        DateTime?
+  stripe_customer_id     String?            @unique
+  stripe_subscription_id String?            @unique
+  invites                workspace_invite[]
+  created_at             DateTime           @default(now())
+  updated_at             DateTime           @updatedAt
+}
+
+model workspace_user {
+  workspace_id Int
+  workspace    workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  user_id      Int
+  user         user      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role         role      @default(user)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@id([workspace_id, user_id])
+}
+
+model workspace_invite {
+  id             Int           @id @default(autoincrement())
+  workspace_id   Int
+  workspace      workspace     @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  email          String
+  role           role          @default(user)
+  token          String        @unique
+  status         invite_status @default(pending)
+  invited_by_id  Int
+  invited_by     user          @relation("workspace_invite_invited_by", fields: [invited_by_id], references: [id], onDelete: Cascade)
+  accepted_by_id Int?
+  accepted_by    user?         @relation("workspace_invite_accepted_by", fields: [accepted_by_id], references: [id], onDelete: SetNull)
+  expires_at     DateTime
+  accepted_at    DateTime?
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+
+  @@index([workspace_id, email])
+  @@index([email, status])
+}
+
+model rate_limit_window {
+  key        String   @id
+  count      Int      @default(0)
+  reset_at   DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([reset_at])
+}
+
+model billing_plan {
+  id              Int      @id @default(autoincrement())
+  key             String   @unique
+  name            String
+  description     String?
+  stripe_price_id String   @unique
+  amount_cents    Int?
+  currency        String   @default("brl")
+  interval        String   @default("month")
+  is_active       Boolean  @default(true)
+  sort_order      Int      @default(0)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([is_active, sort_order])
+}
+
+

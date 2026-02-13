@@ -1,0 +1,73 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
+import AppLayout from "@/components/app-layout";
+import WorkspaceForm from "@/components/workspace-modal";
+import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
+import logger from "@/lib/logger.client";
+import { canManageWorkspace } from "@/lib/workspace-permissions";
+import { WorkspaceRelations } from "@/types";
+
+export default function EditWorkspacePage() {
+  const params = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const workspaceId = params.workspaceId as string;
+  const [workspace, setWorkspace] = useState<WorkspaceRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWorkspace = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await api.get(`/workspace/${workspaceId}`);
+        if (data.success) {
+          setWorkspace(data.data);
+        }
+      } catch (error) {
+        logger.error("Erro ao carregar workspace", error);
+        router.push("/dashboard/settings/workspace");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWorkspace();
+  }, [workspaceId, router]);
+
+  const currentWorkspaceRole = useMemo(() => {
+    if (!workspace || !user) return null;
+    const membership = workspace.users.find((item) => item.user_id === user.id);
+    return membership?.role ?? null;
+  }, [workspace, user]);
+
+  const canManage = canManageWorkspace(currentWorkspaceRole);
+
+  return (
+    <AppLayout
+      title={workspace ? `Editar: ${workspace.name}` : "Editar Workspace"}
+      backButton={{
+        href: "/dashboard/settings/workspace",
+        label: "Voltar para workspaces",
+      }}
+      isLoading={isLoading}
+    >
+      <div className="flex flex-col gap-6 p-4">
+        {workspace && canManage ? <WorkspaceForm workspace={workspace} /> : null}
+        {workspace && !canManage ? (
+          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+            Voce nao tem permissao para editar este workspace.
+            <div className="mt-3">
+              <Button variant="outline" onClick={() => router.push(`/dashboard/settings/workspace/${workspaceId}`)}>
+                Voltar para detalhes
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </AppLayout>
+  );
+}
