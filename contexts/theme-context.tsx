@@ -1,8 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-
-export type ThemeMode = "light" | "dark" | "system";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  DEFAULT_THEME,
+  THEME_COOKIE_NAME,
+  THEME_STORAGE_KEY,
+  ThemeMode,
+  buildPreferenceCookie,
+  parseTheme,
+  resolveTheme,
+} from "@/lib/user-preferences";
 
 type ThemeContextValue = {
   theme: ThemeMode;
@@ -12,31 +19,32 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function resolveTheme(theme: ThemeMode) {
-  if (theme === "system") {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  initialTheme?: ThemeMode;
+};
 
-  return theme;
-}
-
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") {
-      return "system";
-    }
-    const stored = window.localStorage.getItem("repolead.theme");
-    return stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
+export function ThemeProvider({ children, initialTheme = DEFAULT_THEME }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<ThemeMode>(() => parseTheme(initialTheme));
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
+    const normalizedTheme = parseTheme(initialTheme);
+    return normalizedTheme === "dark" ? "dark" : "light";
   });
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+
+  const setTheme = useCallback((nextTheme: ThemeMode) => {
+    setThemeState(parseTheme(nextTheme));
+  }, []);
 
   useEffect(() => {
     const apply = () => {
-      const resolved = resolveTheme(theme);
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const resolved = resolveTheme(theme, prefersDark);
       setResolvedTheme(resolved);
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(resolved);
-      window.localStorage.setItem("repolead.theme", theme);
+      document.documentElement.style.colorScheme = resolved;
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+      document.cookie = buildPreferenceCookie(THEME_COOKIE_NAME, theme);
     };
 
     apply();
@@ -57,7 +65,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       resolvedTheme,
       setTheme,
     }),
-    [theme, resolvedTheme],
+    [theme, resolvedTheme, setTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

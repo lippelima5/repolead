@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { getServerUserPreferences } from "@/lib/user-preferences.server";
+import { localeToHtmlLang } from "@/lib/user-preferences";
 import "./globals.css";
 
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "RepoLead";
@@ -40,9 +42,12 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { locale, theme } = await getServerUserPreferences();
+  const initialThemeClass = theme === "dark" || theme === "light" ? theme : 'dark';
+
   return (
-    <html lang="en-US">
+    <html lang={localeToHtmlLang(locale)} className={initialThemeClass} suppressHydrationWarning>
       <body>
         {GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>

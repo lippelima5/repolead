@@ -1,10 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import en from "@/content/i18n/en.json";
 import pt from "@/content/i18n/pt.json";
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE_NAME,
+  LOCALE_STORAGE_KEY,
+  Locale,
+  buildPreferenceCookie,
+  localeToHtmlLang,
+  parseLocale,
+} from "@/lib/user-preferences";
 
-type Locale = "pt" | "en";
 type TranslationParams = Record<string, string | number>;
 type DictionaryNode = string | { [key: string]: DictionaryNode };
 
@@ -40,19 +48,22 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<Locale>(() => {
-    if (typeof window === "undefined") {
-      return "pt";
-    }
+type I18nProviderProps = {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+};
 
-    const stored = window.localStorage.getItem("repolead.locale");
-    return stored === "pt" || stored === "en" ? stored : "pt";
-  });
+export function I18nProvider({ children, initialLocale = DEFAULT_LOCALE }: I18nProviderProps) {
+  const [locale, setLocaleState] = useState<Locale>(() => parseLocale(initialLocale));
+
+  const setLocale = useCallback((nextLocale: Locale) => {
+    setLocaleState(parseLocale(nextLocale));
+  }, []);
 
   useEffect(() => {
-    window.localStorage.setItem("repolead.locale", locale);
-    document.documentElement.lang = locale === "pt" ? "pt-BR" : "en-US";
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    document.cookie = buildPreferenceCookie(LOCALE_COOKIE_NAME, locale);
+    document.documentElement.lang = localeToHtmlLang(locale);
   }, [locale]);
 
   const value = useMemo<I18nContextValue>(
@@ -65,7 +76,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         return interpolate(localized || fallback || key, params);
       },
     }),
-    [locale],
+    [locale, setLocale],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
