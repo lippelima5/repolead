@@ -202,6 +202,14 @@
     "title": "Leads",
     "subtitle": "{count} leads in workspace",
     "search_placeholder": "Search by email, phone or name...",
+    "export_csv": "Download CSV",
+    "export_email": "Send by email",
+    "exporting": "Exporting...",
+    "sending_export_email": "Sending...",
+    "export_started": "Export started",
+    "export_failed": "Failed to export CSV",
+    "export_email_sent": "Export link sent by email",
+    "export_email_failed": "Failed to send export email",
     "all": "all",
     "lead": "Lead",
     "identities": "Identities",
@@ -297,6 +305,27 @@
     "security_isolation_desc": "Every read/write is scoped by workspace_id.",
     "alerts_description": "Configure alert rules in this workspace. Use alerts page to inspect triggered events.",
     "open_alerts_center": "Open alerts center",
+    "api_access": "API Access",
+    "api_access_description": "Manage read keys to query leads from the public API.",
+    "api_access_subtitle": "{count} active key(s) for the current workspace.",
+    "open_api_access": "Open API Access",
+    "api_access_load_failed": "Failed to load API keys",
+    "api_access_created": "Read key created",
+    "api_access_create_failed": "Failed to create read key",
+    "api_access_rotated": "Read key rotated",
+    "api_access_rotate_failed": "Failed to rotate key",
+    "api_access_revoked": "Read key revoked",
+    "api_access_revoke_failed": "Failed to revoke key",
+    "api_access_key_copied": "Key copied",
+    "api_access_key_once": "Copy this key now. It will not be shown again.",
+    "api_access_create": "Create new key",
+    "api_access_name_placeholder": "Key name (optional)",
+    "api_access_generate": "Generate key",
+    "api_access_empty": "No read keys created yet.",
+    "api_access_active_status": "Active",
+    "api_access_revoked_status": "Revoked",
+    "api_access_rotate": "Rotate",
+    "api_access_revoke": "Revoke",
     "workspace_actions": "Workspace actions",
     "workspace_actions_description": "Create a new workspace or open the full management area.",
     "create_workspace": "Create new workspace",
@@ -355,5 +384,200 @@
     "faq_q3": "Is there rate limiting?",
     "faq_a3": "Each source has a configurable requests-per-minute limit with HTTP 429 on overflow.",
     "footer_rights": "All rights reserved."
+  },
+  "lp": {
+    "nav": {
+      "product": "Product",
+      "how": "How it works",
+      "usecases": "Use cases",
+      "security": "Security",
+      "faq": "FAQ",
+      "docs": "Documentation",
+      "login": "Log in",
+      "cta": "Try it now"
+    },
+    "hero": {
+      "badge": "Open Beta",
+      "title": "A single capture point for all your leads",
+      "subtitle": "API-first platform for reliable lead capture, deduplication and delivery per workspace. Single endpoint, full audit trail, zero lost leads.",
+      "cta": "Try it now",
+      "cta2": "View documentation",
+      "bullet1": "Automatic deduplication by identity",
+      "bullet2": "Append-only audit trail per event",
+      "bullet3": "Reliable delivery with retries and DLQ"
+    },
+    "problem": {
+      "title": "The problem you already know",
+      "intro": "When volume grows, serious teams face the same problems:",
+      "pain1": "Leads scattered across platforms and forms, with no single source of truth",
+      "pain2": "No visibility: there's no single place to query and audit what happened",
+      "pain3": "Duplicate leads that pollute CRMs and distort conversion metrics",
+      "pain4": "Lost leads due to webhook failures, inconsistent routing and fragile integrations",
+      "pain5": "Every new campaign or landing page requires reconfiguring logic in multiple places",
+      "pain6": "Each source sends to a different destination, with no standard and no traceability"
+    },
+    "whatis": {
+      "title": "What is LeadVault",
+      "p1": "LeadVault is an API-first platform that acts as a canonical layer for your leads. It centralizes capture, storage and orchestration of leads from forms, automations, webhooks and custom integrations.",
+      "p2": "Receives events on a single endpoint, applies idempotency and identity normalization, merges duplicates per workspace, records an append-only audit timeline, and delivers events to destinations with signing, retries and DLQ.",
+      "term1": {
+        "title": "Idempotency",
+        "desc": "The same event sent twice doesn't create a duplicate. The idempotency key ensures a single entry."
+      },
+      "term2": {
+        "title": "Append-only audit trail",
+        "desc": "Immutable history of everything that happened with each lead — where it came from, what changed, where it went."
+      },
+      "term3": {
+        "title": "Retry + DLQ",
+        "desc": "If the destination fails, LeadVault retries automatically. After exhausting attempts, the event goes to the Dead Letter Queue for manual replay."
+      }
+    },
+    "how": {
+      "title": "How it works",
+      "step1": {
+        "num": "01",
+        "title": "Capture on a single endpoint",
+        "desc": "Send leads from any source via API or webhook. The raw payload is fully preserved for audit and reprocessing."
+      },
+      "step2": {
+        "num": "02",
+        "title": "Normalize and deduplicate per workspace",
+        "desc": "Identities (email, phone, external_id) are extracted and normalized. Duplicates are detected and merged automatically."
+      },
+      "step3": {
+        "num": "03",
+        "title": "Record audit trail and timeline",
+        "desc": "Every action is recorded in an append-only log: creation, merge, status change, delivery. Nothing is lost."
+      },
+      "step4": {
+        "num": "04",
+        "title": "Deliver with retries and DLQ",
+        "desc": "Fan-out to N destinations with HMAC signing, automatic retries and dead letter queue. Manual or batch replay when needed."
+      }
+    },
+    "diagram": {
+      "sources": "Sources",
+      "api": "Forms · Webhooks · APIs",
+      "ingest": "Capture endpoint",
+      "process": "Dedupe · Normalize · Audit",
+      "deliver": "Delivery",
+      "dest": "CRM · Webhook · Email · Slack"
+    },
+    "payload": {
+      "title": "Ingestion payload example"
+    },
+    "timeline": {
+      "title": "Timeline event example"
+    },
+    "usecases": {
+      "title": "Use cases"
+    },
+    "usecase1": {
+      "title": "Marketing Ops",
+      "desc": "Standardize lead capture across landing pages, forms and campaigns. One endpoint for all sources, no reconfiguring logic for each launch."
+    },
+    "usecase2": {
+      "title": "Revenue Ops",
+      "desc": "Consistent routing to CRM and enrichment tools. Deduplication ensures each lead enters the pipeline once, with full traceability."
+    },
+    "usecase3": {
+      "title": "Engineering",
+      "desc": "Decouple sources and destinations. Eliminate duplicate logic across services. Standardized API with idempotency, no reinventing webhook handling per project."
+    },
+    "usecase4": {
+      "title": "Operations",
+      "desc": "Full audit trail, replay of failed deliveries and failure investigation with immutable timeline. Know exactly what happened with each lead."
+    },
+    "beta": {
+      "title": "Open Beta: how it works",
+      "included_title": "Included in beta",
+      "inc1": "Capture endpoint with idempotency and rate limiting",
+      "inc2": "Automatic deduplication and merge per workspace",
+      "inc3": "Append-only audit timeline",
+      "inc4": "Destinations via webhooks and API integrations",
+      "inc5": "Automatic retries and Dead Letter Queue (DLQ)",
+      "inc6": "Manual and batch replay",
+      "inc7": "Documentation and API reference",
+      "soon_title": "Coming soon",
+      "soon1": "Advanced dashboards and metrics",
+      "soon2": "Pre-configured destination templates",
+      "soon3": "Advanced routing controls (filters, conditions)",
+      "soon4": "Native integrations with popular CRMs",
+      "for_title": "Who the beta is for",
+      "for_desc": "Marketing, growth and engineering teams that capture leads from multiple channels and need a reliable central hub with audit trail and guaranteed delivery.",
+      "not_title": "When it's not for you",
+      "not_desc": "If you need a specific native integration already built (e.g., bidirectional sync with a specific CRM) or don't use APIs/webhooks in your operation."
+    },
+    "security": {
+      "title": "Security and compliance",
+      "intro": "Security practices applied from platform design:",
+      "s1": {
+        "title": "Encryption in transit and at rest",
+        "desc": "TLS 1.2+ for all connections. Data stored with encryption."
+      },
+      "s2": {
+        "title": "HMAC-SHA256 signing",
+        "desc": "Delivery webhooks signed with secret + timestamp for destination validation."
+      },
+      "s3": {
+        "title": "Workspace isolation",
+        "desc": "Data, sources and destinations are isolated per workspace. Role-based access control (admin, user, reader)."
+      },
+      "s4": {
+        "title": "Immutable audit log",
+        "desc": "Append-only record of all actions. It's not possible to alter or delete history."
+      },
+      "lgpd": "Privacy and data protection: LeadVault adopts a privacy-by-design approach. Data is processed and stored with workspace-level access controls and encryption. For specific compliance questions regarding LGPD or privacy regulations, contact our team."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "q1": "What is lead deduplication?",
+      "a1": "It's the process of identifying and unifying duplicate records. LeadVault detects duplicates by email, phone or external_id and merges them automatically, ensuring each lead exists only once in the workspace.",
+      "q2": "How does LeadVault prevent duplicate leads?",
+      "a2": "Through idempotency keys per source and identity normalization. If the same event is sent more than once, the idempotency key prevents duplication. Similar identities (email, phone) are detected and unified automatically.",
+      "q3": "Can I send leads to any CRM or tool?",
+      "a3": "Yes. LeadVault delivers via webhooks with HMAC signing. Any system that accepts HTTP POST with JSON payload can be configured as a destination — CRM, email marketing, Slack, internal tools or custom APIs.",
+      "q4": "What happens if the destination goes down?",
+      "a4": "LeadVault retries automatically with exponential backoff. If all attempts fail, the event is moved to the Dead Letter Queue (DLQ), from which it can be resent manually or in batch when the destination is back.",
+      "q5": "How does workspace isolation work?",
+      "a5": "Each workspace is an isolated environment with its own sources, leads, destinations and members. Data from one workspace is not accessible by another. Ideal for separating clients, projects or environments.",
+      "q6": "Does LeadVault replace my form or CRM?",
+      "a6": "No. LeadVault is an intermediary layer. Your forms keep working and your CRM remains the final destination. LeadVault centralizes capture, ensures data quality and delivers reliably.",
+      "q7": "How do I start using the beta?",
+      "a7": "Click \"Try it now\" to create your account. You'll have immediate access to the capture endpoint, deduplication, audit trail and delivery. The documentation includes integration examples for the most common scenarios.",
+      "q8": "Is there delivery replay and audit?",
+      "a8": "Yes. Every delivery is recorded with status, attempts and HTTP response. Failed deliveries can be reprocessed individually or in batch. The timeline shows the complete history of each lead, including all delivery attempts."
+    },
+    "final": {
+      "title": "Centralize your leads. Eliminate duplicates. Deliver with confidence.",
+      "subtitle": "Open beta. Get started in minutes.",
+      "cta": "Try it now",
+      "contact": "Talk to the team"
+    },
+    "footer": {
+      "product": "Product",
+      "resources": "Resources",
+      "company": "Company",
+      "docs": "Documentation",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contact": "Contact",
+      "status": "Status"
+    },
+    "preview": {
+      "title": "Platform preview",
+      "tab1": "Workspaces & Sources",
+      "tab2": "Dedupe & Merge",
+      "tab3": "Timeline & Deliveries"
+    },
+    "micro": {
+      "event_received": "Event received",
+      "delivery_failed": "Delivery failed",
+      "in_retry": "In retry",
+      "in_dlq": "In DLQ",
+      "merged": "Merge completed",
+      "delivered": "Delivered"
+    }
   }
 }

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Mail, Phone, Search } from "lucide-react";
+import { Download, Mail, Phone, Search } from "lucide-react";
 import AppLayout from "@/components/app-layout";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
@@ -32,6 +33,8 @@ export default function LeadsPage() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [rows, setRows] = useState<LeadItem[]>([]);
+  const [isExportingCsv, setIsExportingCsv] = useState(false);
+  const [isSendingExportEmail, setIsSendingExportEmail] = useState(false);
 
   const fetchLeads = useCallback(async () => {
     try {
@@ -69,12 +72,74 @@ export default function LeadsPage() {
 
   const total = useMemo(() => rows.length, [rows.length]);
 
+  const currentFilters = useMemo(
+    () => ({
+      query: query || undefined,
+      status: status === "all" ? undefined : status,
+    }),
+    [query, status],
+  );
+
+  const handleDownloadCsv = useCallback(async () => {
+    try {
+      setIsExportingCsv(true);
+      const response = await api.get("/leads/export.csv", {
+        params: currentFilters,
+        responseType: "blob",
+      });
+
+      const contentDisposition = String(response.headers["content-disposition"] || "");
+      const filenameMatch = contentDisposition.match(/filename="([^"]+)"/i);
+      const filename = filenameMatch?.[1] || "leads.csv";
+      const blob = new Blob([response.data], { type: "text/csv;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      logger.success(t("leads.export_started"));
+    } catch (error) {
+      logger.error(t("leads.export_failed"), error);
+    } finally {
+      setIsExportingCsv(false);
+    }
+  }, [currentFilters, t]);
+
+  const handleSendExportEmail = useCallback(async () => {
+    try {
+      setIsSendingExportEmail(true);
+      await api.post("/leads/export/email", currentFilters);
+      logger.success(t("leads.export_email_sent"));
+    } catch (error) {
+      logger.error(t("leads.export_email_failed"), error);
+    } finally {
+      setIsSendingExportEmail(false);
+    }
+  }, [currentFilters, t]);
+
   return (
     <AppLayout>
       <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">{t("leads.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{t("leads.subtitle", { count: total.toLocaleString() })}</p>
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">{t("leads.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {t("leads.subtitle", { count: total.toLocaleString() })}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="h-9 text-[13px]" onClick={() => void handleDownloadCsv()} disabled={isExportingCsv}>
+              <Download className="h-4 w-4" />
+              {isExportingCsv ? t("leads.exporting") : t("leads.export_csv")}
+            </Button>
+            <Button className="h-9 text-[13px]" onClick={() => void handleSendExportEmail()} disabled={isSendingExportEmail}>
+              <Mail className="h-4 w-4" />
+              {isSendingExportEmail ? t("leads.sending_export_email") : t("leads.export_email")}
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">

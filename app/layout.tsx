@@ -4,18 +4,16 @@ import { Toaster } from "sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "VibeKit";
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "RepoLead";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} - AI SaaS Starter`,
-  description:
-    "Production-oriented Next.js starter with API-route auth, workspace multi-tenant model, invites and billing.",
+  title: `${APP_NAME} - API-first Lead Operations`,
+  description: "Canonical lead repository with capture, dedupe, timeline, deliveries and workspace isolation.",
   openGraph: {
-    title: `${APP_NAME} - AI SaaS Starter`,
-    description:
-      "Production-oriented Next.js starter with API-route auth, workspace multi-tenant model, invites and billing.",
+    title: `${APP_NAME} - API-first Lead Operations`,
+    description: "Canonical lead repository with capture, dedupe, timeline, deliveries and workspace isolation.",
     url: APP_URL,
     siteName: APP_NAME,
     images: [
@@ -31,8 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${APP_NAME} - AI SaaS Starter`,
-    description: "Production-oriented Next.js starter with auth, workspaces and billing.",
+    title: `${APP_NAME} - API-first Lead Operations`,
+    description: "Canonical lead repository with capture, dedupe, timeline, deliveries and workspace isolation.",
     images: [`${APP_URL}/og.webp`],
   },
 };

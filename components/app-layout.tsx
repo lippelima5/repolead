@@ -63,7 +63,7 @@ export default function AppLayout({
           >
             <Menu className="h-4 w-4" />
           </button>
-          {title ? <h1 className="text-sm font-semibold truncate">{title}</h1> : <span className="text-sm font-semibold">LeadVault</span>}
+          {title ? <h1 className="text-sm font-semibold truncate">{title}</h1> : <span className="text-sm font-semibold">RepoLead</span>}
           <div className="ml-auto">{rightComponent}</div>
         </header>
 

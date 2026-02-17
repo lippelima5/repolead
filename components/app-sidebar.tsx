@@ -67,7 +67,7 @@ export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
         <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
           <Zap className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
-        {!isCollapsed ? <span className="font-semibold text-sm text-foreground tracking-tight">LeadVault</span> : null}
+        {!isCollapsed ? <span className="font-semibold text-sm text-foreground tracking-tight">RepoLead</span> : null}
         {mobile ? (
           <button
             onClick={onClose}

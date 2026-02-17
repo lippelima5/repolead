@@ -1,18 +1,27 @@
 import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
-import { apiSuccess } from "@/lib/api-response";
+import { apiRateLimit, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
 import { buildLeadWhereInput, parseLeadFiltersFromSearchParams } from "@/lib/leadvault/leads-query";
+import {
+  checkWorkspaceReadApiKeyLimit,
+  requireWorkspaceReadApiKey,
+  touchWorkspaceReadApiKey,
+} from "@/lib/leadvault/read-api-key";
 
 export async function GET(request: NextRequest) {
   try {
-    const { workspaceId } = await requireWorkspace(request);
+    const apiKey = await requireWorkspaceReadApiKey(request);
+    const limitResult = await checkWorkspaceReadApiKeyLimit(apiKey.id);
+    if (limitResult.limited) {
+      return apiRateLimit("API read rate limit exceeded", limitResult.retryAfterSeconds);
+    }
+
     const filters = parseLeadFiltersFromSearchParams(request.nextUrl.searchParams, {
       defaultLimit: 20,
       maxLimit: 200,
     });
-    const where = buildLeadWhereInput(workspaceId, filters);
+    const where = buildLeadWhereInput(apiKey.workspaceId, filters);
 
     const [items, total] = await Promise.all([
       prisma.lead.findMany({
@@ -28,18 +37,13 @@ export async function GET(request: NextRequest) {
             },
             orderBy: { created_at: "asc" },
           },
-          _count: {
-            select: {
-              deliveries: true,
-              events: true,
-            },
-          },
         },
         orderBy: { created_at: "desc" },
         skip: filters.offset,
         take: filters.limit,
       }),
       prisma.lead.count({ where }),
+      touchWorkspaceReadApiKey(apiKey.id),
     ]);
 
     return apiSuccess({

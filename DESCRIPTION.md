@@ -1,8 +1,8 @@
-# LeadVault
+# RepoLead
 
 ## Nome
 
-LeadVault
+RepoLead
 
 ## Descricao curta
 
@@ -10,9 +10,9 @@ Plataforma API-first para captura, dedupe e distribuicao confiavel de leads por 
 
 ## Descricao longa
 
-LeadVault centraliza a captura, armazenamento e orquestracao de leads para equipes que recebem dados de varias origens (formularios, automacoes, webhooks e integracoes customizadas).
+RepoLead centraliza a captura, armazenamento e orquestracao de leads para equipes que recebem dados de varias origens (formularios, automacoes, webhooks e integracoes customizadas).
 
-Em vez de cada sistema manter logica propria de deduplicacao, historico e entrega, o LeadVault atua como camada canonica:
+Em vez de cada sistema manter logica propria de deduplicacao, historico e entrega, o RepoLead atua como camada canonica:
 
 - recebe eventos em endpoint unico de captura;
 - aplica idempotencia e normalizacao de identidades;
@@ -58,4 +58,4 @@ Produto SaaS B2B de Lead Operations com foco em confiabilidade, rastreabilidade 
   - warning: `hsl(38 92% 50%)`
   - destructive: `hsl(0 84% 60%)`
 
-Esse conjunto define a identidade visual atual do LeadVault em interface web e comunicacoes por email.
+Esse conjunto define a identidade visual atual do RepoLead em interface web e comunicacoes por email.

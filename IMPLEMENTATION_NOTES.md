@@ -1,4 +1,4 @@
-# LeadVault Implementation Notes
+# RepoLead Implementation Notes
 
 ## 1) Arquitetura aplicada
 
@@ -15,6 +15,9 @@
   - ingest/normalizacao/dedupe: `lib/leadvault/ingest.ts`
   - deliveries/retry/DLQ/replay: `lib/leadvault/delivery.ts`
   - API key/signature/hash: `lib/leadvault/security.ts`
+  - Read API key publica: `lib/leadvault/read-api-key.ts`
+  - filtros compartilhados de leads: `lib/leadvault/leads-query.ts`
+  - token/link de exportacao: `lib/leadvault/lead-export-token.ts`
   - rate limit por source: `lib/leadvault/source-rate-limit.ts`
 - Arquitetura modular de integracoes:
   - catalogo unico: `lib/integrations/catalog.ts`
@@ -25,14 +28,15 @@
 
 ## 2) Banco e Prisma
 
-- Schema expandido em `prisma/schema.prisma` com modelos LeadVault:
+- Schema expandido em `prisma/schema.prisma` com modelos RepoLead:
   - `source`, `api_key`, `ingestion`, `lead`, `lead_identity`, `lead_event`,
   - `destination`, `delivery`, `delivery_attempt`,
   - `alert_rule`, `alert_event`,
   - `source_rate_limit_bucket`
 - Migration adicionada:
-  - `prisma/migrations/20260217010500_leadvault_core/migration.sql`
+  - `prisma/migrations/20260217120001_init/migration.sql`
   - `prisma/migrations/20260217151429_integration_modules/migration.sql`
+  - `prisma/migrations/20260217193000_workspace_read_api_keys/migration.sql`
 - Client gerado em `prisma/generated`.
 
 ## 3) Endpoints principais
@@ -42,6 +46,9 @@
   - `GET/PATCH/DELETE /api/workspaces/:id`
   - `GET/POST /api/workspaces/:id/members`
   - `PATCH/DELETE /api/workspaces/:id/members/:memberId`
+  - `GET/POST /api/workspaces/:id/read-keys`
+  - `POST /api/workspaces/:id/read-keys/:keyId/rotate`
+  - `POST /api/workspaces/:id/read-keys/:keyId/revoke`
 - Sources + keys:
   - `GET/POST /api/sources`
   - `GET/PATCH/DELETE /api/sources/:id`
@@ -57,8 +64,14 @@
   - `GET /api/ingestions/:id`
 - Leads:
   - `GET /api/leads`
+  - `GET /api/leads/export.csv`
+  - `POST /api/leads/export/email`
   - `GET/PATCH /api/leads/:id`
   - `GET /api/leads/:id/timeline`
+- API publica de leitura:
+  - `GET /api/v1/leads`
+  - `GET /api/v1/leads/:id`
+  - `GET /api/v1/leads/:id/timeline`
 - Deliveries:
   - `GET /api/deliveries`
   - `GET /api/deliveries/:id`
@@ -126,6 +139,19 @@ Repetir com a mesma `Idempotency-Key` retorna `202` com `duplicate_of`.
 5. Criar destination e executar teste (`/api/destinations/:id/test`).
 6. Simular falha de delivery e verificar retry/DLQ (cron).
 7. Executar replay individual e replay em lote.
+
+8. Criar Read API key em `Settings > API Access`.
+9. Consultar `GET /api/v1/leads` com chave valida e validar rate limit.
+10. Exportar CSV em `Leads` e enviar link de exportacao por email.
+
+## 9) Docs publica
+
+- Rotas:
+  - `/docs` (redirect)
+  - `/docs/[lang]/[slug]`
+- Conteudo markdown:
+  - `content/docs/pt/*.md`
+  - `content/docs/en/*.md`
 
 ## 8) Observacoes finais
 

@@ -145,6 +145,7 @@ model workspace {
   alert_rules               alert_rule[]
   alert_events              alert_event[]
   source_rate_limit_buckets source_rate_limit_bucket[]
+  read_api_keys             workspace_read_api_key[]
   created_at                DateTime                   @default(now())
   updated_at                DateTime                   @updatedAt
 }
@@ -220,6 +221,21 @@ model api_key {
 
   @@index([workspace_id, source_id])
   @@index([source_id, revoked_at])
+}
+
+model workspace_read_api_key {
+  id           String    @id @default(cuid())
+  workspace_id Int
+  workspace    workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  name         String
+  hashed_key   String    @unique
+  prefix       String
+  last_used_at DateTime?
+  revoked_at   DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@index([workspace_id, revoked_at])
 }
 
 model ingestion {

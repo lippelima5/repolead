@@ -1,11 +1,12 @@
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_APP_NAME || "VibeKit",
-  description: "Starter kit Next.js para agentes de IA com auth, multi-workspace e billing.",
+  name: process.env.NEXT_PUBLIC_APP_NAME || "RepoLead",
+  description: "Plataforma API-first para captura, dedupe e distribuicao confiavel de leads por workspace.",
   links: {
     home: "/",
     login: "/login",
     register: "/register",
     dashboard: "/dashboard",
+    docs: "/docs",
     blog: "/blog",
     changelog: "/changelog",
     github: "https://github.com",
@@ -15,6 +16,7 @@ export const siteConfig = {
     { label: "Pricing", href: "#pricing" },
     { label: "Testimonials", href: "#testimonials" },
     { label: "FAQ", href: "#faq" },
+    { label: "Docs", href: "/docs" },
     { label: "Blog", href: "/blog" },
     { label: "Changelog", href: "/changelog" },
   ],
@@ -24,6 +26,7 @@ export const siteConfig = {
       links: [
         { label: "Features", href: "#features" },
         { label: "Pricing", href: "#pricing" },
+        { label: "Docs", href: "/docs" },
         { label: "Changelog", href: "/changelog" },
       ],
     },
@@ -31,6 +34,7 @@ export const siteConfig = {
       title: "Company",
       links: [
         { label: "Blog", href: "/blog" },
+        { label: "Docs", href: "/docs" },
         { label: "Dashboard", href: "/dashboard" },
         { label: "Login", href: "/login" },
       ],

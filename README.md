@@ -1,6 +1,6 @@
-# LeadVault
+# RepoLead
 
-LeadVault e uma plataforma API-first para captura, normalizacao, dedupe e distribuicao de leads por workspace.
+RepoLead e uma plataforma API-first para captura, normalizacao, dedupe e distribuicao de leads por workspace.
 
 ## Stack
 
@@ -61,6 +61,7 @@ npm run build
 - `/ingestions`
 - `/deliveries`
 - `/settings` (readonly + atalhos)
+- `/settings/api-access`
 - `/workspaces`
 - `/workspaces/create`
 - `/workspaces/[workspaceId]`
@@ -68,6 +69,7 @@ npm run build
 - `/workspaces/[workspaceId]/billing`
 - `/profile`
 - `/alerts` (acesso via Settings)
+- `/docs` (publico, PT/EN)
 
 ## Endpoints principais (API)
 
@@ -77,6 +79,9 @@ Workspace:
 - `GET/PATCH/DELETE /api/workspaces/[id]`
 - `GET/POST /api/workspaces/[id]/members`
 - `PATCH/DELETE /api/workspaces/[id]/members/[memberId]`
+- `GET/POST /api/workspaces/[id]/read-keys`
+- `POST /api/workspaces/[id]/read-keys/[keyId]/rotate`
+- `POST /api/workspaces/[id]/read-keys/[keyId]/revoke`
 
 Convites:
 
@@ -94,12 +99,17 @@ Fontes e destinos:
 - `GET/PATCH/DELETE /api/destinations/[id]`
 - `POST /api/destinations/[id]/test`
 
-LeadVault pipeline:
+RepoLead pipeline:
 
 - `POST /api/v1/leads/ingest`
+- `GET /api/v1/leads`
+- `GET /api/v1/leads/[id]`
+- `GET /api/v1/leads/[id]/timeline`
 - `GET /api/ingestions`
 - `GET /api/ingestions/[id]`
 - `GET /api/leads`
+- `GET /api/leads/export.csv`
+- `POST /api/leads/export/email`
 - `GET/PATCH /api/leads/[id]`
 - `GET /api/leads/[id]/timeline`
 - `GET /api/deliveries`
@@ -130,3 +140,20 @@ LeadVault pipeline:
   - `lib/integrations/source/<id>.tsx`
   - `lib/integrations/destination/<id>.tsx`
 - Cada modulo contem: schema Zod, defaults, formulario e mapeadores de payload.
+
+## Exportacao e API publica
+
+- Exportacao CSV imediata na tela `Leads`.
+- Exportacao por email com link assinado (24h).
+- API publica de leitura autenticada por `Read API key` (workspace-scoped):
+  - header `Authorization: Bearer lv_rk_xxx` ou `X-Api-Key`.
+  - limite inicial: 120 req/min por chave.
+
+## Documentacao publica
+
+- Centro publico em `/docs` com conteudo PT/EN:
+  - getting started
+  - conceitos
+  - exportacao
+  - API publica
+  - exemplos de integracao

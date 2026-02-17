@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, CreditCard, Globe, Lock, Users } from "lucide-react";
+import { Bell, CreditCard, Globe, KeyRound, Lock, Users } from "lucide-react";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
@@ -203,6 +203,22 @@ export default function SettingsPage() {
             <p className="text-[12px] text-muted-foreground">{t("settings.alerts_description")}</p>
             <Button size="sm" variant="outline" className="h-8 text-[12px] w-full" onClick={() => router.push("/alerts")}>
               {t("settings.open_alerts_center")}
+            </Button>
+          </section>
+
+          <section className="bg-card border border-border rounded-xl p-5 space-y-3">
+            <h2 className="text-[14px] font-semibold text-foreground flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-muted-foreground" />
+              {t("settings.api_access")}
+            </h2>
+            <p className="text-[12px] text-muted-foreground">{t("settings.api_access_description")}</p>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-[12px] w-full"
+              onClick={() => router.push("/settings/api-access")}
+            >
+              {t("settings.open_api_access")}
             </Button>
           </section>
 

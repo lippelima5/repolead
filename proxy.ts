@@ -197,6 +197,12 @@ async function handleWebRoute(request: NextRequest): Promise<NextResponse> {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isPublicLeadExportGet =
+    pathname === "/api/leads/export.csv" &&
+    (request.method === "GET" || request.method === "HEAD");
+  const isPublicLeadReadApi =
+    (pathname === "/api/v1/leads" || pathname.startsWith("/api/v1/leads/")) &&
+    (request.method === "GET" || request.method === "HEAD");
   const isWorkspaceInviteGet =
     pathname.startsWith("/api/workspaces/invite/") && (request.method === "GET" || request.method === "HEAD");
 
@@ -210,7 +216,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (publicRoutes.has(pathname) || isWorkspaceInviteGet) {
+  if (publicRoutes.has(pathname) || isWorkspaceInviteGet || isPublicLeadReadApi || isPublicLeadExportGet) {
     return withSecurityHeaders(NextResponse.next());
   }
 

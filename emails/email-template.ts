@@ -45,7 +45,7 @@ function formatDetailsHtml(details: EmailTemplateDetail[]) {
 }
 
 export function createEmailTemplate(options: EmailTemplateOptions) {
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || "LeadVault";
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "RepoLead";
   const year = new Date().getFullYear();
   const details = options.details ?? [];
   const hasDetails = details.length > 0;

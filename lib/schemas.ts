@@ -131,6 +131,10 @@ export const sourceKeyCreateBodySchema = z.object({
   name: z.string().trim().min(1).max(120).optional().default("Default key"),
 });
 
+export const workspaceReadKeyCreateBodySchema = z.object({
+  name: z.string().trim().min(1).max(120).optional().default("Read API key"),
+});
+
 export const destinationMethodSchema = z.enum(["post", "put", "patch"]);
 export const destinationCreateBodySchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -166,6 +170,16 @@ export const destinationTestBodySchema = z.object({
 });
 
 export const leadStatusSchema = z.enum(["new", "contacted", "qualified", "won", "lost", "needs_identity"]);
+export const leadQueryFiltersSchema = z.object({
+  query: z.string().trim().max(120).optional(),
+  status: leadStatusSchema.optional(),
+  source: z.string().trim().min(1).max(120).optional(),
+  sourceId: z.string().trim().min(1).max(120).optional(),
+  tag: z.string().trim().min(1).max(40).optional(),
+});
+
+export const leadExportEmailBodySchema = leadQueryFiltersSchema;
+
 export const leadUpdateBodySchema = z
   .object({
     status: leadStatusSchema.optional(),

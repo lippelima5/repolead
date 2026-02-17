@@ -202,6 +202,14 @@
     "title": "Leads",
     "subtitle": "{count} leads no workspace",
     "search_placeholder": "Buscar por email, telefone ou nome...",
+    "export_csv": "Baixar CSV",
+    "export_email": "Enviar por email",
+    "exporting": "Exportando...",
+    "sending_export_email": "Enviando...",
+    "export_started": "Exportacao iniciada",
+    "export_failed": "Falha ao exportar CSV",
+    "export_email_sent": "Link de exportacao enviado por email",
+    "export_email_failed": "Falha ao enviar exportacao por email",
     "all": "todos",
     "lead": "Lead",
     "identities": "Identidades",
@@ -297,6 +305,27 @@
     "security_isolation_desc": "Toda leitura/escrita e filtrada por workspace_id.",
     "alerts_description": "Configure regras de alerta neste workspace. Use a pagina de alertas para ver eventos disparados.",
     "open_alerts_center": "Abrir central de alertas",
+    "api_access": "API Access",
+    "api_access_description": "Gerencie chaves de leitura para consultar leads via API publica.",
+    "api_access_subtitle": "{count} chave(s) ativas para o workspace atual.",
+    "open_api_access": "Abrir API Access",
+    "api_access_load_failed": "Falha ao carregar chaves de API",
+    "api_access_created": "Chave de leitura criada",
+    "api_access_create_failed": "Falha ao criar chave de leitura",
+    "api_access_rotated": "Chave de leitura rotacionada",
+    "api_access_rotate_failed": "Falha ao rotacionar chave",
+    "api_access_revoked": "Chave de leitura revogada",
+    "api_access_revoke_failed": "Falha ao revogar chave",
+    "api_access_key_copied": "Chave copiada",
+    "api_access_key_once": "Copie a chave agora. Ela nao sera exibida novamente.",
+    "api_access_create": "Criar nova chave",
+    "api_access_name_placeholder": "Nome da chave (opcional)",
+    "api_access_generate": "Gerar chave",
+    "api_access_empty": "Nenhuma chave de leitura criada ainda.",
+    "api_access_active_status": "Ativa",
+    "api_access_revoked_status": "Revogada",
+    "api_access_rotate": "Rotacionar",
+    "api_access_revoke": "Revogar",
     "workspace_actions": "Acoes de workspace",
     "workspace_actions_description": "Crie um novo workspace ou abra a area completa de gestao.",
     "create_workspace": "Criar novo workspace",
@@ -355,5 +384,200 @@
     "faq_q3": "Existe rate limit?",
     "faq_a3": "Cada source possui limite configuravel por minuto e responde HTTP 429 em excesso.",
     "footer_rights": "Todos os direitos reservados."
+  },
+  "lp": {
+    "nav": {
+      "product": "Produto",
+      "how": "Como funciona",
+      "usecases": "Casos de uso",
+      "security": "Segurança",
+      "faq": "FAQ",
+      "docs": "Documentação",
+      "login": "Entrar",
+      "cta": "Experimente agora"
+    },
+    "hero": {
+      "badge": "Beta aberto",
+      "title": "Um único ponto de captura para todos os seus leads",
+      "subtitle": "Plataforma API-first para captura, deduplicação e distribuição confiável de leads por workspace. Endpoint único, auditoria completa, zero leads perdidos.",
+      "cta": "Experimente agora",
+      "cta2": "Ver documentação",
+      "bullet1": "Deduplicação automática por identidade",
+      "bullet2": "Auditoria append-only de cada evento",
+      "bullet3": "Entrega confiável com retries e DLQ"
+    },
+    "problem": {
+      "title": "O problema que você já conhece",
+      "intro": "Quando o volume cresce, times sérios enfrentam os mesmos problemas:",
+      "pain1": "Leads espalhados em diversas plataformas e formulários, sem uma fonte de verdade",
+      "pain2": "Falta de visibilidade: não existe um lugar único para consultar e auditar o que aconteceu",
+      "pain3": "Leads duplicados que poluem CRMs e distorcem métricas de conversão",
+      "pain4": "Leads perdidos por falhas de webhook, roteamentos inconsistentes e integrações frágeis",
+      "pain5": "Cada nova campanha ou landing page exige reconfigurar lógica em vários lugares",
+      "pain6": "Cada origem manda para um destino diferente, sem padrão e sem rastreabilidade"
+    },
+    "whatis": {
+      "title": "O que é o LeadVault",
+      "p1": "LeadVault é uma plataforma API-first que atua como camada canônica para seus leads. Centraliza captura, armazenamento e orquestração de leads vindos de formulários, automações, webhooks e integrações customizadas.",
+      "p2": "Recebe eventos em um endpoint único, aplica idempotência e normalização de identidades, faz merge de duplicados por workspace, registra timeline de auditoria append-only, e distribui eventos para destinos com assinatura, retry e DLQ.",
+      "term1": {
+        "title": "Idempotência",
+        "desc": "O mesmo evento enviado duas vezes não gera duplicidade. A chave de idempotência garante uma única entrada."
+      },
+      "term2": {
+        "title": "Audit trail append-only",
+        "desc": "Histórico imutável de tudo que aconteceu com cada lead — de onde veio, o que mudou, para onde foi."
+      },
+      "term3": {
+        "title": "Retry + DLQ",
+        "desc": "Se o destino falha, o LeadVault faz retry automático. Após esgotar tentativas, o evento vai para a Dead Letter Queue para replay manual."
+      }
+    },
+    "how": {
+      "title": "Como funciona",
+      "step1": {
+        "num": "01",
+        "title": "Capture em um endpoint único",
+        "desc": "Envie leads de qualquer origem via API ou webhook. O payload bruto é preservado na íntegra para auditoria e reprocessamento."
+      },
+      "step2": {
+        "num": "02",
+        "title": "Normalize e deduplique por workspace",
+        "desc": "Identidades (email, telefone, external_id) são extraídas e normalizadas. Duplicatas são detectadas e mergeadas automaticamente."
+      },
+      "step3": {
+        "num": "03",
+        "title": "Registre auditoria e timeline",
+        "desc": "Cada ação é gravada em log append-only: criação, merge, mudança de status, entrega. Nada se perde."
+      },
+      "step4": {
+        "num": "04",
+        "title": "Distribua com retries e DLQ",
+        "desc": "Fan-out para N destinos com assinatura HMAC, retries automáticos e dead letter queue. Replay manual ou em lote quando necessário."
+      }
+    },
+    "diagram": {
+      "sources": "Sources",
+      "api": "Forms · Webhooks · APIs",
+      "ingest": "Endpoint de captura",
+      "process": "Dedupe · Normalize · Audit",
+      "deliver": "Distribuição",
+      "dest": "CRM · Webhook · Email · Slack"
+    },
+    "payload": {
+      "title": "Exemplo de payload de ingestão"
+    },
+    "timeline": {
+      "title": "Exemplo de evento na timeline"
+    },
+    "usecases": {
+      "title": "Casos de uso"
+    },
+    "usecase1": {
+      "title": "Marketing Ops",
+      "desc": "Padronize a captura de leads entre landing pages, formulários e campanhas. Um endpoint para todas as origens, sem reconfigurar lógica a cada lançamento."
+    },
+    "usecase2": {
+      "title": "Revenue Ops",
+      "desc": "Roteamento consistente para CRM e ferramentas de enriquecimento. Deduplicação garante que cada lead entre uma vez no pipeline, com rastreabilidade completa."
+    },
+    "usecase3": {
+      "title": "Engenharia",
+      "desc": "Desacople origens e destinos. Elimine lógica duplicada entre serviços. API padronizada com idempotência, sem reinventar webhook handling em cada projeto."
+    },
+    "usecase4": {
+      "title": "Operações",
+      "desc": "Auditoria completa, replay de entregas falhadas e investigação de falhas com timeline imutável. Saiba exatamente o que aconteceu com cada lead."
+    },
+    "beta": {
+      "title": "Beta aberto: como funciona",
+      "included_title": "Incluído no beta",
+      "inc1": "Endpoint de captura com idempotência e rate limiting",
+      "inc2": "Deduplicação e merge automático por workspace",
+      "inc3": "Timeline de auditoria append-only",
+      "inc4": "Destinations via webhooks e integrações via API",
+      "inc5": "Retries automáticos e Dead Letter Queue (DLQ)",
+      "inc6": "Replay manual e em lote",
+      "inc7": "Documentação e API reference",
+      "soon_title": "Em breve",
+      "soon1": "Dashboards e métricas avançadas",
+      "soon2": "Templates de destinos pré-configurados",
+      "soon3": "Controles avançados de roteamento (filtros, condições)",
+      "soon4": "Integrações nativas com CRMs populares",
+      "for_title": "Para quem é o beta",
+      "for_desc": "Times de marketing, growth e engenharia que capturam leads de múltiplos canais e precisam de um hub central confiável, com auditoria e entrega garantida.",
+      "not_title": "Quando não é indicado",
+      "not_desc": "Se você precisa de uma integração nativa específica já pronta (ex: sincronização bidirecional com um CRM específico) ou não usa API/webhooks na sua operação."
+    },
+    "security": {
+      "title": "Segurança e conformidade",
+      "intro": "Práticas de segurança aplicadas desde o design da plataforma:",
+      "s1": {
+        "title": "Criptografia em trânsito e repouso",
+        "desc": "TLS 1.2+ para todas as conexões. Dados armazenados com criptografia."
+      },
+      "s2": {
+        "title": "Assinatura HMAC-SHA256",
+        "desc": "Webhooks de entrega assinados com secret + timestamp para validação no destino."
+      },
+      "s3": {
+        "title": "Isolamento por workspace",
+        "desc": "Dados, sources e destinations são isolados por workspace. Controle de acesso por papel (admin, user, reader)."
+      },
+      "s4": {
+        "title": "Audit log imutável",
+        "desc": "Registro append-only de todas as ações. Não é possível alterar ou excluir histórico."
+      },
+      "lgpd": "Privacidade e LGPD: O LeadVault adota uma abordagem de privacidade por design. Os dados são processados e armazenados com controles de acesso por workspace e criptografia. Para questões específicas de conformidade com LGPD ou regulamentações de privacidade, entre em contato com nossa equipe."
+    },
+    "faq": {
+      "title": "Perguntas frequentes",
+      "q1": "O que é deduplicação de leads?",
+      "a1": "É o processo de identificar e unificar registros duplicados. O LeadVault detecta duplicatas por email, telefone ou external_id e faz merge automático, garantindo que cada lead exista uma única vez no workspace.",
+      "q2": "Como o LeadVault evita leads duplicados?",
+      "a2": "Através de chaves de idempotência por source e normalização de identidades. Se o mesmo evento é enviado mais de uma vez, a chave de idempotência impede a duplicação. Identidades similares (email, telefone) são detectadas e unificadas automaticamente.",
+      "q3": "Posso enviar leads para qualquer CRM ou ferramenta?",
+      "a3": "Sim. O LeadVault distribui via webhooks com assinatura HMAC. Qualquer sistema que aceite HTTP POST com payload JSON pode ser configurado como destino — CRM, email marketing, Slack, ferramentas internas ou APIs customizadas.",
+      "q4": "O que acontece se o destino ficar fora do ar?",
+      "a4": "O LeadVault faz retries automáticos com backoff exponencial. Se todas as tentativas falharem, o evento é movido para a Dead Letter Queue (DLQ), de onde pode ser reenviado manualmente ou em lote quando o destino voltar.",
+      "q5": "Como funciona o isolamento por workspace?",
+      "a5": "Cada workspace é um ambiente isolado com seus próprios sources, leads, destinations e membros. Dados de um workspace não são acessíveis por outro. Ideal para separar clientes, projetos ou ambientes.",
+      "q6": "O LeadVault substitui meu formulário ou CRM?",
+      "a6": "Não. O LeadVault é uma camada intermediária. Seus formulários continuam funcionando e seu CRM continua sendo o destino final. O LeadVault centraliza a captura, garante a qualidade dos dados e distribui com confiabilidade.",
+      "q7": "Como começo a usar o beta?",
+      "a7": "Clique em \"Experimente agora\" para criar sua conta. Você terá acesso imediato ao endpoint de captura, deduplicação, auditoria e distribuição. A documentação inclui exemplos de integração para os cenários mais comuns.",
+      "q8": "Existe replay e auditoria de entregas?",
+      "a8": "Sim. Toda entrega é registrada com status, tentativas e resposta HTTP. Entregas falhadas podem ser reprocessadas individualmente ou em lote. A timeline mostra o histórico completo de cada lead, incluindo todas as tentativas de entrega."
+    },
+    "final": {
+      "title": "Centralize seus leads. Elimine duplicatas. Entregue com confiança.",
+      "subtitle": "Beta aberto. Comece em minutos.",
+      "cta": "Experimente agora",
+      "contact": "Falar com a equipe"
+    },
+    "footer": {
+      "product": "Produto",
+      "resources": "Recursos",
+      "company": "Empresa",
+      "docs": "Documentação",
+      "privacy": "Privacidade",
+      "terms": "Termos",
+      "contact": "Contato",
+      "status": "Status"
+    },
+    "preview": {
+      "title": "Prévia da plataforma",
+      "tab1": "Workspaces e Sources",
+      "tab2": "Dedupe e Merge",
+      "tab3": "Timeline e Entregas"
+    },
+    "micro": {
+      "event_received": "Evento recebido",
+      "delivery_failed": "Entrega falhou",
+      "in_retry": "Em retry",
+      "in_dlq": "Na DLQ",
+      "merged": "Merge realizado",
+      "delivered": "Entregue"
+    }
   }
 }
