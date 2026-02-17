@@ -1,19 +1,25 @@
 'use client';
 
-import { Zap, ArrowRight, CheckCircle, Shield, RefreshCw, Activity, FileJson, Clock, Send, Lock, Globe, Sun, Moon, Monitor, ChevronDown, AlertTriangle, Database, GitMerge, Eye, Users, Code, ExternalLink, Check, } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Zap, ArrowRight, CheckCircle, Shield, RefreshCw, Activity, FileJson, Clock, Send, Lock, Globe, Sun, Moon, Monitor, ChevronDown, AlertTriangle, Database, GitMerge, Eye, Users, Code, ExternalLink, Check, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useI18n } from "@/contexts/i18n-context";
 import { useTheme } from "@/contexts/theme-context";
-import Link from "next/link";
+
+type ThemeMode = "light" | "dark" | "system";
+type TranslationParams = Record<string, string | number>;
+type TranslationFn = (key: string, params?: TranslationParams) => string;
+
+const THEME_ICONS: Record<ThemeMode, LucideIcon> = { light: Sun, dark: Moon, system: Monitor };
+const NEXT_THEME: Record<ThemeMode, ThemeMode> = { light: "dark", dark: "system", system: "light" };
 
 export default function Landing() {
   const { t, locale, setLocale } = useI18n();
   const { theme, setTheme } = useTheme();
 
-  const themeIcons = { light: Sun, dark: Moon, system: Monitor };
-  const nextTheme: Record<string, "light" | "dark" | "system"> = { light: "dark", dark: "system", system: "light" };
-  const ThemeIcon = themeIcons[theme];
+  const ThemeIcon = THEME_ICONS[theme];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -21,8 +27,8 @@ export default function Landing() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
-              <Zap className="w-3.5 h-3.5 text-primary-foreground" />
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10">
+              <Image src="/logo.png" alt="RepoLead" width={28} height={28} className="w-7 h-7 rounded-lg object-contain" priority />
             </div>
             <span className="font-semibold text-sm text-foreground">RepoLead</span>
           </div>
@@ -35,10 +41,10 @@ export default function Landing() {
             <a href="#" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.docs")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <button onClick={() => setLocale(locale === "pt" ? "en" : "pt")} className="px-2 py-1 rounded-md text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+            <button type="button" onClick={() => setLocale(locale === "pt" ? "en" : "pt")} className="px-2 py-1 rounded-md text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
               {locale === "pt" ? "EN" : "PT"}
             </button>
-            <button onClick={() => setTheme(nextTheme[theme])} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+            <button type="button" onClick={() => setTheme(NEXT_THEME[theme])} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
               <ThemeIcon className="w-4 h-4" />
             </button>
             <Link href="/dashboard">
@@ -319,8 +325,8 @@ X-Source-Key: sk_live_...
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-start justify-between gap-8">
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-primary">
-                <Zap className="w-3 h-3 text-primary-foreground" />
+              <div className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/10">
+                <Image src="/logo.png" alt="RepoLead" width={24} height={24} className="w-6 h-6 rounded-md object-contain" />
               </div>
               <span className="text-[13px] font-semibold text-foreground">RepoLead</span>
             </div>
@@ -347,7 +353,7 @@ X-Source-Key: sk_live_...
           </div>
           <div className="mt-8 pt-6 border-t border-border flex items-center justify-between">
             <p className="text-[12px] text-muted-foreground">© 2026 RepoLead. All rights reserved.</p>
-            <button onClick={() => setLocale(locale === "pt" ? "en" : "pt")} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+            <button type="button" onClick={() => setLocale(locale === "pt" ? "en" : "pt")} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors">
               {locale === "pt" ? "English" : "Português"}
             </button>
           </div>
@@ -359,7 +365,7 @@ X-Source-Key: sk_live_...
 
 /* ===== Sub-components ===== */
 
-function DiagramBlock({ icon: Icon, label, sub, accent }: { icon: any; label: string; sub: string; accent?: boolean }) {
+function DiagramBlock({ icon: Icon, label, sub, accent }: { icon: LucideIcon; label: string; sub: string; accent?: boolean }) {
   return (
     <div className={`flex flex-col items-center text-center px-4 py-3 rounded-xl border ${accent ? "border-primary bg-primary/5" : "border-border bg-surface-2"} min-w-[120px]`}>
       <Icon className={`w-5 h-5 mb-1.5 ${accent ? "text-primary" : "text-muted-foreground"}`} />
@@ -390,6 +396,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className="border-b border-border last:border-0">
       <button
+        type="button"
         className="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-accent/50 transition-colors"
         onClick={() => setOpen(!open)}
       >
@@ -407,7 +414,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 /* ===== Platform Preview Tabs ===== */
 
-function PreviewTabs({ t }: { t: (key: any) => string }) {
+function PreviewTabs({ t }: { t: TranslationFn }) {
   const [tab, setTab] = useState<0 | 1 | 2>(0);
   const tabs = [t("lp.preview.tab1"), t("lp.preview.tab2"), t("lp.preview.tab3")];
 
@@ -416,6 +423,7 @@ function PreviewTabs({ t }: { t: (key: any) => string }) {
       <div className="flex items-center gap-1 mb-6 bg-surface-3 rounded-lg p-1 max-w-lg mx-auto">
         {tabs.map((label, i) => (
           <button
+            type="button"
             key={i}
             onClick={() => setTab(i as 0 | 1 | 2)}
             className={`flex-1 text-[12px] font-medium py-2 px-3 rounded-md transition-colors ${tab === i ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
