@@ -6,8 +6,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { InstalledList, InstalledIntegrationItem, InstalledListAction } from "@/components/integrations/installed-list";
@@ -22,6 +21,7 @@ type SourceRecord = {
   environment: "production" | "staging" | "development";
   rate_limit_per_min: number;
   status: "active" | "inactive";
+  integration_id: string;
   updated_at: string;
   _count: {
     ingestions: number;
@@ -34,23 +34,8 @@ export default function SourcesPage() {
   const { t } = useI18n();
   const [tab, setTab] = useState<"installed" | "browse">(() => (searchParams.get("tab") === "browse" ? "browse" : "installed"));
   const [rows, setRows] = useState<SourceRecord[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
   const [showKeyDialog, setShowKeyDialog] = useState(false);
   const [generatedKey, setGeneratedKey] = useState<{ sourceName: string; plainKey: string } | null>(null);
-  const [editForm, setEditForm] = useState<{
-    name: string;
-    type: string;
-    environment: "production" | "staging" | "development";
-    rate_limit_per_min: number;
-    status: "active" | "inactive";
-  }>({
-    name: "",
-    type: "",
-    environment: "production",
-    rate_limit_per_min: 60,
-    status: "active",
-  });
 
   const loadSources = async () => {
     try {
@@ -84,43 +69,6 @@ export default function SourcesPage() {
       })),
     [rows],
   );
-
-  const openEditSource = (sourceId: string) => {
-    const source = rows.find((item) => item.id === sourceId);
-    if (!source) {
-      return;
-    }
-
-    setEditForm({
-      name: source.name,
-      type: source.type,
-      environment: source.environment,
-      rate_limit_per_min: source.rate_limit_per_min,
-      status: source.status,
-    });
-    setEditingSourceId(sourceId);
-  };
-
-  const saveSource = async () => {
-    if (!editingSourceId) {
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      const response = await api.patch(`/sources/${editingSourceId}`, editForm);
-      if (response.data?.success) {
-        toast.success(t("sources.updated_success"));
-        setEditingSourceId(null);
-        await loadSources();
-      }
-    } catch (error) {
-      logger.error("Failed to update source", error);
-      toast.error(t("sources.updated_failed"));
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const toggleSourceStatus = async (sourceId: string, current: "active" | "inactive") => {
     try {
@@ -178,8 +126,10 @@ export default function SourcesPage() {
 
     return [
       {
-        label: t("common.edit"),
-        onSelect: () => openEditSource(source.id),
+        label: t("common.configure"),
+        onSelect: () => {
+          router.push(`/sources/configure/${source.integration_id}?sourceId=${source.id}&returnTo=${encodeURIComponent("/sources")}`);
+        },
       },
       {
         label: t("sources.action_generate_key"),
@@ -258,94 +208,6 @@ export default function SourcesPage() {
         )}
       </div>
 
-      <Dialog open={Boolean(editingSourceId)} onOpenChange={(open) => (!open ? setEditingSourceId(null) : undefined)}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader>
-            <DialogTitle>{t("sources.edit_title")}</DialogTitle>
-            <DialogDescription>{t("sources.edit_description")}</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-foreground">{t("common.name")}</label>
-              <Input
-                value={editForm.name}
-                onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))}
-                className="h-9 text-[13px]"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-foreground">{t("sources.field_type")}</label>
-              <Input
-                value={editForm.type}
-                onChange={(event) => setEditForm((prev) => ({ ...prev, type: event.target.value }))}
-                className="h-9 text-[13px]"
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-foreground">{t("integrations.source_environment")}</label>
-                <select
-                  className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
-                  value={editForm.environment}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      environment: event.target.value as "production" | "staging" | "development",
-                    }))
-                  }
-                >
-                  <option value="production">production</option>
-                  <option value="staging">staging</option>
-                  <option value="development">development</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-foreground">{t("integrations.source_rate_limit")}</label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={20000}
-                  value={editForm.rate_limit_per_min}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      rate_limit_per_min: Number(event.target.value || 60),
-                    }))
-                  }
-                  className="h-9 text-[13px]"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-foreground">{t("sources.field_status")}</label>
-              <select
-                className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
-                value={editForm.status}
-                onChange={(event) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    status: event.target.value as "active" | "inactive",
-                  }))
-                }
-              >
-                <option value="active">{t("sources.status_active")}</option>
-                <option value="inactive">{t("sources.status_inactive")}</option>
-              </select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingSourceId(null)}>
-              {t("common.cancel")}
-            </Button>
-            <Button onClick={saveSource} disabled={isSaving || !editForm.name.trim() || !editForm.type.trim()}>
-              {isSaving ? t("common.loading") : t("common.save")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={showKeyDialog} onOpenChange={setShowKeyDialog}>
         <DialogContent className="bg-card border-border">
           <DialogHeader>
@@ -378,3 +240,4 @@ export default function SourcesPage() {
     </AppLayout>
   );
 }
+

@@ -2,10 +2,13 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
+import { CustomError } from "@/lib/errors";
 import { parseJsonBody } from "@/lib/validation";
 import { destinationCreateBodySchema } from "@/lib/schemas";
 import { requireWorkspace } from "@/lib/leadvault/workspace";
 import { createSigningSecret, hashValue } from "@/lib/leadvault/security";
+import { getDestinationModuleByIntegrationId } from "@/lib/integrations/catalog";
+import { Prisma } from "@/prisma/generated/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,6 +56,18 @@ export async function POST(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const body = await parseJsonBody(request, destinationCreateBodySchema);
+    const integrationId = body.integration_id || "custom-destination";
+    const integrationModule = getDestinationModuleByIntegrationId(integrationId);
+    let integrationConfig = body.integration_config_json || {};
+
+    if (integrationModule) {
+      const parsedConfig = integrationModule.configSchema.safeParse(integrationConfig);
+      if (!parsedConfig.success) {
+        const errors = parsedConfig.error.flatten().fieldErrors;
+        throw new CustomError("Invalid integration configuration", 422, errors);
+      }
+      integrationConfig = parsedConfig.data;
+    }
 
     const generatedSecret = body.signing_secret ? null : createSigningSecret();
     const plainSecret = body.signing_secret ?? generatedSecret?.plainSecret ?? null;
@@ -70,6 +85,8 @@ export async function POST(request: NextRequest) {
         signing_secret_prefix: signingSecretPrefix,
         enabled: body.enabled,
         subscribed_events_json: body.subscribed_events_json,
+        integration_id: integrationId,
+        integration_config_json: integrationConfig as Prisma.InputJsonValue,
       },
     });
 

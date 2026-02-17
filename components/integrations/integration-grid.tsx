@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { CategoryPills } from "@/components/integrations/category-pills";
 import { IntegrationCard } from "@/components/integrations/integration-card";
-import { integrationsCatalog, IntegrationDirection } from "@/content/integrations-catalog";
+import { integrationsCatalog } from "@/lib/integrations/catalog";
+import { IntegrationDirection } from "@/lib/integrations/types";
 import { useI18n } from "@/contexts/i18n-context";
 
 export function IntegrationGrid({

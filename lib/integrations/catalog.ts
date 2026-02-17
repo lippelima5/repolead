@@ -1,51 +1,9 @@
-export type IntegrationCategory = "webhooks" | "forms" | "automation" | "ads" | "sdk" | "custom";
-export type IntegrationDirection = "source" | "destination";
-export type IntegrationAvailability = "active" | "soon";
-export type IntegrationBadge = "popular" | "soon";
-
-export type LocalizedText = {
-  pt: string;
-  en: string;
-};
-
-export type SourceSetupConfig = {
-  type: string;
-  default_name: LocalizedText;
-  default_key_name?: LocalizedText;
-  default_environment?: "production" | "staging" | "development";
-  default_rate_limit_per_min?: number;
-  allow_environment?: boolean;
-  allow_rate_limit?: boolean;
-  allow_key_generation?: boolean;
-  ingest_example_payload?: Record<string, unknown>;
-};
-
-export type DestinationSetupConfig = {
-  default_name: LocalizedText;
-  default_method?: "post" | "put" | "patch";
-  default_url?: string;
-  subscribed_events?: string[];
-  allow_method?: boolean;
-  allow_secret?: boolean;
-  allow_events?: boolean;
-  test_payload?: Record<string, unknown>;
-};
-
-export type IntegrationCatalogItem = {
-  id: string;
-  title: string;
-  icon: string;
-  category: IntegrationCategory;
-  direction: IntegrationDirection;
-  availability: IntegrationAvailability;
-  badge?: IntegrationBadge;
-  short_description: LocalizedText;
-  full_description_md: LocalizedText;
-  setup?: {
-    source?: SourceSetupConfig;
-    destination?: DestinationSetupConfig;
-  };
-};
+import { IntegrationCatalogItem, IntegrationDirection } from "@/lib/integrations/types";
+import { formBackendSourceModule } from "@/lib/integrations/source/form-backend";
+import { n8nIngoingSourceModule } from "@/lib/integrations/source/n8n-ingoing";
+import { phpFormHandlerSourceModule } from "@/lib/integrations/source/php-form-handler";
+import { universalWebhookSourceModule } from "@/lib/integrations/source/universal-webhook";
+import { n8nOutgoingDestinationModule } from "@/lib/integrations/destination/n8n-outgoing";
 
 export const integrationsCatalog: IntegrationCatalogItem[] = [
   {
@@ -73,12 +31,7 @@ Conector universal para qualquer sistema que consiga enviar HTTP POST para o end
 1. Crie a source no LeadVault.
 2. Gere a API key (aparece uma unica vez).
 3. Configure sua aplicacao para enviar payloads para \`POST /api/v1/leads/ingest\`.
-4. Valide o lead no Lead Store e timeline.
-
-## Headers recomendados
-- \`Authorization: Bearer <api_key>\`
-- \`Content-Type: application/json\`
-- \`Idempotency-Key: <id_unico>\``,
+4. Valide o lead no Lead Store e timeline.`,
       en: `## Overview
 Universal connector for any system able to send HTTP POST to the ingestion endpoint.
 
@@ -91,31 +44,9 @@ Universal connector for any system able to send HTTP POST to the ingestion endpo
 1. Create the source in LeadVault.
 2. Generate the API key (shown only once).
 3. Configure your application to send payloads to \`POST /api/v1/leads/ingest\`.
-4. Validate the lead in Lead Store and timeline.
-
-## Recommended headers
-- \`Authorization: Bearer <api_key>\`
-- \`Content-Type: application/json\`
-- \`Idempotency-Key: <unique_id>\``,
+4. Validate the lead in Lead Store and timeline.`,
     },
-    setup: {
-      source: {
-        type: "webhook",
-        default_name: { pt: "Universal Webhook", en: "Universal Webhook" },
-        default_key_name: { pt: "Chave principal", en: "Primary key" },
-        default_environment: "production",
-        default_rate_limit_per_min: 120,
-        allow_environment: true,
-        allow_rate_limit: true,
-        allow_key_generation: true,
-        ingest_example_payload: {
-          name: "Jane Doe",
-          email: "jane@example.com",
-          phone: "+5511999999999",
-          campaign: "Black Friday",
-        },
-      },
-    },
+    module: universalWebhookSourceModule,
   },
   {
     id: "form-backend",
@@ -141,11 +72,7 @@ Use o LeadVault como backend de captura para formularios web.
 1. Crie a source de formulario.
 2. Gere API key dedicada para esse formulario.
 3. Envie os campos para o endpoint de ingestao.
-4. Verifique no dashboard de ingestoes e leads.
-
-## Boas praticas
-- Inclua UTM no payload para analise futura.
-- Use validacao no frontend e backend.`,
+4. Verifique no dashboard de ingestoes e leads.`,
       en: `## Overview
 Use LeadVault as a capture backend for web forms.
 
@@ -158,30 +85,9 @@ Use LeadVault as a capture backend for web forms.
 1. Create the form source.
 2. Generate a dedicated API key for this form.
 3. Send fields to the ingestion endpoint.
-4. Verify ingestion and lead records in the dashboard.
-
-## Best practices
-- Include UTM fields in payloads.
-- Validate input in both frontend and backend.`,
+4. Verify ingestion and lead records in the dashboard.`,
     },
-    setup: {
-      source: {
-        type: "form_backend",
-        default_name: { pt: "Form Backend", en: "Form Backend" },
-        default_key_name: { pt: "Chave formulario", en: "Form key" },
-        default_environment: "production",
-        default_rate_limit_per_min: 100,
-        allow_environment: true,
-        allow_rate_limit: true,
-        allow_key_generation: true,
-        ingest_example_payload: {
-          name: "Form Lead",
-          email: "lead@company.com",
-          phone: "+5511988887777",
-          page: "/contato",
-        },
-      },
-    },
+    module: formBackendSourceModule,
   },
   {
     id: "n8n-ingoing",
@@ -207,13 +113,7 @@ Integracao de entrada com n8n para centralizar leads no LeadVault.
 1. Crie uma source dedicada para n8n.
 2. Gere e salve a API key em credenciais do n8n.
 3. Configure node HTTP Request para \`POST /api/v1/leads/ingest\`.
-4. Envie \`Idempotency-Key\` por execucao.
-5. Valide no Lead Store e timeline.
-
-## Exemplo de mapeamento
-- \`email\` -> \`{{$json.contact.email}}\`
-- \`name\` -> \`{{$json.contact.name}}\`
-- \`phone\` -> \`{{$json.contact.phone}}\``,
+4. Envie \`Idempotency-Key\` por execucao.`,
       en: `## Overview
 Inbound n8n integration to centralize leads in LeadVault.
 
@@ -226,32 +126,9 @@ Inbound n8n integration to centralize leads in LeadVault.
 1. Create a dedicated source for n8n.
 2. Generate and store the API key in n8n credentials.
 3. Configure HTTP Request node to \`POST /api/v1/leads/ingest\`.
-4. Send \`Idempotency-Key\` per execution.
-5. Validate in Lead Store and timeline.
-
-## Mapping example
-- \`email\` -> \`{{$json.contact.email}}\`
-- \`name\` -> \`{{$json.contact.name}}\`
-- \`phone\` -> \`{{$json.contact.phone}}\``,
+4. Send \`Idempotency-Key\` per execution.`,
     },
-    setup: {
-      source: {
-        type: "n8n_ingoing",
-        default_name: { pt: "n8n Ingoing", en: "n8n Ingoing" },
-        default_key_name: { pt: "Chave n8n Ingoing", en: "n8n Ingoing key" },
-        default_environment: "production",
-        default_rate_limit_per_min: 180,
-        allow_environment: true,
-        allow_rate_limit: true,
-        allow_key_generation: true,
-        ingest_example_payload: {
-          source: "n8n",
-          name: "n8n Contact",
-          email: "n8n@example.com",
-          flow_id: "wf-001",
-        },
-      },
-    },
+    module: n8nIngoingSourceModule,
   },
   {
     id: "n8n-outgoing",
@@ -277,14 +154,7 @@ Integracao de saida para disparar workflows n8n com eventos do LeadVault.
 1. Crie a destination n8n Outgoing.
 2. Configure URL do webhook do n8n.
 3. Defina eventos assinados (ex: \`lead_created\`, \`lead_updated\`).
-4. Execute teste de delivery.
-5. Monitore retries e DLQ em Deliveries.
-
-## Headers enviados
-- \`X-LeadVault-Signature\`
-- \`X-LeadVault-Timestamp\`
-- \`X-LeadVault-Event\`
-- \`X-LeadVault-Delivery-Id\``,
+4. Execute teste de delivery.`,
       en: `## Overview
 Outbound integration to trigger n8n workflows from LeadVault events.
 
@@ -297,30 +167,9 @@ Outbound integration to trigger n8n workflows from LeadVault events.
 1. Create the n8n Outgoing destination.
 2. Configure n8n webhook URL.
 3. Select subscribed events (for example \`lead_created\`, \`lead_updated\`).
-4. Run a delivery test.
-5. Monitor retries and DLQ in Deliveries.
-
-## Sent headers
-- \`X-LeadVault-Signature\`
-- \`X-LeadVault-Timestamp\`
-- \`X-LeadVault-Event\`
-- \`X-LeadVault-Delivery-Id\``,
+4. Run a delivery test.`,
     },
-    setup: {
-      destination: {
-        default_name: { pt: "n8n Outgoing", en: "n8n Outgoing" },
-        default_method: "post",
-        subscribed_events: ["lead_created", "lead_updated", "delivery_failed"],
-        allow_method: true,
-        allow_secret: false,
-        allow_events: true,
-        test_payload: {
-          workflow: "lead_sync",
-          sample: true,
-          lead: { email: "n8n-outgoing@example.com", name: "n8n Outgoing Lead" },
-        },
-      },
-    },
+    module: n8nOutgoingDestinationModule,
   },
   {
     id: "meta-lead-ads",
@@ -336,19 +185,9 @@ Outbound integration to trigger n8n workflows from LeadVault events.
     },
     full_description_md: {
       pt: `## Em breve
-Conector nativo para ingestao direta de leads de campanhas Meta Lead Ads.
-
-Incluira:
-- onboarding OAuth;
-- selecao de paginas e formularios;
-- sincronizacao automatica com idempotencia.`,
+Conector nativo para ingestao direta de leads de campanhas Meta Lead Ads.`,
       en: `## Coming soon
-Native connector for direct ingestion from Meta Lead Ads campaigns.
-
-Planned:
-- OAuth onboarding;
-- page/form selection;
-- automated sync with idempotency.`,
+Native connector for direct ingestion from Meta Lead Ads campaigns.`,
     },
   },
   {
@@ -412,13 +251,7 @@ Integracao para projetos PHP que enviam formulario no backend.
 1. Crie a source PHP Form Handler.
 2. Gere API key e configure em variavel de ambiente.
 3. No handler PHP, envie o payload para \`POST /api/v1/leads/ingest\`.
-4. Inclua \`Idempotency-Key\` para evitar duplicidade.
-
-## Exemplo de campos
-- \`name\`
-- \`email\`
-- \`phone\`
-- \`external_id\``,
+4. Inclua \`Idempotency-Key\` para evitar duplicidade.`,
       en: `## Overview
 Integration for PHP projects that submit forms on the backend.
 
@@ -430,32 +263,9 @@ Integration for PHP projects that submit forms on the backend.
 1. Create the PHP Form Handler source.
 2. Generate API key and store it in environment variables.
 3. In your PHP handler, send payload to \`POST /api/v1/leads/ingest\`.
-4. Include \`Idempotency-Key\` to avoid duplicates.
-
-## Typical fields
-- \`name\`
-- \`email\`
-- \`phone\`
-- \`external_id\``,
+4. Include \`Idempotency-Key\` to avoid duplicates.`,
     },
-    setup: {
-      source: {
-        type: "php_form_handler",
-        default_name: { pt: "PHP Form Handler", en: "PHP Form Handler" },
-        default_key_name: { pt: "Chave PHP", en: "PHP key" },
-        default_environment: "production",
-        default_rate_limit_per_min: 90,
-        allow_environment: true,
-        allow_rate_limit: true,
-        allow_key_generation: true,
-        ingest_example_payload: {
-          source: "php_form_handler",
-          name: "PHP Lead",
-          email: "php@example.com",
-          form: "contact_form",
-        },
-      },
-    },
+    module: phpFormHandlerSourceModule,
   },
   {
     id: "custom-source",
@@ -496,3 +306,49 @@ Extensible template to build proprietary outbound connectors.`,
     },
   },
 ];
+
+export function getIntegrationCatalogItem(id: string, direction: IntegrationDirection) {
+  return integrationsCatalog.find((item) => item.id === id && item.direction === direction) ?? null;
+}
+
+export function getSourceModuleByIntegrationId(integrationId: string) {
+  const item = integrationsCatalog.find((entry) => entry.id === integrationId && entry.direction === "source");
+  if (!item || !item.module || item.module.direction !== "source") {
+    return null;
+  }
+
+  return item.module;
+}
+
+export function getDestinationModuleByIntegrationId(integrationId: string) {
+  const item = integrationsCatalog.find((entry) => entry.id === integrationId && entry.direction === "destination");
+  if (!item || !item.module || item.module.direction !== "destination") {
+    return null;
+  }
+
+  return item.module;
+}
+
+const sourceLegacyMap: Record<string, string> = {
+  webhook: "universal-webhook",
+  form_backend: "form-backend",
+  n8n_ingoing: "n8n-ingoing",
+  php_form_handler: "php-form-handler",
+};
+
+export function resolveSourceIntegrationIdFromLegacyType(type: string | null | undefined) {
+  if (!type) {
+    return null;
+  }
+
+  return sourceLegacyMap[type] ?? null;
+}
+
+export function resolveSourceTypeFromIntegrationId(integrationId: string) {
+  const integrationModule = getSourceModuleByIntegrationId(integrationId);
+  if (!integrationModule) {
+    return null;
+  }
+
+  return integrationModule.sourceType;
+}

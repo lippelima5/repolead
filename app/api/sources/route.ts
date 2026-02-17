@@ -3,9 +3,15 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@/prisma/generated/client";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
+import { CustomError } from "@/lib/errors";
 import { parseJsonBody } from "@/lib/validation";
 import { sourceCreateBodySchema } from "@/lib/schemas";
 import { requireWorkspace } from "@/lib/leadvault/workspace";
+import {
+  getSourceModuleByIntegrationId,
+  resolveSourceIntegrationIdFromLegacyType,
+  resolveSourceTypeFromIntegrationId,
+} from "@/lib/integrations/catalog";
 
 export async function GET(request: NextRequest) {
   try {
@@ -62,14 +68,30 @@ export async function POST(request: NextRequest) {
     const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const body = await parseJsonBody(request, sourceCreateBodySchema);
 
+    const integrationId = body.integration_id || resolveSourceIntegrationIdFromLegacyType(body.type) || "custom-source";
+    const integrationModule = getSourceModuleByIntegrationId(integrationId);
+    const sourceType = body.type || resolveSourceTypeFromIntegrationId(integrationId) || "custom_source";
+    let integrationConfig = body.integration_config_json || {};
+
+    if (integrationModule) {
+      const parsedConfig = integrationModule.configSchema.safeParse(integrationConfig);
+      if (!parsedConfig.success) {
+        const errors = parsedConfig.error.flatten().fieldErrors;
+        throw new CustomError("Invalid integration configuration", 422, errors);
+      }
+      integrationConfig = parsedConfig.data;
+    }
+
     const source = await prisma.source.create({
       data: {
         workspace_id: workspaceId,
         name: body.name,
-        type: body.type,
+        type: sourceType,
         environment: body.environment,
         rate_limit_per_min: body.rate_limit_per_min,
         status: body.status,
+        integration_id: integrationId,
+        integration_config_json: integrationConfig as Prisma.InputJsonValue,
       },
     });
 

@@ -16,6 +16,12 @@
   - deliveries/retry/DLQ/replay: `lib/leadvault/delivery.ts`
   - API key/signature/hash: `lib/leadvault/security.ts`
   - rate limit por source: `lib/leadvault/source-rate-limit.ts`
+- Arquitetura modular de integracoes:
+  - catalogo unico: `lib/integrations/catalog.ts`
+  - contratos/tipos: `lib/integrations/types.ts`
+  - modulos source (1 arquivo por integracao): `lib/integrations/source/*.tsx`
+  - modulos destination (1 arquivo por integracao): `lib/integrations/destination/*.tsx`
+  - cada modulo contem form, validacoes e mapeamento para payload da API
 
 ## 2) Banco e Prisma
 
@@ -26,6 +32,7 @@
   - `source_rate_limit_bucket`
 - Migration adicionada:
   - `prisma/migrations/20260217010500_leadvault_core/migration.sql`
+  - `prisma/migrations/20260217151429_integration_modules/migration.sql`
 - Client gerado em `prisma/generated`.
 
 ## 3) Endpoints principais
@@ -124,3 +131,8 @@ Repetir com a mesma `Idempotency-Key` retorna `202` com `duplicate_of`.
 
 - Pasta temporaria `lovable-front/` foi removida.
 - O design/tokens do front novo foram incorporados no app real (`app/globals.css`, `components/app-layout.tsx`, `components/app-sidebar.tsx` e novas paginas).
+- `content/integrations-catalog.ts` foi removido e substituido por `lib/integrations/catalog.ts`.
+- Como adicionar nova integracao ativa:
+  1. criar `lib/integrations/source/<id>.tsx` ou `lib/integrations/destination/<id>.tsx`;
+  2. exportar modulo com form + schema + mapeadores;
+  3. registrar entrada no catalogo `lib/integrations/catalog.ts`.

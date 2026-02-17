@@ -3,7 +3,7 @@ import { Bell, Blocks, Braces, Code2, FileCode, FileInput, GitBranch, Megaphone,
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/contexts/i18n-context";
-import { IntegrationCatalogItem } from "@/content/integrations-catalog";
+import { IntegrationCatalogItem } from "@/lib/integrations/types";
 
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   Webhook,

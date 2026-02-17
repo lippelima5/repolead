@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -8,16 +8,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { IntegrationDirection, integrationsCatalog } from "@/content/integrations-catalog";
+import { getIntegrationCatalogItem } from "@/lib/integrations/catalog";
+import { DestinationIntegrationModule, IntegrationDirection, IntegrationFormValues, SourceIntegrationModule } from "@/lib/integrations/types";
 import { useI18n } from "@/contexts/i18n-context";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
-
-type SourceEnvironment = "production" | "staging" | "development";
-type DestinationMethod = "post" | "put" | "patch";
-
-const fallbackDeliveryEvents = ["lead_created", "lead_updated", "delivery_failed", "delivery_success"] as const;
 
 type IntegrationConfigurePageProps = {
   direction: IntegrationDirection;
@@ -36,123 +31,181 @@ function resolveReturnTo(value: string | null, fallback: string) {
   return value;
 }
 
+function extractZodMessage(error: unknown) {
+  if (!error || typeof error !== "object" || !("issues" in error)) {
+    return null;
+  }
+
+  const issues = (error as { issues?: Array<{ message?: string }> }).issues;
+  if (!issues || issues.length === 0) {
+    return null;
+  }
+
+  return issues[0]?.message || null;
+}
+
 export function IntegrationConfigurePage({ direction, defaultReturnTo }: IntegrationConfigurePageProps) {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { locale, t } = useI18n();
 
-  const integration = useMemo(
-    () => integrationsCatalog.find((item) => item.id === params.id && item.direction === direction) ?? null,
-    [params.id, direction],
-  );
-
+  const integration = useMemo(() => getIntegrationCatalogItem(params.id, direction), [params.id, direction]);
   const returnTo = resolveReturnTo(searchParams.get("returnTo"), defaultReturnTo);
+  const sourceId = direction === "source" ? searchParams.get("sourceId") : null;
+  const destinationId = direction === "destination" ? searchParams.get("destinationId") : null;
+  const isEditMode = Boolean(sourceId || destinationId);
 
-  const sourceSetup = integration?.setup?.source;
-  const destinationSetup = integration?.setup?.destination;
+  const sourceModule = useMemo(() => {
+    if (!integration || integration.direction !== "source" || !integration.module || integration.module.direction !== "source") {
+      return null;
+    }
 
-  const [sourceName, setSourceName] = useState(sourceSetup?.default_name[locale] ?? "");
-  const [sourceKeyName, setSourceKeyName] = useState(sourceSetup?.default_key_name?.[locale] ?? "");
-  const [sourceEnvironment, setSourceEnvironment] = useState<SourceEnvironment>(sourceSetup?.default_environment ?? "production");
-  const [sourceRateLimit, setSourceRateLimit] = useState(sourceSetup?.default_rate_limit_per_min ?? 120);
-  const [sourceCreateKey, setSourceCreateKey] = useState(sourceSetup?.allow_key_generation ?? true);
+    return integration.module as SourceIntegrationModule;
+  }, [integration]);
+
+  const destinationModule = useMemo(() => {
+    if (!integration || integration.direction !== "destination" || !integration.module || integration.module.direction !== "destination") {
+      return null;
+    }
+
+    return integration.module as DestinationIntegrationModule;
+  }, [integration]);
+
+  const activeModule = (sourceModule || destinationModule) as SourceIntegrationModule | DestinationIntegrationModule | null;
+
+  const [formValues, setFormValues] = useState<IntegrationFormValues>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingEntity, setIsLoadingEntity] = useState(false);
+  const [isTestingDestination, setIsTestingDestination] = useState(false);
   const [sourceResult, setSourceResult] = useState<{ sourceId: string; plainKey?: string } | null>(null);
-  const [creatingSource, setCreatingSource] = useState(false);
-
-  const [destinationName, setDestinationName] = useState(destinationSetup?.default_name[locale] ?? "");
-  const [destinationUrl, setDestinationUrl] = useState(destinationSetup?.default_url ?? "");
-  const [destinationMethod, setDestinationMethod] = useState<DestinationMethod>(destinationSetup?.default_method ?? "post");
-  const [destinationEvents, setDestinationEvents] = useState<string[]>(
-    destinationSetup?.subscribed_events ?? ["lead_created", "lead_updated"],
-  );
   const [destinationResult, setDestinationResult] = useState<{ destinationId: string; signingSecret?: string } | null>(null);
-  const [creatingDestination, setCreatingDestination] = useState(false);
-  const [testingDestination, setTestingDestination] = useState(false);
 
-  const supportsSource = direction === "source" && Boolean(sourceSetup && integration?.availability === "active");
-  const supportsDestination = direction === "destination" && Boolean(destinationSetup && integration?.availability === "active");
-
-  const handleCreateSource = async () => {
-    if (!sourceSetup || !sourceName.trim()) {
+  useEffect(() => {
+    if (!activeModule) {
       return;
     }
 
-    setCreatingSource(true);
-    try {
-      const createResponse = await api.post("/sources", {
-        name: sourceName.trim(),
-        type: sourceSetup.type,
-        environment: sourceEnvironment,
-        rate_limit_per_min: sourceRateLimit,
-      });
+    setFormValues(activeModule.getDefaults(locale));
+  }, [activeModule, locale]);
 
-      if (!createResponse.data?.success) {
+  useEffect(() => {
+    const load = async () => {
+      if (!activeModule || !isEditMode) {
         return;
       }
 
-      const sourceId = createResponse.data.data.id as string;
-      let plainKey: string | undefined;
-
-      if (sourceCreateKey) {
-        const keyResponse = await api.post(`/sources/${sourceId}/keys`, {
-          name: sourceKeyName.trim() || `${sourceName.trim()} key`,
-        });
-
-        plainKey = keyResponse.data?.data?.plain_key as string | undefined;
+      const id = direction === "source" ? sourceId : destinationId;
+      if (!id) {
+        return;
       }
 
-      setSourceResult({ sourceId, plainKey });
-      toast.success(t("integrations.created_success"));
-    } catch (error) {
-      logger.error("Failed to configure source integration", error);
-      toast.error(t("integrations.create_failed"));
-    } finally {
-      setCreatingSource(false);
-    }
-  };
+      setIsLoadingEntity(true);
+      try {
+        const endpoint = direction === "source" ? `/sources/${id}` : `/destinations/${id}`;
+        const response = await api.get(endpoint);
+        if (!response.data?.success) {
+          return;
+        }
 
-  const handleCreateDestination = async () => {
-    if (!destinationName.trim() || !destinationUrl.trim()) {
+        setFormValues(activeModule.fromEntity(response.data.data, locale));
+      } catch (error) {
+        logger.error("Failed to load integration entity", error);
+        toast.error(direction === "source" ? t("sources.updated_failed") : t("destinations.load_failed"));
+      } finally {
+        setIsLoadingEntity(false);
+      }
+    };
+
+    void load();
+  }, [activeModule, destinationId, direction, isEditMode, locale, sourceId, t]);
+
+  const handleSubmit = async () => {
+    if (!activeModule) {
       return;
     }
 
-    setCreatingDestination(true);
-    try {
-      const response = await api.post("/destinations", {
-        name: destinationName.trim(),
-        url: destinationUrl.trim(),
-        method: destinationMethod,
-        subscribed_events_json: destinationEvents,
-      });
+    const parsed = activeModule.formSchema.safeParse(formValues);
+    if (!parsed.success) {
+      const message = extractZodMessage(parsed.error) || t("integrations.create_failed");
+      toast.error(message);
+      return;
+    }
 
-      if (!response.data?.success) {
-        return;
+    setIsSubmitting(true);
+    try {
+      if (direction === "source" && sourceModule) {
+        if (isEditMode && sourceId) {
+          const payload = sourceModule.toUpdatePayload(parsed.data);
+          const response = await api.patch(`/sources/${sourceId}`, payload);
+          if (response.data?.success) {
+            toast.success(t("sources.updated_success"));
+            router.push(returnTo);
+          }
+        } else {
+          const payload = sourceModule.toCreatePayload(parsed.data);
+          const createResponse = await api.post("/sources", payload);
+          if (!createResponse.data?.success) {
+            return;
+          }
+
+          const createdSourceId = createResponse.data.data.id as string;
+          const values = parsed.data as Record<string, unknown>;
+          const shouldCreateKey = values.create_api_key !== false;
+          let plainKey: string | undefined;
+
+          if (shouldCreateKey) {
+            const keyName = typeof values.key_name === "string" && values.key_name.trim().length > 0 ? values.key_name.trim() : `${payload.name} key`;
+            const keyResponse = await api.post(`/sources/${createdSourceId}/keys`, { name: keyName });
+            plainKey = keyResponse.data?.data?.plain_key as string | undefined;
+          }
+
+          setSourceResult({ sourceId: createdSourceId, plainKey });
+          toast.success(t("integrations.created_success"));
+        }
       }
 
-      setDestinationResult({
-        destinationId: response.data.data.id as string,
-        signingSecret: response.data.data.signing_secret as string | undefined,
-      });
-      toast.success(t("integrations.created_success"));
+      if (direction === "destination" && destinationModule) {
+        if (isEditMode && destinationId) {
+          const payload = destinationModule.toUpdatePayload(parsed.data);
+          const response = await api.patch(`/destinations/${destinationId}`, payload);
+          if (response.data?.success) {
+            toast.success(t("destinations.updated_success"));
+            router.push(returnTo);
+          }
+        } else {
+          const payload = destinationModule.toCreatePayload(parsed.data);
+          const response = await api.post("/destinations", payload);
+          if (!response.data?.success) {
+            return;
+          }
+
+          setDestinationResult({
+            destinationId: response.data.data.id as string,
+            signingSecret: response.data.data.signing_secret as string | undefined,
+          });
+          toast.success(t("integrations.created_success"));
+        }
+      }
     } catch (error) {
-      logger.error("Failed to configure destination integration", error);
-      toast.error(t("integrations.create_failed"));
+      logger.error("Failed to submit integration configuration", error);
+      toast.error(direction === "source" ? t("sources.updated_failed") : t("destinations.updated_failed"));
     } finally {
-      setCreatingDestination(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleTestDestination = async () => {
-    if (!destinationResult?.destinationId) {
+    const targetId = destinationResult?.destinationId || destinationId;
+    if (!targetId) {
       return;
     }
 
-    setTestingDestination(true);
+    setIsTestingDestination(true);
     try {
-      const response = await api.post(`/destinations/${destinationResult.destinationId}/test`, {
+      const response = await api.post(`/destinations/${targetId}/test`, {
         event_type: "test_event",
-        payload: destinationSetup?.test_payload ?? {
+        payload: {
           integration: integration?.id ?? "unknown",
           lead: { email: "test@example.com", name: "Test Lead" },
         },
@@ -165,7 +218,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
       logger.error("Failed to test destination integration", error);
       toast.error(t("integrations.test_failed"));
     } finally {
-      setTestingDestination(false);
+      setIsTestingDestination(false);
     }
   };
 
@@ -186,9 +239,9 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
   }
 
   const markdown = integration.full_description_md[locale];
-  const sourcePayload = sourceSetup?.ingest_example_payload ?? { email: "john@doe.com", name: "John Doe" };
-  const eventOptions = destinationSetup?.subscribed_events ?? [...fallbackDeliveryEvents];
-  const configTitle = direction === "source" ? t("integrations.source_config") : t("integrations.destination_config");
+  const sourcePayload = { name: "Jane Doe", email: "jane@example.com", phone: "+5511999999999" };
+  const canConfigure = integration.availability === "active" && Boolean(activeModule);
+  const ModuleForm = activeModule?.Form;
 
   return (
     <AppLayout
@@ -213,232 +266,116 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
 
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)] gap-4 items-start">
           <section className="rounded-xl border border-border bg-card p-5 space-y-4 xl:sticky xl:top-4">
-            <h2 className="text-[14px] font-semibold text-foreground">{configTitle}</h2>
+            <h2 className="text-[14px] font-semibold text-foreground">
+              {direction === "source" ? t("integrations.source_config") : t("integrations.destination_config")}
+            </h2>
             <p className="text-[12px] text-muted-foreground">{t("integrations.setup_subtitle")}</p>
 
-            {supportsSource ? (
+            {canConfigure && ModuleForm ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[12px] font-medium text-foreground">{t("integrations.source_name")}</label>
-                    <Input value={sourceName} onChange={(event) => setSourceName(event.target.value)} className="h-9 text-[13px]" />
-                  </div>
+                {isLoadingEntity ? (
+                  <p className="text-[13px] text-muted-foreground">{t("common.loading")}</p>
+                ) : (
+                  <ModuleForm
+                    values={formValues as never}
+                    onChange={setFormValues as never}
+                    mode={isEditMode ? "edit" : "create"}
+                    locale={locale}
+                  />
+                )}
 
-                  {sourceSetup?.allow_environment ?? true ? (
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-foreground">{t("integrations.source_environment")}</label>
-                      <select
-                        className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
-                        value={sourceEnvironment}
-                        onChange={(event) => setSourceEnvironment(event.target.value as SourceEnvironment)}
-                      >
-                        <option value="production">production</option>
-                        <option value="staging">staging</option>
-                        <option value="development">development</option>
-                      </select>
-                    </div>
-                  ) : null}
-
-                  {sourceSetup?.allow_rate_limit ?? true ? (
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-foreground">{t("integrations.source_rate_limit")}</label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={20000}
-                        value={sourceRateLimit}
-                        onChange={(event) => setSourceRateLimit(Number(event.target.value || 120))}
-                        className="h-9 text-[13px]"
-                      />
-                    </div>
-                  ) : null}
-
-                  {sourceSetup?.allow_key_generation ?? true ? (
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-foreground">{t("integrations.source_key_name")}</label>
-                      <Input
-                        value={sourceKeyName}
-                        onChange={(event) => setSourceKeyName(event.target.value)}
-                        className="h-9 text-[13px]"
-                        disabled={!sourceCreateKey}
-                      />
-                    </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button className="h-9 text-[13px]" onClick={handleSubmit} disabled={isSubmitting || isLoadingEntity}>
+                    {isSubmitting
+                      ? t("common.loading")
+                      : isEditMode
+                        ? t("common.save")
+                        : direction === "source"
+                          ? t("integrations.create_source_and_key")
+                          : t("integrations.create_destination_and_test")}
+                  </Button>
+                  {direction === "destination" ? (
+                    <Button
+                      variant="outline"
+                      className="h-9 text-[13px]"
+                      onClick={handleTestDestination}
+                      disabled={isTestingDestination || (!destinationResult?.destinationId && !destinationId)}
+                    >
+                      {isTestingDestination ? t("integrations.testing") : t("integrations.test_destination")}
+                    </Button>
                   ) : null}
                 </div>
+              </>
+            ) : (
+              <div className="rounded-xl border border-border bg-surface-2 p-4">
+                <p className="text-[13px] text-muted-foreground">{t("integrations.not_supported_for_direction")}</p>
+              </div>
+            )}
 
-                {sourceSetup?.allow_key_generation ?? true ? (
-                  <label className="inline-flex items-center gap-2 text-[13px] text-foreground">
-                    <input
-                      type="checkbox"
-                      checked={sourceCreateKey}
-                      onChange={(event) => setSourceCreateKey(event.target.checked)}
-                      className="h-4 w-4 rounded border-border bg-background"
-                    />
-                    {t("integrations.generate_api_key")}
-                  </label>
+            {sourceResult ? (
+              <div className="rounded-xl border border-border bg-surface-2 p-4 space-y-2">
+                <p className="text-[12px] font-medium text-foreground">{t("integrations.source_created_id", { id: sourceResult.sourceId })}</p>
+                {sourceResult.plainKey ? (
+                  <>
+                    <p className="text-[12px] text-warning">{t("integrations.copy_key_now")}</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
+                        {sourceResult.plainKey}
+                      </code>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          navigator.clipboard.writeText(sourceResult.plainKey || "");
+                          toast.success(t("integrations.key_copied"));
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </>
                 ) : null}
-
-                <Button className="h-9 text-[13px]" onClick={handleCreateSource} disabled={creatingSource || !sourceName.trim()}>
-                  {creatingSource ? t("integrations.creating") : t("integrations.create_source_and_key")}
-                </Button>
-
-                {sourceResult ? (
-                  <div className="rounded-xl border border-border bg-surface-2 p-4 space-y-2">
-                    <p className="text-[12px] font-medium text-foreground">{t("integrations.source_created_id", { id: sourceResult.sourceId })}</p>
-                    {sourceResult.plainKey ? (
-                      <>
-                        <p className="text-[12px] text-warning">{t("integrations.copy_key_now")}</p>
-                        <div className="flex items-center gap-2">
-                          <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
-                            {sourceResult.plainKey}
-                          </code>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              navigator.clipboard.writeText(sourceResult.plainKey || "");
-                              toast.success(t("integrations.key_copied"));
-                            }}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </>
-                    ) : null}
-                    <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
-                      {`curl -X POST "$APP_URL/api/v1/leads/ingest" \\
+                <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
+                  {`curl -X POST "$APP_URL/api/v1/leads/ingest" \\
 -H "Authorization: Bearer ${sourceResult.plainKey || "lv_api_key"}" \\
 -H "Idempotency-Key: sample-001" \\
 -H "Content-Type: application/json" \\
 -d '${JSON.stringify(sourcePayload)}'`}
-                    </code>
-                  </div>
-                ) : null}
-              </>
+                </code>
+              </div>
             ) : null}
 
-            {supportsDestination ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[12px] font-medium text-foreground">{t("integrations.destination_name")}</label>
-                    <Input value={destinationName} onChange={(event) => setDestinationName(event.target.value)} className="h-9 text-[13px]" />
-                  </div>
-
-                  {destinationSetup?.allow_method ?? true ? (
-                    <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-foreground">{t("integrations.destination_method")}</label>
-                      <select
-                        className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
-                        value={destinationMethod}
-                        onChange={(event) => setDestinationMethod(event.target.value as DestinationMethod)}
+            {destinationResult ? (
+              <div className="rounded-xl border border-border bg-surface-2 p-4 space-y-2">
+                <p className="text-[12px] font-medium text-foreground">{t("integrations.destination_created_id", { id: destinationResult.destinationId })}</p>
+                {destinationResult.signingSecret ? (
+                  <div className="space-y-1">
+                    <p className="text-[12px] text-warning">{t("integrations.copy_secret_now")}</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
+                        {destinationResult.signingSecret}
+                      </code>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          navigator.clipboard.writeText(destinationResult.signingSecret || "");
+                          toast.success(t("integrations.secret_copied"));
+                        }}
                       >
-                        <option value="post">POST</option>
-                        <option value="put">PUT</option>
-                        <option value="patch">PATCH</option>
-                      </select>
-                    </div>
-                  ) : null}
-
-                  <div className="space-y-1.5 md:col-span-2 xl:col-span-1">
-                    <label className="text-[12px] font-medium text-foreground">{t("integrations.destination_url")}</label>
-                    <Input
-                      value={destinationUrl}
-                      onChange={(event) => setDestinationUrl(event.target.value)}
-                      className="h-9 text-[13px]"
-                      placeholder="https://example.com/webhook"
-                    />
-                  </div>
-                </div>
-
-                {destinationSetup?.allow_events ?? true ? (
-                  <div className="space-y-2">
-                    <p className="text-[12px] font-medium text-foreground">{t("integrations.destination_events")}</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
-                      {eventOptions.map((eventName) => (
-                        <label key={eventName} className="inline-flex items-center gap-2 text-[13px] text-foreground">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-border bg-background"
-                            checked={destinationEvents.includes(eventName)}
-                            onChange={(event) => {
-                              setDestinationEvents((prev) => {
-                                if (event.target.checked) {
-                                  return [...new Set([...prev, eventName])];
-                                }
-
-                                return prev.filter((item) => item !== eventName);
-                              });
-                            }}
-                          />
-                          {eventName}
-                        </label>
-                      ))}
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 ) : null}
-
-                <p className="text-[12px] text-muted-foreground">{t("integrations.destination_secret_auto")}</p>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    className="h-9 text-[13px]"
-                    onClick={handleCreateDestination}
-                    disabled={creatingDestination || !destinationName.trim() || !destinationUrl.trim()}
-                  >
-                    {creatingDestination ? t("integrations.creating") : t("integrations.create_destination_and_test")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-9 text-[13px]"
-                    onClick={handleTestDestination}
-                    disabled={testingDestination || !destinationResult?.destinationId}
-                  >
-                    {testingDestination ? t("integrations.testing") : t("integrations.test_destination")}
-                  </Button>
+                <div className="inline-flex items-center gap-1.5 text-[12px] text-success">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>{t("integrations.destination_ready")}</span>
                 </div>
-
-                {destinationResult ? (
-                  <div className="rounded-xl border border-border bg-surface-2 p-4 space-y-2">
-                    <p className="text-[12px] font-medium text-foreground">
-                      {t("integrations.destination_created_id", { id: destinationResult.destinationId })}
-                    </p>
-                    {destinationResult.signingSecret ? (
-                      <div className="space-y-1">
-                        <p className="text-[12px] text-warning">{t("integrations.copy_secret_now")}</p>
-                        <div className="flex items-center gap-2">
-                          <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
-                            {destinationResult.signingSecret}
-                          </code>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              navigator.clipboard.writeText(destinationResult.signingSecret || "");
-                              toast.success(t("integrations.secret_copied"));
-                            }}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    ) : null}
-                    <div className="inline-flex items-center gap-1.5 text-[12px] text-success">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span>{t("integrations.destination_ready")}</span>
-                    </div>
-                  </div>
-                ) : null}
-              </>
-            ) : null}
-
-            {!supportsSource && !supportsDestination && integration.availability !== "soon" ? (
-              <div className="rounded-xl border border-border bg-surface-2 p-4">
-                <p className="text-[13px] text-muted-foreground">{t("integrations.not_supported_for_direction")}</p>
               </div>
             ) : null}
           </section>
@@ -453,3 +390,4 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
     </AppLayout>
   );
 }
+

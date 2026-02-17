@@ -188,6 +188,8 @@ model source {
   workspace          workspace                  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
   name               String
   type               String
+  integration_id     String                     @default("custom-source")
+  integration_config_json Json?
   environment        source_environment         @default(production)
   rate_limit_per_min Int                        @default(60)
   status             source_status              @default(active)
@@ -199,6 +201,7 @@ model source {
   updated_at         DateTime                   @updatedAt
 
   @@index([workspace_id])
+  @@index([workspace_id, integration_id])
 }
 
 model api_key {
@@ -314,6 +317,8 @@ model destination {
   name                   String
   url                    String
   method                 destination_method @default(post)
+  integration_id         String             @default("custom-destination")
+  integration_config_json Json?
   headers_json           Json?
   signing_secret_hash    String?
   signing_secret_prefix  String?
@@ -324,6 +329,7 @@ model destination {
   updated_at             DateTime           @updatedAt
 
   @@index([workspace_id])
+  @@index([workspace_id, integration_id])
 }
 
 model delivery {

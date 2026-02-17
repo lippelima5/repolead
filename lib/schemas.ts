@@ -103,13 +103,23 @@ export const sourceEnvironmentSchema = z.enum(["production", "staging", "develop
 export const sourceStatusSchema = z.enum(["active", "inactive"]);
 export const sourceCreateBodySchema = z.object({
   name: z.string().trim().min(1).max(120),
-  type: z.string().trim().min(2).max(80),
+  type: z.string().trim().min(2).max(80).optional(),
+  integration_id: z.string().trim().min(2).max(80).optional(),
+  integration_config_json: z.record(z.string(), z.unknown()).optional().default({}),
   environment: sourceEnvironmentSchema.optional().default("production"),
   rate_limit_per_min: z.number().int().min(1).max(20000).optional().default(60),
   status: sourceStatusSchema.optional().default("active"),
 });
-export const sourceUpdateBodySchema = sourceCreateBodySchema
-  .partial()
+export const sourceUpdateBodySchema = z
+  .object({
+    name: z.string().trim().min(1).max(120).optional(),
+    type: z.string().trim().min(2).max(80).optional(),
+    integration_id: z.string().trim().min(2).max(80).optional(),
+    integration_config_json: z.record(z.string(), z.unknown()).optional(),
+    environment: sourceEnvironmentSchema.optional(),
+    rate_limit_per_min: z.number().int().min(1).max(20000).optional(),
+    status: sourceStatusSchema.optional(),
+  })
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field must be provided",
   });
@@ -123,18 +133,26 @@ export const destinationCreateBodySchema = z.object({
   name: z.string().trim().min(1).max(120),
   url: z.string().trim().url(),
   method: destinationMethodSchema.optional().default("post"),
+  integration_id: z.string().trim().min(2).max(80).optional(),
+  integration_config_json: z.record(z.string(), z.unknown()).optional().default({}),
   headers_json: z.record(z.string(), z.string()).optional().default({}),
   signing_secret: z.string().trim().min(8).max(200).optional(),
   enabled: z.boolean().optional().default(true),
   subscribed_events_json: z.array(z.string().trim().min(1).max(120)).optional().default([]),
 });
 
-export const destinationUpdateBodySchema = destinationCreateBodySchema
-  .omit({ signing_secret: true })
-  .extend({
+export const destinationUpdateBodySchema = z
+  .object({
+    name: z.string().trim().min(1).max(120).optional(),
+    url: z.string().trim().url().optional(),
+    method: destinationMethodSchema.optional(),
+    integration_id: z.string().trim().min(2).max(80).optional(),
+    integration_config_json: z.record(z.string(), z.unknown()).optional(),
+    headers_json: z.record(z.string(), z.string()).optional(),
+    enabled: z.boolean().optional(),
+    subscribed_events_json: z.array(z.string().trim().min(1).max(120)).optional(),
     signing_secret: z.string().trim().min(8).max(200).optional().nullable(),
   })
-  .partial()
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field must be provided",
   });
@@ -178,4 +196,3 @@ export const alertRuleUpdateBodySchema = z
   .refine((value) => Object.keys(value).length > 0, {
     message: "At least one field must be provided",
   });
-
