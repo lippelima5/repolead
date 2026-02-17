@@ -5,8 +5,8 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { parseJsonBody } from "@/lib/validation";
 import { destinationTestBodySchema } from "@/lib/schemas";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
-import { dispatchDeliveryAttempt } from "@/lib/leadvault/delivery";
+import { requireWorkspace } from "@/lib/repolead/workspace";
+import { dispatchDeliveryAttempt } from "@/lib/repolead/delivery";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
-import { buildLeadWhereInput, parseLeadFiltersFromSearchParams } from "@/lib/leadvault/leads-query";
+import { requireWorkspace } from "@/lib/repolead/workspace";
+import { buildLeadWhereInput, parseLeadFiltersFromSearchParams } from "@/lib/repolead/leads-query";
 
 export async function GET(request: NextRequest) {
   try {

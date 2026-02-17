@@ -58,7 +58,7 @@ export function WorkspaceSwitcher() {
     try {
       const { data } = await api.put("/profile", { workspace_active_id: workspaceId });
       if (data?.success) {
-        window.localStorage.setItem("leadvault.workspace_id", String(workspaceId));
+        window.localStorage.setItem("repolead.workspace_id", String(workspaceId));
         window.location.reload();
       }
     } catch (error) {
@@ -68,7 +68,7 @@ export function WorkspaceSwitcher() {
 
   useEffect(() => {
     if (selected?.workspace_id) {
-      window.localStorage.setItem("leadvault.workspace_id", String(selected.workspace_id));
+      window.localStorage.setItem("repolead.workspace_id", String(selected.workspace_id));
     }
   }, [selected?.workspace_id]);
 

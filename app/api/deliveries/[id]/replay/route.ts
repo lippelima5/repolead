@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
-import { replayDelivery } from "@/lib/leadvault/delivery";
+import { requireWorkspace } from "@/lib/repolead/workspace";
+import { replayDelivery } from "@/lib/repolead/delivery";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

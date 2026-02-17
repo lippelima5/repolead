@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { hashValue, resolveApiKeyFromHeaders } from "@/lib/leadvault/security";
+import { hashValue, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
 import { CustomError } from "@/lib/errors";
 
 export const PUBLIC_READ_RATE_LIMIT_PER_MIN = 120;
@@ -59,7 +59,7 @@ export async function checkWorkspaceReadApiKeyLimit(
   options?: { limit?: number; windowMs?: number },
 ) {
   return checkRateLimit({
-    namespace: "leadvault:v1:leads:read",
+    namespace: "repolead:v1:leads:read",
     identifier: keyId,
     limit: options?.limit ?? PUBLIC_READ_RATE_LIMIT_PER_MIN,
     windowMs: options?.windowMs ?? 60 * 1000,

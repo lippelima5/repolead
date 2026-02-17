@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { createWebhookSignature } from "@/lib/leadvault/security";
+import { createWebhookSignature } from "@/lib/repolead/security";
 import { Prisma, delivery, destination } from "@/prisma/generated/client";
 
 const MAX_DELIVERY_ATTEMPTS = 50;
@@ -118,13 +118,13 @@ async function createAttemptResult(
   const headers: Record<string, string> = {
     "content-type": "application/json",
     ...customHeaders,
-    "x-leadvault-timestamp": timestamp,
-    "x-leadvault-event": deliveryItem.event_type,
-    "x-leadvault-delivery-id": deliveryItem.id,
+    "x-repolead-timestamp": timestamp,
+    "x-repolead-event": deliveryItem.event_type,
+    "x-repolead-delivery-id": deliveryItem.id,
   };
 
   if (signature) {
-    headers["x-leadvault-signature"] = signature;
+    headers["x-repolead-signature"] = signature;
   }
 
   let responseStatus: number | null = null;

@@ -4,7 +4,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError, verifyUserWorkspace } from "@/lib/helper";
 import { parseJsonBody } from "@/lib/validation";
 import { workspaceReadKeyCreateBodySchema } from "@/lib/schemas";
-import { createWorkspaceReadApiKey } from "@/lib/leadvault/read-api-key";
+import { createWorkspaceReadApiKey } from "@/lib/repolead/read-api-key";
 
 function parseId(value: string) {
   const parsed = Number(value);

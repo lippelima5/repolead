@@ -8,17 +8,17 @@
 - Sem Server Actions: leituras/mutacoes no cliente passam por Route Handlers em `app/api/**`.
 - Cliente HTTP padronizado em `lib/api.ts` (axios), com `X-Workspace-Id` automatico a partir de `localStorage`.
 - Multi-tenant:
-  - helper `requireWorkspace` em `lib/leadvault/workspace.ts`
+  - helper `requireWorkspace` em `lib/repolead/workspace.ts`
   - resolve workspace por `X-Workspace-Id` -> query -> `user.workspace_active_id`
   - validacao de membership via `verifyUserWorkspace`
 - Servicos de dominio:
-  - ingest/normalizacao/dedupe: `lib/leadvault/ingest.ts`
-  - deliveries/retry/DLQ/replay: `lib/leadvault/delivery.ts`
-  - API key/signature/hash: `lib/leadvault/security.ts`
-  - Read API key publica: `lib/leadvault/read-api-key.ts`
-  - filtros compartilhados de leads: `lib/leadvault/leads-query.ts`
-  - token/link de exportacao: `lib/leadvault/lead-export-token.ts`
-  - rate limit por source: `lib/leadvault/source-rate-limit.ts`
+  - ingest/normalizacao/dedupe: `lib/repolead/ingest.ts`
+  - deliveries/retry/DLQ/replay: `lib/repolead/delivery.ts`
+  - API key/signature/hash: `lib/repolead/security.ts`
+  - Read API key publica: `lib/repolead/read-api-key.ts`
+  - filtros compartilhados de leads: `lib/repolead/leads-query.ts`
+  - token/link de exportacao: `lib/repolead/lead-export-token.ts`
+  - rate limit por source: `lib/repolead/source-rate-limit.ts`
 - Arquitetura modular de integracoes:
   - catalogo unico: `lib/integrations/catalog.ts`
   - contratos/tipos: `lib/integrations/types.ts`

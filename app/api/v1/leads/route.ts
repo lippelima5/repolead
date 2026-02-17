@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiRateLimit, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { buildLeadWhereInput, parseLeadFiltersFromSearchParams } from "@/lib/leadvault/leads-query";
+import { buildLeadWhereInput, parseLeadFiltersFromSearchParams } from "@/lib/repolead/leads-query";
 import {
   checkWorkspaceReadApiKeyLimit,
   requireWorkspaceReadApiKey,
   touchWorkspaceReadApiKey,
-} from "@/lib/leadvault/read-api-key";
+} from "@/lib/repolead/read-api-key";
 
 export async function GET(request: NextRequest) {
   try {

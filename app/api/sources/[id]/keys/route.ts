@@ -4,8 +4,8 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { parseJsonBody } from "@/lib/validation";
 import { sourceKeyCreateBodySchema } from "@/lib/schemas";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
-import { createApiKey } from "@/lib/leadvault/security";
+import { requireWorkspace } from "@/lib/repolead/workspace";
+import { createApiKey } from "@/lib/repolead/security";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

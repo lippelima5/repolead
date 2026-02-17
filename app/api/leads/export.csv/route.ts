@@ -2,20 +2,20 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiError } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { serializeLeadsToCsv } from "@/lib/leadvault/lead-csv";
-import { verifyLeadExportToken } from "@/lib/leadvault/lead-export-token";
+import { serializeLeadsToCsv } from "@/lib/repolead/lead-csv";
+import { verifyLeadExportToken } from "@/lib/repolead/lead-export-token";
 import {
   buildLeadWhereInput,
   parseLeadFilters,
   parseLeadFiltersFromSearchParams,
-} from "@/lib/leadvault/leads-query";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
+} from "@/lib/repolead/leads-query";
+import { requireWorkspace } from "@/lib/repolead/workspace";
 
 const EXPORT_MAX_ROWS = 10_000;
 
 function buildExportFilename() {
   const now = new Date().toISOString().replaceAll(":", "-");
-  return `leadvault-leads-${now}.csv`;
+  return `repolead-leads-${now}.csv`;
 }
 
 export async function GET(request: NextRequest) {

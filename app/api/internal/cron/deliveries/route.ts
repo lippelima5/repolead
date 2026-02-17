@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { runDeliveryCron } from "@/lib/leadvault/delivery";
+import { runDeliveryCron } from "@/lib/repolead/delivery";
 
 function isAuthorized(request: NextRequest) {
   const expected = process.env.CRON_SECRET;

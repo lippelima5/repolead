@@ -28,7 +28,7 @@ Conector universal para qualquer sistema que consiga enviar HTTP POST para o end
 - Enviar \`Idempotency-Key\` em reenvios.
 
 ## Passo a passo
-1. Crie a source no LeadVault.
+1. Crie a source no RepoLead.
 2. Gere a API key (aparece uma unica vez).
 3. Configure sua aplicacao para enviar payloads para \`POST /api/v1/leads/ingest\`.
 4. Valide o lead no Lead Store e timeline.`,
@@ -41,7 +41,7 @@ Universal connector for any system able to send HTTP POST to the ingestion endpo
 - Send \`Idempotency-Key\` on retries.
 
 ## Setup steps
-1. Create the source in LeadVault.
+1. Create the source in RepoLead.
 2. Generate the API key (shown only once).
 3. Configure your application to send payloads to \`POST /api/v1/leads/ingest\`.
 4. Validate the lead in Lead Store and timeline.`,
@@ -61,7 +61,7 @@ Universal connector for any system able to send HTTP POST to the ingestion endpo
     },
     full_description_md: {
       pt: `## Overview
-Use o LeadVault como backend de captura para formularios web.
+Use o RepoLead como backend de captura para formularios web.
 
 ## Requisitos
 - Formulario enviando \`POST\`.
@@ -74,7 +74,7 @@ Use o LeadVault como backend de captura para formularios web.
 3. Envie os campos para o endpoint de ingestao.
 4. Verifique no dashboard de ingestoes e leads.`,
       en: `## Overview
-Use LeadVault as a capture backend for web forms.
+Use RepoLead as a capture backend for web forms.
 
 ## Requirements
 - Form submitting with \`POST\`.
@@ -102,11 +102,11 @@ Use LeadVault as a capture backend for web forms.
     },
     full_description_md: {
       pt: `## Overview
-Integracao de entrada com n8n para centralizar leads no LeadVault.
+Integracao de entrada com n8n para centralizar leads no RepoLead.
 
 ## Requisitos
 - Workflow no n8n com node HTTP Request.
-- API key ativa da source no LeadVault.
+- API key ativa da source no RepoLead.
 - Payload contendo \`email\`, \`phone\` ou \`external_id\`.
 
 ## Passo a passo
@@ -115,11 +115,11 @@ Integracao de entrada com n8n para centralizar leads no LeadVault.
 3. Configure node HTTP Request para \`POST /api/v1/leads/ingest\`.
 4. Envie \`Idempotency-Key\` por execucao.`,
       en: `## Overview
-Inbound n8n integration to centralize leads in LeadVault.
+Inbound n8n integration to centralize leads in RepoLead.
 
 ## Requirements
 - n8n workflow with an HTTP Request node.
-- Active source API key in LeadVault.
+- Active source API key in RepoLead.
 - Payload containing \`email\`, \`phone\` or \`external_id\`.
 
 ## Setup steps
@@ -138,12 +138,12 @@ Inbound n8n integration to centralize leads in LeadVault.
     direction: "destination",
     availability: "active",
     short_description: {
-      pt: "Envie eventos do LeadVault para workflows n8n.",
-      en: "Send LeadVault events to n8n workflows.",
+      pt: "Envie eventos do RepoLead para workflows n8n.",
+      en: "Send RepoLead events to n8n workflows.",
     },
     full_description_md: {
       pt: `## Overview
-Integracao de saida para disparar workflows n8n com eventos do LeadVault.
+Integracao de saida para disparar workflows n8n com eventos do RepoLead.
 
 ## Requisitos
 - Endpoint webhook ativo no n8n.
@@ -156,7 +156,7 @@ Integracao de saida para disparar workflows n8n com eventos do LeadVault.
 3. Defina eventos assinados (ex: \`lead_created\`, \`lead_updated\`).
 4. Execute teste de delivery.`,
       en: `## Overview
-Outbound integration to trigger n8n workflows from LeadVault events.
+Outbound integration to trigger n8n workflows from RepoLead events.
 
 ## Requirements
 - Active n8n webhook endpoint.

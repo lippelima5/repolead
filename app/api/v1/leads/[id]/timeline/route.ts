@@ -6,7 +6,7 @@ import {
   checkWorkspaceReadApiKeyLimit,
   requireWorkspaceReadApiKey,
   touchWorkspaceReadApiKey,
-} from "@/lib/leadvault/read-api-key";
+} from "@/lib/repolead/read-api-key";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

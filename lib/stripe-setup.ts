@@ -221,9 +221,9 @@ export async function ensureStripeWebhookSetup(originFallback?: string) {
     const createdEndpoint = await stripe.webhookEndpoints.create({
       url: webhookUrl,
       enabled_events: [...STRIPE_REQUIRED_WEBHOOK_EVENTS],
-      description: "VibeKit workspace subscription sync",
+      description: "RepoLead workspace subscription sync",
       metadata: {
-        app: "vibekit",
+        app: "repolead",
         managed_by: "admin-setup",
       },
     });

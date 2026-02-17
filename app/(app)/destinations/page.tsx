@@ -101,7 +101,7 @@ export default function DestinationsPage() {
       const response = await api.post(`/destinations/${destinationId}/test`, {
         event_type: "test_event",
         payload: {
-          lead: { email: "test@leadvault.dev", name: "Destination Test" },
+          lead: { email: "test@repolead.dev", name: "Destination Test" },
           source: "manual_test",
         },
       });

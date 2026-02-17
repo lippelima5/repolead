@@ -417,8 +417,8 @@
       "pain6": "Cada origem manda para um destino diferente, sem padrão e sem rastreabilidade"
     },
     "whatis": {
-      "title": "O que é o LeadVault",
-      "p1": "LeadVault é uma plataforma API-first que atua como camada canônica para seus leads. Centraliza captura, armazenamento e orquestração de leads vindos de formulários, automações, webhooks e integrações customizadas.",
+      "title": "O que é o RepoLead",
+      "p1": "RepoLead é uma plataforma API-first que atua como camada canônica para seus leads. Centraliza captura, armazenamento e orquestração de leads vindos de formulários, automações, webhooks e integrações customizadas.",
       "p2": "Recebe eventos em um endpoint único, aplica idempotência e normalização de identidades, faz merge de duplicados por workspace, registra timeline de auditoria append-only, e distribui eventos para destinos com assinatura, retry e DLQ.",
       "term1": {
         "title": "Idempotência",
@@ -430,7 +430,7 @@
       },
       "term3": {
         "title": "Retry + DLQ",
-        "desc": "Se o destino falha, o LeadVault faz retry automático. Após esgotar tentativas, o evento vai para a Dead Letter Queue para replay manual."
+        "desc": "Se o destino falha, o RepoLead faz retry automático. Após esgotar tentativas, o evento vai para a Dead Letter Queue para replay manual."
       }
     },
     "how": {
@@ -528,22 +528,22 @@
         "title": "Audit log imutável",
         "desc": "Registro append-only de todas as ações. Não é possível alterar ou excluir histórico."
       },
-      "lgpd": "Privacidade e LGPD: O LeadVault adota uma abordagem de privacidade por design. Os dados são processados e armazenados com controles de acesso por workspace e criptografia. Para questões específicas de conformidade com LGPD ou regulamentações de privacidade, entre em contato com nossa equipe."
+      "lgpd": "Privacidade e LGPD: O RepoLead adota uma abordagem de privacidade por design. Os dados são processados e armazenados com controles de acesso por workspace e criptografia. Para questões específicas de conformidade com LGPD ou regulamentações de privacidade, entre em contato com nossa equipe."
     },
     "faq": {
       "title": "Perguntas frequentes",
       "q1": "O que é deduplicação de leads?",
-      "a1": "É o processo de identificar e unificar registros duplicados. O LeadVault detecta duplicatas por email, telefone ou external_id e faz merge automático, garantindo que cada lead exista uma única vez no workspace.",
-      "q2": "Como o LeadVault evita leads duplicados?",
+      "a1": "É o processo de identificar e unificar registros duplicados. O RepoLead detecta duplicatas por email, telefone ou external_id e faz merge automático, garantindo que cada lead exista uma única vez no workspace.",
+      "q2": "Como o RepoLead evita leads duplicados?",
       "a2": "Através de chaves de idempotência por source e normalização de identidades. Se o mesmo evento é enviado mais de uma vez, a chave de idempotência impede a duplicação. Identidades similares (email, telefone) são detectadas e unificadas automaticamente.",
       "q3": "Posso enviar leads para qualquer CRM ou ferramenta?",
-      "a3": "Sim. O LeadVault distribui via webhooks com assinatura HMAC. Qualquer sistema que aceite HTTP POST com payload JSON pode ser configurado como destino — CRM, email marketing, Slack, ferramentas internas ou APIs customizadas.",
+      "a3": "Sim. O RepoLead distribui via webhooks com assinatura HMAC. Qualquer sistema que aceite HTTP POST com payload JSON pode ser configurado como destino — CRM, email marketing, Slack, ferramentas internas ou APIs customizadas.",
       "q4": "O que acontece se o destino ficar fora do ar?",
-      "a4": "O LeadVault faz retries automáticos com backoff exponencial. Se todas as tentativas falharem, o evento é movido para a Dead Letter Queue (DLQ), de onde pode ser reenviado manualmente ou em lote quando o destino voltar.",
+      "a4": "O RepoLead faz retries automáticos com backoff exponencial. Se todas as tentativas falharem, o evento é movido para a Dead Letter Queue (DLQ), de onde pode ser reenviado manualmente ou em lote quando o destino voltar.",
       "q5": "Como funciona o isolamento por workspace?",
       "a5": "Cada workspace é um ambiente isolado com seus próprios sources, leads, destinations e membros. Dados de um workspace não são acessíveis por outro. Ideal para separar clientes, projetos ou ambientes.",
-      "q6": "O LeadVault substitui meu formulário ou CRM?",
-      "a6": "Não. O LeadVault é uma camada intermediária. Seus formulários continuam funcionando e seu CRM continua sendo o destino final. O LeadVault centraliza a captura, garante a qualidade dos dados e distribui com confiabilidade.",
+      "q6": "O RepoLead substitui meu formulário ou CRM?",
+      "a6": "Não. O RepoLead é uma camada intermediária. Seus formulários continuam funcionando e seu CRM continua sendo o destino final. O RepoLead centraliza a captura, garante a qualidade dos dados e distribui com confiabilidade.",
       "q7": "Como começo a usar o beta?",
       "a7": "Clique em \"Experimente agora\" para criar sua conta. Você terá acesso imediato ao endpoint de captura, deduplicação, auditoria e distribuição. A documentação inclui exemplos de integração para os cenários mais comuns.",
       "q8": "Existe replay e auditoria de entregas?",

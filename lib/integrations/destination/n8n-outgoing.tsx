@@ -76,7 +76,7 @@ export const n8nOutgoingDestinationModule: DestinationIntegrationModule = {
             value={formValues.url}
             onChange={(event) => update({ url: event.target.value })}
             className="h-9 text-[13px]"
-            placeholder="https://n8n.example.com/webhook/leadvault"
+            placeholder="https://n8n.example.com/webhook/repolead"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3">

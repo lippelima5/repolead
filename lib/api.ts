@@ -7,7 +7,7 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const workspaceId = window.localStorage.getItem("leadvault.workspace_id");
+    const workspaceId = window.localStorage.getItem("repolead.workspace_id");
 
     if (workspaceId && !config.headers["X-Workspace-Id"]) {
       config.headers["X-Workspace-Id"] = workspaceId;

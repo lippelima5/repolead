@@ -1,6 +1,6 @@
 import { PrismaClientKnownRequestError } from "@/prisma/generated/internal/prismaNamespace";
 import prisma from "@/lib/prisma";
-import { enqueueDeliveries } from "@/lib/leadvault/delivery";
+import { enqueueDeliveries } from "@/lib/repolead/delivery";
 
 type IdentityInput = {
   type: "email" | "phone" | "external";

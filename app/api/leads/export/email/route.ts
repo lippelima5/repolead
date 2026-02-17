@@ -6,9 +6,9 @@ import { onError } from "@/lib/helper";
 import logger from "@/lib/logger.server";
 import { parseJsonBody } from "@/lib/validation";
 import { leadExportEmailBodySchema } from "@/lib/schemas";
-import { createLeadExportToken } from "@/lib/leadvault/lead-export-token";
-import { parseLeadFilters } from "@/lib/leadvault/leads-query";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
+import { createLeadExportToken } from "@/lib/repolead/lead-export-token";
+import { parseLeadFilters } from "@/lib/repolead/leads-query";
+import { requireWorkspace } from "@/lib/repolead/workspace";
 
 export async function POST(request: NextRequest) {
   try {

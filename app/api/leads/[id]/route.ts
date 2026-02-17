@@ -4,7 +4,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { parseJsonBody } from "@/lib/validation";
 import { leadUpdateBodySchema } from "@/lib/schemas";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
+import { requireWorkspace } from "@/lib/repolead/workspace";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

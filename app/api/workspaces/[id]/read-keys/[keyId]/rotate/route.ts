@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { onError, verifyUserWorkspace } from "@/lib/helper";
-import { createWorkspaceReadApiKey } from "@/lib/leadvault/read-api-key";
+import { createWorkspaceReadApiKey } from "@/lib/repolead/read-api-key";
 
 function parseId(value: string) {
   const parsed = Number(value);

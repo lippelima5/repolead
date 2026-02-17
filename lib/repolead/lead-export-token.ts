@@ -1,9 +1,9 @@
 import { SignJWT, jwtVerify, type JWTPayload } from "jose";
-import type { LeadStatusValue } from "@/lib/leadvault/leads-query";
+import type { LeadStatusValue } from "@/lib/repolead/leads-query";
 
 const EXPORT_TOKEN_TYPE = "leads_export";
-const EXPORT_TOKEN_ISSUER = "leadvault";
-const EXPORT_TOKEN_AUDIENCE = "leadvault:leads-export";
+const EXPORT_TOKEN_ISSUER = "repolead";
+const EXPORT_TOKEN_AUDIENCE = "repolead:leads-export";
 const DEFAULT_EXPIRY_SECONDS = 24 * 60 * 60;
 
 export type LeadExportFilters = {

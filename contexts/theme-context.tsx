@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") {
       return "system";
     }
-    const stored = window.localStorage.getItem("leadvault.theme");
+    const stored = window.localStorage.getItem("repolead.theme");
     return stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
   });
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setResolvedTheme(resolved);
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(resolved);
-      window.localStorage.setItem("leadvault.theme", theme);
+      window.localStorage.setItem("repolead.theme", theme);
     };
 
     apply();

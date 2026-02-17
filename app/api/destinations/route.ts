@@ -5,8 +5,8 @@ import { onError } from "@/lib/helper";
 import { CustomError } from "@/lib/errors";
 import { parseJsonBody } from "@/lib/validation";
 import { destinationCreateBodySchema } from "@/lib/schemas";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
-import { createSigningSecret, hashValue } from "@/lib/leadvault/security";
+import { requireWorkspace } from "@/lib/repolead/workspace";
+import { createSigningSecret, hashValue } from "@/lib/repolead/security";
 import { getDestinationModuleByIntegrationId } from "@/lib/integrations/catalog";
 import { Prisma } from "@/prisma/generated/client";
 

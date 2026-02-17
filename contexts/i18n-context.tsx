@@ -46,12 +46,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       return "pt";
     }
 
-    const stored = window.localStorage.getItem("leadvault.locale");
+    const stored = window.localStorage.getItem("repolead.locale");
     return stored === "pt" || stored === "en" ? stored : "pt";
   });
 
   useEffect(() => {
-    window.localStorage.setItem("leadvault.locale", locale);
+    window.localStorage.setItem("repolead.locale", locale);
     document.documentElement.lang = locale === "pt" ? "pt-BR" : "en-US";
   }, [locale]);
 

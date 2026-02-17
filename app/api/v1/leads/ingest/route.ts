@@ -3,9 +3,9 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@/prisma/generated/client";
 import { apiError, apiRateLimit, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { hashValue, resolveApiKeyFromHeaders } from "@/lib/leadvault/security";
-import { checkSourceRateLimit } from "@/lib/leadvault/source-rate-limit";
-import { enqueueIngestionProcessing, parseFormUrlEncodedBody } from "@/lib/leadvault/ingest";
+import { hashValue, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
+import { checkSourceRateLimit } from "@/lib/repolead/source-rate-limit";
+import { enqueueIngestionProcessing, parseFormUrlEncodedBody } from "@/lib/repolead/ingest";
 
 const MAX_PAYLOAD_BYTES = 256 * 1024;
 

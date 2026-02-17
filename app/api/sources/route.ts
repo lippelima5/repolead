@@ -6,7 +6,7 @@ import { onError } from "@/lib/helper";
 import { CustomError } from "@/lib/errors";
 import { parseJsonBody } from "@/lib/validation";
 import { sourceCreateBodySchema } from "@/lib/schemas";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
+import { requireWorkspace } from "@/lib/repolead/workspace";
 import {
   getSourceModuleByIntegrationId,
   resolveSourceIntegrationIdFromLegacyType,

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { requireWorkspace } from "@/lib/leadvault/workspace";
+import { requireWorkspace } from "@/lib/repolead/workspace";
 
 function startOfToday() {
   const now = new Date();
