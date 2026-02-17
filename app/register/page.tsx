@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Field, FieldDescription, FieldGroup, FieldLabel, } from "@/components/ui/field"
@@ -16,8 +16,38 @@ export default function Page() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [checkingSession, setCheckingSession] = useState(true);
     const redirectParam = searchParams.get("redirect");
     const redirectTo = redirectParam && redirectParam.startsWith("/") ? redirectParam : null;
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const checkSession = async () => {
+            try {
+                const response = await fetch("/api/profile", { credentials: "include", cache: "no-store" });
+                if (!cancelled && response.ok) {
+                    const data = await response.json();
+                    if (data?.success) {
+                        window.location.href = "/dashboard";
+                        return;
+                    }
+                }
+            } catch {
+                // ignore
+            } finally {
+                if (!cancelled) {
+                    setCheckingSession(false);
+                }
+            }
+        };
+
+        void checkSession();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         try {
@@ -48,6 +78,14 @@ export default function Page() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (checkingSession) {
+        return (
+            <div className="bg-muted flex min-h-svh items-center justify-center p-6">
+                <p className="text-sm text-muted-foreground">Verificando sessao...</p>
+            </div>
+        );
     }
 
     return (

@@ -137,11 +137,11 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
     <>
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-[14px] text-foreground">
             <Users className="h-5 w-5 text-muted-foreground" />
             Gerenciar Usuarios do Workspace
           </CardTitle>
-          <CardDescription>Adicione, remova ou altere as funcoes dos usuarios neste workspace.</CardDescription>
+          <CardDescription className="text-[12px]">Adicione, remova ou altere as funcoes dos usuarios neste workspace.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -149,24 +149,25 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
             {canManage ? (
               <div className="flex items-end gap-2">
                 <div className="flex-1 space-y-2">
-                  <label htmlFor="new-user-email" className="text-sm font-medium">
+                  <label htmlFor="new-user-email" className="text-[12px] font-medium text-foreground">
                     Adicionar usuario por email
                   </label>
                   <Input
                     id="new-user-email"
                     placeholder="email@exemplo.com"
+                    className="h-9 text-[13px]"
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
                   />
                 </div>
 
                 <div className="w-[140px] space-y-2">
-                  <label htmlFor="new-user-role" className="text-sm font-medium">
+                  <label htmlFor="new-user-role" className="text-[12px] font-medium text-foreground">
                     Funcao
                   </label>
                   <select
                     id="new-user-role"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="h-9 w-full rounded-md border border-border bg-background px-3 text-[13px] text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     value={newUserRole}
                     onChange={(e) => setNewUserRole(e.target.value as role)}
                   >
@@ -178,7 +179,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
                   </select>
                 </div>
 
-                <Button onClick={handleAddUser} disabled={isAddingUser} className="mb-0.5">
+                <Button onClick={handleAddUser} disabled={isAddingUser} className="mb-0.5 h-9 text-[13px]">
                   <Plus className="mr-1 h-4 w-4" />
                   {isAddingUser ? "Enviando..." : "Convidar"}
                 </Button>
@@ -194,7 +195,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
               <Input
                 type="search"
                 placeholder="Buscar usuarios..."
-                className="pl-8"
+                className="pl-8 h-9 text-[13px]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

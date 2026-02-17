@@ -36,8 +36,8 @@ function formatDetailsHtml(details: EmailTemplateDetail[]) {
     .map(
       (item) => `
         <tr>
-          <td style="padding: 8px 0; color: #6b7280; font-size: 14px; width: 140px; vertical-align: top;">${escapeHtml(item.label)}</td>
-          <td style="padding: 8px 0; color: #111827; font-size: 14px; vertical-align: top;">${escapeHtml(item.value)}</td>
+          <td style="padding: 8px 0; color: #64748b; font-size: 14px; width: 140px; vertical-align: top;">${escapeHtml(item.label)}</td>
+          <td style="padding: 8px 0; color: #0f172a; font-size: 14px; vertical-align: top;">${escapeHtml(item.value)}</td>
         </tr>
       `,
     )
@@ -45,10 +45,16 @@ function formatDetailsHtml(details: EmailTemplateDetail[]) {
 }
 
 export function createEmailTemplate(options: EmailTemplateOptions) {
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || "Template";
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "LeadVault";
   const year = new Date().getFullYear();
   const details = options.details ?? [];
   const hasDetails = details.length > 0;
+  const brandPrimary = "#6366f1";
+  const bg = "#f8fafc";
+  const surface = "#ffffff";
+  const border = "#e2e8f0";
+  const textPrimary = "#0f172a";
+  const textMuted = "#64748b";
   const fallbackLabel =
     options.fallbackLabel || "Se o botao nao funcionar, copie e cole este link no navegador:";
 
@@ -76,16 +82,16 @@ export function createEmailTemplate(options: EmailTemplateOptions) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>${escapeHtml(options.title)}</title>
       </head>
-      <body style="margin: 0; padding: 24px; background: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-        <main style="max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
-          <div style="padding: 24px; border-bottom: 1px solid #e5e7eb;">
-            <p style="margin: 0; color: #6b7280; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">${escapeHtml(appName)}</p>
-            <h1 style="margin: 12px 0 0; color: #111827; font-size: 22px; line-height: 1.3;">${escapeHtml(options.title)}</h1>
+      <body style="margin: 0; padding: 24px; background: ${bg}; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <main style="max-width: 600px; margin: 0 auto; background: ${surface}; border: 1px solid ${border}; border-radius: 14px; overflow: hidden;">
+          <div style="padding: 24px; border-bottom: 1px solid ${border}; background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);">
+            <p style="margin: 0; color: ${textMuted}; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;">${escapeHtml(appName)}</p>
+            <h1 style="margin: 12px 0 0; color: ${textPrimary}; font-size: 22px; line-height: 1.3;">${escapeHtml(options.title)}</h1>
           </div>
 
           <div style="padding: 24px;">
-            ${options.greeting ? `<p style="margin: 0 0 14px; color: #111827; font-size: 15px;">${escapeHtml(options.greeting)}</p>` : ""}
-            <p style="margin: 0 0 18px; color: #374151; font-size: 15px; line-height: 1.7;">${escapeHtml(options.intro)}</p>
+            ${options.greeting ? `<p style="margin: 0 0 14px; color: ${textPrimary}; font-size: 15px;">${escapeHtml(options.greeting)}</p>` : ""}
+            <p style="margin: 0 0 18px; color: ${textPrimary}; font-size: 15px; line-height: 1.7;">${escapeHtml(options.intro)}</p>
 
             ${
               hasDetails
@@ -98,24 +104,24 @@ export function createEmailTemplate(options: EmailTemplateOptions) {
             ${
               options.action
                 ? `<div style="margin: 0 0 20px;">
-                    <a href="${escapeHtml(options.action.url)}" style="display: inline-block; padding: 12px 18px; border-radius: 8px; background: #2563eb; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600;">
+                    <a href="${escapeHtml(options.action.url)}" style="display: inline-block; padding: 12px 18px; border-radius: 8px; background: ${brandPrimary}; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600;">
                       ${escapeHtml(options.action.label)}
                     </a>
                   </div>
-                  <p style="margin: 0 0 20px; color: #6b7280; font-size: 12px; line-height: 1.6; word-break: break-all;">
-                    ${escapeHtml(fallbackLabel)} <a href="${escapeHtml(options.action.url)}" style="color: #2563eb;">${escapeHtml(options.action.url)}</a>
+                  <p style="margin: 0 0 20px; color: ${textMuted}; font-size: 12px; line-height: 1.6; word-break: break-all;">
+                    ${escapeHtml(fallbackLabel)} <a href="${escapeHtml(options.action.url)}" style="color: ${brandPrimary};">${escapeHtml(options.action.url)}</a>
                   </p>`
                 : ""
             }
 
             ${
               options.footerMessage
-                ? `<p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.7;">${escapeHtml(options.footerMessage)}</p>`
+                ? `<p style="margin: 0; color: ${textMuted}; font-size: 13px; line-height: 1.7;">${escapeHtml(options.footerMessage)}</p>`
                 : ""
             }
           </div>
         </main>
-        <p style="margin: 16px 0 0; text-align: center; color: #9ca3af; font-size: 12px;">&copy; ${year} ${escapeHtml(appName)}. Todos os direitos reservados.</p>
+        <p style="margin: 16px 0 0; text-align: center; color: #94a3b8; font-size: 12px;">&copy; ${year} ${escapeHtml(appName)}. Todos os direitos reservados.</p>
       </body>
     </html>
   `;

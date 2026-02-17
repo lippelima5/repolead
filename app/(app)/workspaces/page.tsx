@@ -90,16 +90,20 @@ export default function WorkspacesPage() {
 
   return (
     <AppLayout
-      title="Workspaces"
       isLoading={isLoading}
       rightComponent={
-        <Button onClick={handleCreateWorkspace}>
+        <Button onClick={handleCreateWorkspace} className="h-9 text-[13px]">
           <Plus className="mr-2 h-4 w-4" />
           Novo Workspace
         </Button>
       }
     >
-      <div className="flex flex-col gap-6 p-4">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Workspaces</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Gerencie seus workspaces, membros e assinatura.</p>
+        </div>
+
         <div className="flex items-center">
           <div className="relative w-full max-w-sm">
             <Input
@@ -112,12 +116,12 @@ export default function WorkspacesPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredWorkspaces.map((workspace) => {
             const canManageCurrentWorkspace = canManageWorkspace(workspace.role);
 
             return (
-              <Card key={workspace.workspace?.id} className="overflow-hidden">
+              <Card key={workspace.workspace?.id} className="overflow-hidden border-border bg-card">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
@@ -130,7 +134,7 @@ export default function WorkspacesPage() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Abrir menu</span>
                         </Button>
@@ -174,7 +178,7 @@ export default function WorkspacesPage() {
                           Criado em {formatDate(String(workspace.workspace?.created_at))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <Badge variant="outline">{WorkspaceStatusName(workspace.workspace?.plan_status || "") || "-"}</Badge>
                         <Badge variant={workspace.role === "owner" || workspace.role === "admin" ? "default" : "secondary"}>
                           {workspace.role === "owner" ? "Owner" : workspace.role === "admin" ? "Admin" : workspace.role === "viewer" ? "Viewer" : "User"}
@@ -182,7 +186,7 @@ export default function WorkspacesPage() {
                       </div>
                     </div>
 
-                    <Button variant="outline" className="w-full" onClick={() => handleViewWorkspace(workspace)}>
+                    <Button variant="outline" className="w-full h-8 text-[12px]" onClick={() => handleViewWorkspace(workspace)}>
                       Acessar Workspace
                     </Button>
                   </div>
@@ -192,7 +196,7 @@ export default function WorkspacesPage() {
           })}
 
           {filteredWorkspaces.length === 0 && (
-            <div className="md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center rounded-lg border p-12 text-center">
+            <div className="md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center rounded-xl border border-border bg-card p-12 text-center">
               <Building className="h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-medium">Nenhum workspace encontrado</h3>
               <p className="mb-4 mt-1 text-muted-foreground">

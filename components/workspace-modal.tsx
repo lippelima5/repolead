@@ -88,15 +88,15 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
 
   return (
     <form onSubmit={workspace && workspace.id ? handleUpdateWorkspace : handleCreateWorkspace}>
-      <Card>
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle>Informações do Workspace</CardTitle>
-          <CardDescription>Configure as informações bÃ¡sicas do workspace</CardDescription>
+          <CardTitle className="text-[14px]">Informacoes do workspace</CardTitle>
+          <CardDescription className="text-[12px]">Configure os dados principais do workspace</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome do Workspace</Label>
-            <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Digite o nome do workspace" required disabled={isSending} />
+            <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} className="h-9 text-[13px]" placeholder="Digite o nome do workspace" required disabled={isSending} />
           </div>
 
           <div className="space-y-2">
@@ -106,14 +106,15 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
               name="slug"
               value={slug}
               onChange={(e) => setSlug(e.target.value.toLowerCase())}
+              className="h-9 text-[13px]"
               placeholder="ex: time-comercial"
               disabled={isSending}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
-            <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Digite uma descrição para o workspace" rows={4} disabled={isSending} />
+            <Label htmlFor="description">Descricao</Label>
+            <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} className="text-[13px]" placeholder="Digite uma descricao para o workspace" rows={4} disabled={isSending} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -126,6 +127,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
                 min={1}
                 max={3650}
                 value={retentionDays}
+                className="h-9 text-[13px]"
                 onChange={(e) => setRetentionDays(Number(e.target.value || 180))}
                 disabled={isSending}
               />
@@ -139,6 +141,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
                 min={1}
                 max={720}
                 value={idempotencyWindowHours}
+                className="h-9 text-[13px]"
                 onChange={(e) => setIdempotencyWindowHours(Number(e.target.value || 24))}
                 disabled={isSending}
               />
@@ -146,7 +149,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button type="submit" disabled={isSending}>
+          <Button type="submit" disabled={isSending} className="h-9 text-[13px]">
             {workspace && workspace.id ? "Atualizar" : "Criar"}
           </Button>
         </CardFooter>

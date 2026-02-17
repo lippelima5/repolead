@@ -160,14 +160,14 @@ export default function BillingPage() {
       title={hasPaidPlan ? "Gerenciar assinatura" : "Escolha seu plano"}
       isLoading={isLoadingWorkspace}
       rightComponent={
-        <Button variant="outline" onClick={() => router.back()}>
+        <Button variant="outline" className="h-8 text-[12px]" onClick={() => router.back()}>
           Voltar
         </Button>
       }
     >
-      <div className="mx-auto max-w-7xl p-6">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         {!isLoadingWorkspace && !canManage ? (
-          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
             Apenas administradores ou owners podem gerenciar billing deste workspace.
           </div>
         ) : null}
@@ -181,16 +181,16 @@ export default function BillingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={openPortal} disabled={!canManage}>
+              <Button onClick={openPortal} disabled={!canManage} className="h-8 text-[12px]">
                 Abrir central da assinatura
               </Button>
             </CardContent>
           </Card>
         ) : (
           <>
-            <div className="mb-12 text-center">
-              <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Planos disponiveis</h2>
-              <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">Planos disponiveis</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Escolha o plano ideal para liberar recursos premium e escalar seu workspace com tranquilidade.
               </p>
             </div>
@@ -207,13 +207,13 @@ export default function BillingPage() {
                 </CardHeader>
               </Card>
             ) : (
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {orderedPlans.map((plan, index) => {
                   const IconComponent = PLAN_ICONS[index % PLAN_ICONS.length];
                   const isLoading = loadingKey === plan.key;
 
                   return (
-                    <Card key={plan.id} className="relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-sm">
+                    <Card key={plan.id} className="relative overflow-hidden border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-sm">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-30  " />
 
                       <CardHeader className="relative items-center justify-center pb-4 text-center">
@@ -221,16 +221,16 @@ export default function BillingPage() {
                           <IconComponent className="h-6 w-6 text-primary-foreground" />
                         </div>
 
-                        <CardTitle className="mb-2 text-xl font-bold">{plan.name}</CardTitle>
+                        <CardTitle className="mb-2 text-xl font-bold text-foreground">{plan.name}</CardTitle>
 
                         <div className="mb-2">
-                          <span className="text-2xl font-bold">{formatPrice(plan.amount_cents, plan.currency || "BRL")}</span>
+                          <span className="text-2xl font-bold text-foreground">{formatPrice(plan.amount_cents, plan.currency || "BRL")}</span>
                           <span className="text-sm text-muted-foreground">/{plan.interval}</span>
                         </div>
 
                         <div>
                           <Badge variant="outline">{plan.key}</Badge>
-                          {plan.description ? <CardDescription className="mt-2 text-sm">{plan.description}</CardDescription> : null}
+                          {plan.description ? <CardDescription className="mt-2 text-sm text-muted-foreground">{plan.description}</CardDescription> : null}
                         </div>
 
                       </CardHeader>
@@ -246,10 +246,9 @@ export default function BillingPage() {
                         </ul>
 
                         <Button
-                          className="w-full"
+                          className="w-full h-9 text-[13px]"
                           disabled={isLoading || !canManage}
                           onClick={() => void startCheckout(plan.key)}
-                          size="lg"
                         >
                           {isLoading ? "Abrindo checkout..." : "Quero este plano"}
                         </Button>

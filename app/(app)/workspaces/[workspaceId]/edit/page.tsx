@@ -55,13 +55,13 @@ export default function EditWorkspacePage() {
       }}
       isLoading={isLoading}
     >
-      <div className="flex flex-col gap-6 p-4">
+      <div className="p-4 md:p-6 max-w-[1000px] space-y-5">
         {workspace && canManage ? <WorkspaceForm workspace={workspace} /> : null}
         {workspace && !canManage ? (
-          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
             Voce nao tem permissao para editar este workspace.
             <div className="mt-3">
-              <Button variant="outline" onClick={() => router.push(`/workspaces/${workspaceId}`)}>
+              <Button variant="outline" className="h-8 text-[12px]" onClick={() => router.push(`/workspaces/${workspaceId}`)}>
                 Voltar para detalhes
               </Button>
             </div>

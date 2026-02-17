@@ -1,6 +1,6 @@
 # LeadVault
 
-LeadVault e uma plataforma API-first para ingestao, normalizacao, dedupe e distribuicao de leads por workspace.
+LeadVault e uma plataforma API-first para captura, normalizacao, dedupe e distribuicao de leads por workspace.
 
 ## Stack
 

@@ -22,8 +22,38 @@ export default function Page() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const consumedMagicRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/profile", { credentials: "include", cache: "no-store" });
+        if (!cancelled && response.ok) {
+          const data = await response.json();
+          if (data?.success) {
+            window.location.href = "/dashboard";
+            return;
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) {
+          setCheckingSession(false);
+        }
+      }
+    };
+
+    void checkSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!magicToken || consumedMagicRef.current) {
@@ -77,6 +107,14 @@ export default function Page() {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="bg-muted flex min-h-svh items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">Verificando sessao...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">

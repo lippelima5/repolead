@@ -81,13 +81,18 @@ export default function ProfilePage() {
   };
 
   return (
-    <AppLayout title="Meu Perfil" isLoading={isLoading}>
-      <div className="flex flex-col gap-6 p-4">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card className="md:col-span-1">
+    <AppLayout isLoading={isLoading}>
+      <div className="p-4 md:p-6 max-w-[1100px] space-y-5">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Visualize e atualize suas informacoes pessoais.</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <CardTitle>Informacoes do Perfil</CardTitle>
-              <CardDescription>Visualize e gerencie suas informacoes pessoais</CardDescription>
+              <CardTitle className="text-[14px]">Resumo</CardTitle>
+              <CardDescription className="text-[12px]">Dados da conta logada</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="mb-6 flex flex-col items-center">
@@ -96,8 +101,8 @@ export default function ProfilePage() {
                     <AvatarFallback className="text-2xl">{user?.name ? getInitials(user.name) : "U"}</AvatarFallback>
                   </Avatar>
                 </div>
-                <h3 className="text-xl font-semibold">{user?.name || "Usuario"}</h3>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <h3 className="text-lg font-semibold text-foreground">{user?.name || "Usuario"}</h3>
+                <p className="text-[13px] text-muted-foreground">{user?.email}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Membro desde {user?.created_at ? formatDate(String(user.created_at)) : ""}
                 </p>
@@ -109,30 +114,30 @@ export default function ProfilePage() {
                 <div className="flex items-start gap-2">
                   <User className="mt-0.5 h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">Nome</p>
-                    <p className="text-sm text-muted-foreground">{user?.name || "Nao informado"}</p>
+                    <p className="text-[12px] font-medium text-foreground">Nome</p>
+                    <p className="text-[12px] text-muted-foreground">{user?.name || "Nao informado"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
                   <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    <p className="text-[12px] font-medium text-foreground">Email</p>
+                    <p className="text-[12px] text-muted-foreground">{user?.email}</p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <CardTitle>Editar Perfil</CardTitle>
-              <CardDescription>Atualize suas informacoes pessoais</CardDescription>
+              <CardTitle className="text-[14px]">Editar perfil</CardTitle>
+              <CardDescription className="text-[12px]">Atualize nome, email e senha</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
-                <div className="mt-4 grid gap-4 space-y-4">
+                <div className="mt-2 grid gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="name">Nome Completo</Label>
                     <Input
@@ -177,8 +182,8 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <div className="mt-4 flex justify-end">
-                    <Button type="submit" disabled={isSaving}>
+                  <div className="mt-1 flex justify-end">
+                    <Button type="submit" disabled={isSaving} className="h-9 text-[13px]">
                       <Save className="mr-2 h-4 w-4" />
                       {isSaving ? "Salvando..." : "Salvar Alteracoes"}
                     </Button>
