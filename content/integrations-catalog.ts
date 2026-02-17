@@ -312,7 +312,7 @@ Outbound integration to trigger n8n workflows from LeadVault events.
         default_method: "post",
         subscribed_events: ["lead_created", "lead_updated", "delivery_failed"],
         allow_method: true,
-        allow_secret: true,
+        allow_secret: false,
         allow_events: true,
         test_payload: {
           workflow: "lead_sync",

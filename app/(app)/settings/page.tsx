@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, Globe, Shield, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import AppLayout from "@/components/app-layout";
@@ -34,6 +35,7 @@ type MemberData = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t } = useI18n();
   const workspaceId = user?.workspace_active_id ?? null;
@@ -140,67 +142,85 @@ export default function SettingsPage() {
           </TabsList>
 
           <TabsContent value="workspace">
-            <div className="bg-card border border-border rounded-xl p-5 space-y-4 max-w-lg">
-              <h3 className="text-[13px] font-medium text-foreground">{t("settings.workspace_configuration")}</h3>
-              <div>
-                <label className="text-[13px] font-medium text-foreground">{t("common.name")}</label>
-                <Input
-                  value={workspace?.name || ""}
-                  className="mt-1.5 h-9 text-[13px]"
-                  onChange={(event) => setWorkspace((prev) => (prev ? { ...prev, name: event.target.value } : prev))}
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-4 max-w-5xl">
+              <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+                <h3 className="text-[13px] font-medium text-foreground">{t("settings.workspace_configuration")}</h3>
+                <div>
+                  <label className="text-[13px] font-medium text-foreground">{t("common.name")}</label>
+                  <Input
+                    value={workspace?.name || ""}
+                    className="mt-1.5 h-9 text-[13px]"
+                    onChange={(event) => setWorkspace((prev) => (prev ? { ...prev, name: event.target.value } : prev))}
+                  />
+                </div>
+                <div>
+                  <label className="text-[13px] font-medium text-foreground">{t("settings.slug")}</label>
+                  <Input
+                    value={workspace?.slug || ""}
+                    className="mt-1.5 h-9 text-[13px]"
+                    onChange={(event) => setWorkspace((prev) => (prev ? { ...prev, slug: event.target.value || null } : prev))}
+                  />
+                </div>
+                <div>
+                  <label className="text-[13px] font-medium text-foreground">{t("settings.retention_days")}</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={3650}
+                    value={workspace?.retention_days || 180}
+                    className="mt-1.5 h-9 text-[13px]"
+                    onChange={(event) =>
+                      setWorkspace((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              retention_days: Number(event.target.value || 180),
+                            }
+                          : prev,
+                      )
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-[13px] font-medium text-foreground">{t("settings.idempotency_window")}</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={720}
+                    value={workspace?.idempotency_window_hours || 24}
+                    className="mt-1.5 h-9 text-[13px]"
+                    onChange={(event) =>
+                      setWorkspace((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              idempotency_window_hours: Number(event.target.value || 24),
+                            }
+                          : prev,
+                      )
+                    }
+                  />
+                </div>
+                <Button size="sm" className="h-8 text-[13px]" onClick={saveWorkspace}>
+                  {t("common.save")}
+                </Button>
               </div>
-              <div>
-                <label className="text-[13px] font-medium text-foreground">{t("settings.slug")}</label>
-                <Input
-                  value={workspace?.slug || ""}
-                  className="mt-1.5 h-9 text-[13px]"
-                  onChange={(event) => setWorkspace((prev) => (prev ? { ...prev, slug: event.target.value || null } : prev))}
-                />
+
+              <div className="bg-card border border-border rounded-xl p-5 space-y-3 h-fit">
+                <h3 className="text-[13px] font-medium text-foreground">{t("settings.workspace_actions")}</h3>
+                <p className="text-[12px] text-muted-foreground">{t("settings.workspace_actions_description")}</p>
+                <Button size="sm" className="h-8 text-[13px] w-full" onClick={() => router.push("/dashboard/settings/workspace/create")}>
+                  {t("settings.create_workspace")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[13px] w-full"
+                  onClick={() => router.push("/dashboard/settings/workspace")}
+                >
+                  {t("settings.open_workspace_manager")}
+                </Button>
               </div>
-              <div>
-                <label className="text-[13px] font-medium text-foreground">{t("settings.retention_days")}</label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={3650}
-                  value={workspace?.retention_days || 180}
-                  className="mt-1.5 h-9 text-[13px]"
-                  onChange={(event) =>
-                    setWorkspace((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            retention_days: Number(event.target.value || 180),
-                          }
-                        : prev,
-                    )
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-[13px] font-medium text-foreground">{t("settings.idempotency_window")}</label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={720}
-                  value={workspace?.idempotency_window_hours || 24}
-                  className="mt-1.5 h-9 text-[13px]"
-                  onChange={(event) =>
-                    setWorkspace((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            idempotency_window_hours: Number(event.target.value || 24),
-                          }
-                        : prev,
-                    )
-                  }
-                />
-              </div>
-              <Button size="sm" className="h-8 text-[13px]" onClick={saveWorkspace}>
-                {t("common.save")}
-              </Button>
             </div>
           </TabsContent>
 

@@ -8,6 +8,7 @@ import AppLayout from "@/components/app-layout";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/contexts/i18n-context";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 
@@ -28,8 +29,24 @@ type LeadTimelineEvent = {
   reason: string | null;
   new_value_json: unknown;
   old_value_json: unknown;
-  ingestion?: { id: string } | null;
-  delivery?: { id: string; event_type: string; status: string; attempt_count: number; destination?: { name: string } | null } | null;
+  ingestion?: {
+    id: string;
+    source_id: string;
+    received_at: string;
+    source?: {
+      id: string;
+      name: string;
+      type: string;
+    } | null;
+  } | null;
+  delivery?: {
+    id: string;
+    event_type: string;
+    status: string;
+    attempt_count: number;
+    last_error?: string | null;
+    destination?: { name: string } | null;
+  } | null;
 };
 
 type DeliveryItem = {
@@ -40,7 +57,29 @@ type DeliveryItem = {
   destination: { name: string };
 };
 
+function asRecord(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function truncateText(value: string | null | undefined, max = 140) {
+  if (!value) {
+    return "";
+  }
+
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (compact.length <= max) {
+    return compact;
+  }
+
+  return `${compact.slice(0, max - 3)}...`;
+}
+
 export default function LeadDetailPage() {
+  const { locale, t } = useI18n();
   const params = useParams<{ id: string }>();
   const leadId = params.id;
   const [lead, setLead] = useState<LeadDetail | null>(null);
@@ -94,6 +133,93 @@ export default function LeadDetailPage() {
 
   const tags = useMemo(() => (Array.isArray(lead?.tags_json) ? (lead?.tags_json as string[]) : []), [lead?.tags_json]);
 
+  const describeTimelineEvent = (event: LeadTimelineEvent) => {
+    const sourceName = event.ingestion?.source?.name;
+    const destinationName = event.delivery?.destination?.name;
+    const newData = asRecord(event.new_value_json);
+    const oldData = asRecord(event.old_value_json);
+
+    if (event.type === "ingested") {
+      if (sourceName) {
+        return t("lead_detail.ingested_from", { source: sourceName });
+      }
+      return t("lead_detail.ingested");
+    }
+
+    if (event.type === "normalized") {
+      const identities = Array.isArray(newData?.identities)
+        ? newData.identities
+            .map((item) => {
+              const identity = asRecord(item);
+              const type = typeof identity?.type === "string" ? identity.type : null;
+              const value = typeof identity?.value === "string" ? identity.value : null;
+              return type && value ? `${type}: ${value}` : null;
+            })
+            .filter(Boolean)
+            .slice(0, 3)
+            .join(", ")
+        : "";
+
+      if (identities) {
+        return t("lead_detail.normalized_with_identities", { identities });
+      }
+
+      return t("lead_detail.normalized");
+    }
+
+    if (event.type === "merged") {
+      const mergedCount = Array.isArray(oldData?.merged_lead_ids) ? oldData.merged_lead_ids.length : 0;
+      if (mergedCount > 0) {
+        return t("lead_detail.merged_count", { count: mergedCount });
+      }
+      return t("lead_detail.merged");
+    }
+
+    if (event.type === "delivered") {
+      if (destinationName) {
+        return t("lead_detail.delivered_to", { destination: destinationName });
+      }
+      return t("lead_detail.delivered");
+    }
+
+    if (event.type === "delivery_failed") {
+      const errorText = truncateText(event.delivery?.last_error || event.reason);
+      if (destinationName && errorText) {
+        return t("lead_detail.delivery_failed_with_error", { destination: destinationName, error: errorText });
+      }
+      if (destinationName) {
+        return t("lead_detail.delivery_failed_to", { destination: destinationName });
+      }
+      if (errorText) {
+        return errorText;
+      }
+      return t("lead_detail.delivery_failed");
+    }
+
+    if (event.type === "replayed") {
+      return destinationName ? t("lead_detail.replayed_to", { destination: destinationName }) : t("lead_detail.replayed");
+    }
+
+    if (event.type === "lead_updated") {
+      const changedKeys = Object.keys(newData || {}).filter((key) => key !== "updated_at");
+      if (changedKeys.length > 0) {
+        return t("lead_detail.updated_fields", { fields: changedKeys.slice(0, 3).join(", ") });
+      }
+      return t("lead_detail.updated");
+    }
+
+    return truncateText(event.reason) || t("lead_detail.no_details");
+  };
+
+  const timelineEventLabel = (eventType: string) => {
+    const key = `lead_detail.event_${eventType}`;
+    const translated = t(key);
+    if (translated === key) {
+      return eventType.replaceAll("_", " ");
+    }
+    return translated;
+  };
+
   return (
     <AppLayout>
       <div className="p-6 max-w-[1000px] space-y-5">
@@ -105,7 +231,7 @@ export default function LeadDetailPage() {
           </Button>
           <div className="flex-1">
             <div className="flex items-center gap-2.5">
-              <h1 className="text-lg font-semibold text-foreground">{lead?.name || "Unnamed lead"}</h1>
+              <h1 className="text-lg font-semibold text-foreground">{lead?.name || t("leads.unnamed")}</h1>
               {lead ? <StatusBadge status={lead.status} /> : null}
             </div>
             <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{lead?.id}</p>
@@ -133,7 +259,7 @@ export default function LeadDetailPage() {
               <span className="text-[11px] font-medium uppercase tracking-wider">Tags</span>
             </div>
             <div className="flex flex-wrap gap-1">
-              {tags.length > 0 ? tags.map((tag) => <span key={tag} className="px-2 py-0.5 rounded-md text-[11px] bg-accent text-accent-foreground">{tag}</span>) : <span className="text-[12px] text-muted-foreground">No tags</span>}
+              {tags.length > 0 ? tags.map((tag) => <span key={tag} className="px-2 py-0.5 rounded-md text-[11px] bg-accent text-accent-foreground">{tag}</span>) : <span className="text-[12px] text-muted-foreground">{t("leads.no_tags")}</span>}
             </div>
           </div>
         </div>
@@ -166,9 +292,12 @@ export default function LeadDetailPage() {
                     <div className="pb-5">
                       <div className="flex items-center gap-2">
                         <StatusBadge status={event.type} />
-                        <span className="text-[11px] text-muted-foreground">{new Date(event.timestamp).toLocaleString()}</span>
+                        <span className="text-[12px] font-medium text-foreground">{timelineEventLabel(event.type)}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {new Date(event.timestamp).toLocaleString(locale === "pt" ? "pt-BR" : "en-US")}
+                        </span>
                       </div>
-                      <p className="text-[13px] text-foreground mt-1">{event.reason || "No details"}</p>
+                      <p className="text-[13px] text-muted-foreground mt-1">{describeTimelineEvent(event)}</p>
                     </div>
                   </div>
                 ))}

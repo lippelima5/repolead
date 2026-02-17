@@ -21,16 +21,25 @@ export type InstalledIntegrationItem = {
   direction: "source" | "destination";
 };
 
+export type InstalledListAction = {
+  label: string;
+  onSelect: () => void;
+  destructive?: boolean;
+  separatorBefore?: boolean;
+};
+
 export function InstalledList({
   items,
   emptyTitle,
   emptyDescription,
   onBrowse,
+  getActions,
 }: {
   items: InstalledIntegrationItem[];
   emptyTitle: string;
   emptyDescription: string;
   onBrowse: () => void;
+  getActions?: (item: InstalledIntegrationItem) => InstalledListAction[];
 }) {
   const { t, locale } = useI18n();
 
@@ -67,54 +76,64 @@ export function InstalledList({
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors duration-100">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-2 border border-border">
-                      {item.direction === "source" ? (
-                        <Radio className="w-3.5 h-3.5 text-foreground" />
-                      ) : (
-                        <Webhook className="w-3.5 h-3.5 text-foreground" />
-                      )}
+            {items.map((item) => {
+              const actions = getActions?.(item) ?? [];
+              return (
+                <tr key={item.id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors duration-100">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-2 border border-border">
+                        {item.direction === "source" ? (
+                          <Radio className="w-3.5 h-3.5 text-foreground" />
+                        ) : (
+                          <Webhook className="w-3.5 h-3.5 text-foreground" />
+                        )}
+                      </div>
+                      <p className="text-[13px] font-medium text-foreground">{item.name}</p>
                     </div>
-                    <p className="text-[13px] font-medium text-foreground">{item.name}</p>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={item.status} label={item.status.replaceAll("_", " ")} />
-                </td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  <span className="text-[13px] font-mono text-foreground">{item.events_today.toLocaleString()}</span>
-                </td>
-                <td className="px-4 py-3 hidden lg:table-cell">
-                  <span className="text-[12px] text-muted-foreground">
-                    {new Intl.DateTimeFormat(locale === "pt" ? "pt-BR" : "en-US", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }).format(new Date(item.last_activity))}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7">
-                        <MoreHorizontal className="w-3.5 h-3.5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem className="text-[12px]">{t("common.edit")}</DropdownMenuItem>
-                      <DropdownMenuItem className="text-[12px]">{t("common.view_logs")}</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-[12px]">{t("common.disable")}</DropdownMenuItem>
-                      <DropdownMenuItem className="text-[12px] text-destructive">{t("common.delete")}</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={item.status} label={item.status.replaceAll("_", " ")} />
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <span className="text-[13px] font-mono text-foreground">{item.events_today.toLocaleString()}</span>
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <span className="text-[12px] text-muted-foreground">
+                      {new Intl.DateTimeFormat(locale === "pt" ? "pt-BR" : "en-US", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).format(new Date(item.last_activity))}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {actions.length > 0 ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          {actions.flatMap((action, index) => [
+                            action.separatorBefore ? <DropdownMenuSeparator key={`${item.id}-sep-${index}`} /> : null,
+                            <DropdownMenuItem
+                              key={`${item.id}-action-${index}`}
+                              className={action.destructive ? "text-[12px] text-destructive" : "text-[12px]"}
+                              onSelect={action.onSelect}
+                            >
+                              {action.label}
+                            </DropdownMenuItem>,
+                          ])}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -50,7 +50,10 @@
     "unknown": "Unknown",
     "yes": "Yes",
     "no": "No",
-    "active": "active"
+    "active": "active",
+    "enable": "Enable",
+    "copy": "Copy",
+    "test": "Test"
   },
   "sidebar": {
     "select_workspace": "Select workspace",
@@ -59,7 +62,8 @@
     "open_sidebar": "Open menu",
     "close_sidebar": "Close menu",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "create_workspace": "New workspace"
   },
   "integrations": {
     "hub_title": "Integrations Hub",
@@ -122,7 +126,9 @@
       "ads": "Ads",
       "sdk": "SDK",
       "custom": "Custom"
-    }
+    },
+    "destination_secret_auto": "Signing secret is generated automatically. You can rotate it later in Destinations.",
+    "not_supported_for_direction": "This integration has no automatic setup for this direction."
   },
   "sources": {
     "title": "Sources",
@@ -130,7 +136,27 @@
     "new": "New source",
     "go_browse": "Choose in catalog",
     "empty_title": "No source configured",
-    "empty_description": "Choose a source in the catalog to configure."
+    "empty_description": "Choose a source in the catalog to configure.",
+    "updated_success": "Source updated successfully",
+    "updated_failed": "Failed to update source",
+    "enabled_success": "Source enabled successfully",
+    "disabled_success": "Source disabled successfully",
+    "toggle_failed": "Failed to change source status",
+    "delete_confirm": "Are you sure you want to delete source \"{name}\"?",
+    "deleted_success": "Source deleted successfully",
+    "deleted_failed": "Failed to delete source",
+    "key_created": "API key created successfully",
+    "key_failed": "Failed to generate API key",
+    "action_generate_key": "Generate API key",
+    "action_view_ingestions": "View ingestions",
+    "edit_title": "Edit source",
+    "edit_description": "Update the selected source configuration.",
+    "field_type": "Type",
+    "field_status": "Status",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "key_dialog_title": "Generated API key",
+    "key_dialog_description": "Copy this key now. It will not be shown again."
   },
   "destinations": {
     "title": "Destinations",
@@ -138,7 +164,26 @@
     "new": "New destination",
     "go_browse": "Choose in catalog",
     "empty_title": "No destination configured",
-    "empty_description": "Choose a destination in the catalog to configure."
+    "empty_description": "Choose a destination in the catalog to configure.",
+    "load_failed": "Failed to load destination",
+    "updated_success": "Destination updated successfully",
+    "updated_failed": "Failed to update destination",
+    "enabled_success": "Destination enabled successfully",
+    "disabled_success": "Destination disabled successfully",
+    "toggle_failed": "Failed to change destination status",
+    "delete_confirm": "Are you sure you want to delete destination \"{name}\"?",
+    "deleted_success": "Destination deleted successfully",
+    "deleted_failed": "Failed to delete destination",
+    "test_success": "Test executed successfully",
+    "test_failed": "Failed to execute destination test",
+    "edit_title": "Edit destination",
+    "edit_description": "Update URL, method, subscribed events, and signing secret.",
+    "field_status": "Status",
+    "status_enabled": "Enabled",
+    "status_disabled": "Disabled",
+    "field_signing_secret": "New signing secret (optional)",
+    "signing_secret_hint": "Only fill this if you want to rotate the current secret.",
+    "action_view_deliveries": "View deliveries"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -174,7 +219,29 @@
     "destination": "Destination",
     "event": "Event",
     "attempts": "Attempts",
-    "no_details": "No details"
+    "no_details": "No details",
+    "event_ingested": "Ingested",
+    "event_normalized": "Normalized",
+    "event_merged": "Merged",
+    "event_delivered": "Delivered",
+    "event_delivery_failed": "Delivery failed",
+    "event_replayed": "Replayed",
+    "event_lead_updated": "Lead updated",
+    "ingested_from": "Lead ingested from {source}",
+    "ingested": "Lead ingested by ingestion endpoint",
+    "normalized": "Identities normalized",
+    "normalized_with_identities": "Detected identities: {identities}",
+    "merged": "Lead merged with existing records",
+    "merged_count": "Merge applied with {count} duplicate lead(s)",
+    "delivered": "Delivery completed",
+    "delivered_to": "Delivery completed to {destination}",
+    "delivery_failed": "Delivery attempt failed",
+    "delivery_failed_to": "Delivery failed to {destination}",
+    "delivery_failed_with_error": "Delivery failed to {destination}: {error}",
+    "replayed": "Delivery re-queued for replay",
+    "replayed_to": "Delivery re-queued to {destination}",
+    "updated": "Lead updated manually",
+    "updated_fields": "Lead updated (fields: {fields})"
   },
   "deliveries": {
     "title": "Deliveries",
@@ -229,7 +296,11 @@
     "security_isolation_title": "Workspace isolation",
     "security_isolation_desc": "Every read/write is scoped by workspace_id.",
     "alerts_description": "Configure alert rules in this workspace. Use alerts page to inspect triggered events.",
-    "open_alerts_center": "Open alerts center"
+    "open_alerts_center": "Open alerts center",
+    "workspace_actions": "Workspace actions",
+    "workspace_actions_description": "Create a new workspace or open the full management area.",
+    "create_workspace": "Create new workspace",
+    "open_workspace_manager": "Open workspace manager"
   },
   "alerts": {
     "title": "Alerts",

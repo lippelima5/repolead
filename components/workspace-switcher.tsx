@@ -101,6 +101,10 @@ export function WorkspaceSwitcher() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-[12px]" onSelect={() => router.push("/dashboard/settings/workspace/create")}>
+          <Plus className="h-3.5 w-3.5" />
+          {t("sidebar.create_workspace")}
+        </DropdownMenuItem>
         <DropdownMenuItem className="text-[12px]" onSelect={() => router.push("/settings")}>
           <Plus className="h-3.5 w-3.5" />
           {t("sidebar.manage_workspaces")}

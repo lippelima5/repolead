@@ -50,7 +50,10 @@
     "unknown": "Desconhecido",
     "yes": "Sim",
     "no": "Nao",
-    "active": "ativo"
+    "active": "ativo",
+    "enable": "Ativar",
+    "copy": "Copiar",
+    "test": "Testar"
   },
   "sidebar": {
     "select_workspace": "Selecionar workspace",
@@ -59,7 +62,8 @@
     "open_sidebar": "Abrir menu",
     "close_sidebar": "Fechar menu",
     "language": "Idioma",
-    "theme": "Tema"
+    "theme": "Tema",
+    "create_workspace": "Novo workspace"
   },
   "integrations": {
     "hub_title": "Integrations Hub",
@@ -122,7 +126,9 @@
       "ads": "Ads",
       "sdk": "SDK",
       "custom": "Custom"
-    }
+    },
+    "destination_secret_auto": "O signing secret e gerado automaticamente. Voce pode rotacionar depois em Destinations.",
+    "not_supported_for_direction": "Esta integracao nao possui setup automatico para esta direcao."
   },
   "sources": {
     "title": "Sources",
@@ -130,7 +136,27 @@
     "new": "Nova source",
     "go_browse": "Escolher no catalogo",
     "empty_title": "Nenhuma source configurada",
-    "empty_description": "Escolha uma source no catalogo para configurar."
+    "empty_description": "Escolha uma source no catalogo para configurar.",
+    "updated_success": "Source atualizada com sucesso",
+    "updated_failed": "Falha ao atualizar source",
+    "enabled_success": "Source ativada com sucesso",
+    "disabled_success": "Source desativada com sucesso",
+    "toggle_failed": "Falha ao alterar status da source",
+    "delete_confirm": "Tem certeza que deseja excluir a source \"{name}\"?",
+    "deleted_success": "Source excluida com sucesso",
+    "deleted_failed": "Falha ao excluir source",
+    "key_created": "API key criada com sucesso",
+    "key_failed": "Falha ao gerar API key",
+    "action_generate_key": "Gerar API key",
+    "action_view_ingestions": "Ver ingestoes",
+    "edit_title": "Editar source",
+    "edit_description": "Atualize os parametros da source selecionada.",
+    "field_type": "Tipo",
+    "field_status": "Status",
+    "status_active": "Ativa",
+    "status_inactive": "Inativa",
+    "key_dialog_title": "API key gerada",
+    "key_dialog_description": "Copie esta chave agora. Ela nao sera exibida novamente."
   },
   "destinations": {
     "title": "Destinations",
@@ -138,7 +164,26 @@
     "new": "Nova destination",
     "go_browse": "Escolher no catalogo",
     "empty_title": "Nenhuma destination configurada",
-    "empty_description": "Escolha uma destination no catalogo para configurar."
+    "empty_description": "Escolha uma destination no catalogo para configurar.",
+    "load_failed": "Falha ao carregar destination",
+    "updated_success": "Destination atualizada com sucesso",
+    "updated_failed": "Falha ao atualizar destination",
+    "enabled_success": "Destination ativada com sucesso",
+    "disabled_success": "Destination desativada com sucesso",
+    "toggle_failed": "Falha ao alterar status da destination",
+    "delete_confirm": "Tem certeza que deseja excluir a destination \"{name}\"?",
+    "deleted_success": "Destination excluida com sucesso",
+    "deleted_failed": "Falha ao excluir destination",
+    "test_success": "Teste executado com sucesso",
+    "test_failed": "Falha ao executar teste da destination",
+    "edit_title": "Editar destination",
+    "edit_description": "Atualize URL, metodo, eventos e segredo de assinatura.",
+    "field_status": "Status",
+    "status_enabled": "Ativa",
+    "status_disabled": "Inativa",
+    "field_signing_secret": "Novo signing secret (opcional)",
+    "signing_secret_hint": "Preencha apenas se quiser rotacionar o segredo atual.",
+    "action_view_deliveries": "Ver deliveries"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -174,7 +219,29 @@
     "destination": "Destination",
     "event": "Evento",
     "attempts": "Tentativas",
-    "no_details": "Sem detalhes"
+    "no_details": "Sem detalhes",
+    "event_ingested": "Ingerido",
+    "event_normalized": "Normalizado",
+    "event_merged": "Mesclado",
+    "event_delivered": "Entregue",
+    "event_delivery_failed": "Falha de entrega",
+    "event_replayed": "Reenfileirado",
+    "event_lead_updated": "Lead atualizada",
+    "ingested_from": "Lead ingerido via {source}",
+    "ingested": "Lead ingerido pelo endpoint de ingestao",
+    "normalized": "Identidades normalizadas",
+    "normalized_with_identities": "Identidades detectadas: {identities}",
+    "merged": "Lead mesclado com registros existentes",
+    "merged_count": "Merge aplicado com {count} lead(s) duplicados",
+    "delivered": "Delivery concluida",
+    "delivered_to": "Delivery concluida para {destination}",
+    "delivery_failed": "Falha na tentativa de entrega",
+    "delivery_failed_to": "Falha na entrega para {destination}",
+    "delivery_failed_with_error": "Falha na entrega para {destination}: {error}",
+    "replayed": "Entrega reenfileirada para replay",
+    "replayed_to": "Entrega reenfileirada para {destination}",
+    "updated": "Lead atualizada manualmente",
+    "updated_fields": "Lead atualizada (campos: {fields})"
   },
   "deliveries": {
     "title": "Entregas",
@@ -229,7 +296,11 @@
     "security_isolation_title": "Isolamento por workspace",
     "security_isolation_desc": "Toda leitura/escrita e filtrada por workspace_id.",
     "alerts_description": "Configure regras de alerta neste workspace. Use a pagina de alertas para ver eventos disparados.",
-    "open_alerts_center": "Abrir central de alertas"
+    "open_alerts_center": "Abrir central de alertas",
+    "workspace_actions": "Acoes de workspace",
+    "workspace_actions_description": "Crie um novo workspace ou abra a area completa de gestao.",
+    "create_workspace": "Criar novo workspace",
+    "open_workspace_manager": "Abrir gerenciador"
   },
   "alerts": {
     "title": "Alertas",

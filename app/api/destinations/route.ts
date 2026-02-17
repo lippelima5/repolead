@@ -26,6 +26,13 @@ export async function GET(request: NextRequest) {
     const [items, total] = await Promise.all([
       prisma.destination.findMany({
         where,
+        include: {
+          _count: {
+            select: {
+              deliveries: true,
+            },
+          },
+        },
         orderBy: { created_at: "desc" },
         skip: offset,
         take: limit,

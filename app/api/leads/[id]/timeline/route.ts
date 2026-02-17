@@ -32,6 +32,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             id: true,
             source_id: true,
             received_at: true,
+            source: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
           },
         },
         delivery: {
@@ -40,6 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             event_type: true,
             status: true,
             attempt_count: true,
+            last_error: true,
             destination: {
               select: {
                 id: true,

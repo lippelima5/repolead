@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
-import { InstalledList, InstalledIntegrationItem } from "@/components/integrations/installed-list";
+import { InstalledList, InstalledIntegrationItem, InstalledListAction } from "@/components/integrations/installed-list";
 import { IntegrationGrid } from "@/components/integrations/integration-grid";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/contexts/i18n-context";
@@ -26,10 +29,28 @@ type SourceRecord = {
 };
 
 export default function SourcesPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useI18n();
   const [tab, setTab] = useState<"installed" | "browse">(() => (searchParams.get("tab") === "browse" ? "browse" : "installed"));
   const [rows, setRows] = useState<SourceRecord[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
+  const [showKeyDialog, setShowKeyDialog] = useState(false);
+  const [generatedKey, setGeneratedKey] = useState<{ sourceName: string; plainKey: string } | null>(null);
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    type: string;
+    environment: "production" | "staging" | "development";
+    rate_limit_per_min: number;
+    status: "active" | "inactive";
+  }>({
+    name: "",
+    type: "",
+    environment: "production",
+    rate_limit_per_min: 60,
+    status: "active",
+  });
 
   const loadSources = async () => {
     try {
@@ -63,6 +84,131 @@ export default function SourcesPage() {
       })),
     [rows],
   );
+
+  const openEditSource = (sourceId: string) => {
+    const source = rows.find((item) => item.id === sourceId);
+    if (!source) {
+      return;
+    }
+
+    setEditForm({
+      name: source.name,
+      type: source.type,
+      environment: source.environment,
+      rate_limit_per_min: source.rate_limit_per_min,
+      status: source.status,
+    });
+    setEditingSourceId(sourceId);
+  };
+
+  const saveSource = async () => {
+    if (!editingSourceId) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await api.patch(`/sources/${editingSourceId}`, editForm);
+      if (response.data?.success) {
+        toast.success(t("sources.updated_success"));
+        setEditingSourceId(null);
+        await loadSources();
+      }
+    } catch (error) {
+      logger.error("Failed to update source", error);
+      toast.error(t("sources.updated_failed"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleSourceStatus = async (sourceId: string, current: "active" | "inactive") => {
+    try {
+      const next = current === "active" ? "inactive" : "active";
+      const response = await api.patch(`/sources/${sourceId}`, { status: next });
+      if (response.data?.success) {
+        toast.success(next === "active" ? t("sources.enabled_success") : t("sources.disabled_success"));
+        await loadSources();
+      }
+    } catch (error) {
+      logger.error("Failed to toggle source status", error);
+      toast.error(t("sources.toggle_failed"));
+    }
+  };
+
+  const deleteSource = async (sourceId: string, sourceName: string) => {
+    if (!window.confirm(t("sources.delete_confirm", { name: sourceName }))) {
+      return;
+    }
+
+    try {
+      const response = await api.delete(`/sources/${sourceId}`);
+      if (response.data?.success) {
+        toast.success(t("sources.deleted_success"));
+        await loadSources();
+      }
+    } catch (error) {
+      logger.error("Failed to delete source", error);
+      toast.error(t("sources.deleted_failed"));
+    }
+  };
+
+  const createSourceKey = async (sourceId: string, sourceName: string) => {
+    try {
+      const response = await api.post(`/sources/${sourceId}/keys`, {
+        name: `${sourceName} key`,
+      });
+      if (response.data?.success) {
+        const plainKey = response.data.data.plain_key as string;
+        setGeneratedKey({ sourceName, plainKey });
+        setShowKeyDialog(true);
+        toast.success(t("sources.key_created"));
+      }
+    } catch (error) {
+      logger.error("Failed to create source key", error);
+      toast.error(t("sources.key_failed"));
+    }
+  };
+
+  const getSourceActions = (item: InstalledIntegrationItem): InstalledListAction[] => {
+    const source = rows.find((row) => row.id === item.id);
+    if (!source) {
+      return [];
+    }
+
+    return [
+      {
+        label: t("common.edit"),
+        onSelect: () => openEditSource(source.id),
+      },
+      {
+        label: t("sources.action_generate_key"),
+        onSelect: () => {
+          void createSourceKey(source.id, source.name);
+        },
+      },
+      {
+        label: t("sources.action_view_ingestions"),
+        onSelect: () => {
+          router.push(`/ingestions?sourceId=${source.id}`);
+        },
+      },
+      {
+        label: source.status === "active" ? t("common.disable") : t("common.enable"),
+        separatorBefore: true,
+        onSelect: () => {
+          void toggleSourceStatus(source.id, source.status);
+        },
+      },
+      {
+        label: t("common.delete"),
+        destructive: true,
+        onSelect: () => {
+          void deleteSource(source.id, source.name);
+        },
+      },
+    ];
+  };
 
   return (
     <AppLayout>
@@ -105,11 +251,130 @@ export default function SourcesPage() {
             emptyTitle={t("sources.empty_title")}
             emptyDescription={t("sources.empty_description")}
             onBrowse={() => setTab("browse")}
+            getActions={getSourceActions}
           />
         ) : (
           <IntegrationGrid filterDirection="source" configureBasePath="/sources/configure" returnTo="/sources?tab=browse" />
         )}
       </div>
+
+      <Dialog open={Boolean(editingSourceId)} onOpenChange={(open) => (!open ? setEditingSourceId(null) : undefined)}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle>{t("sources.edit_title")}</DialogTitle>
+            <DialogDescription>{t("sources.edit_description")}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-medium text-foreground">{t("common.name")}</label>
+              <Input
+                value={editForm.name}
+                onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))}
+                className="h-9 text-[13px]"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-medium text-foreground">{t("sources.field_type")}</label>
+              <Input
+                value={editForm.type}
+                onChange={(event) => setEditForm((prev) => ({ ...prev, type: event.target.value }))}
+                className="h-9 text-[13px]"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-medium text-foreground">{t("integrations.source_environment")}</label>
+                <select
+                  className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
+                  value={editForm.environment}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      environment: event.target.value as "production" | "staging" | "development",
+                    }))
+                  }
+                >
+                  <option value="production">production</option>
+                  <option value="staging">staging</option>
+                  <option value="development">development</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-medium text-foreground">{t("integrations.source_rate_limit")}</label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={20000}
+                  value={editForm.rate_limit_per_min}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      rate_limit_per_min: Number(event.target.value || 60),
+                    }))
+                  }
+                  className="h-9 text-[13px]"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-medium text-foreground">{t("sources.field_status")}</label>
+              <select
+                className="h-9 w-full text-[13px] rounded-md border border-border bg-background px-3 text-foreground"
+                value={editForm.status}
+                onChange={(event) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    status: event.target.value as "active" | "inactive",
+                  }))
+                }
+              >
+                <option value="active">{t("sources.status_active")}</option>
+                <option value="inactive">{t("sources.status_inactive")}</option>
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingSourceId(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={saveSource} disabled={isSaving || !editForm.name.trim() || !editForm.type.trim()}>
+              {isSaving ? t("common.loading") : t("common.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showKeyDialog} onOpenChange={setShowKeyDialog}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle>{t("sources.key_dialog_title")}</DialogTitle>
+            <DialogDescription>
+              {generatedKey?.sourceName ? `${t("sources.key_dialog_description")} (${generatedKey.sourceName})` : t("sources.key_dialog_description")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="rounded-xl border border-border bg-surface-2 p-3 space-y-2">
+            <p className="text-[12px] text-warning">{t("integrations.copy_key_now")}</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
+                {generatedKey?.plainKey || ""}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (!generatedKey?.plainKey) return;
+                  navigator.clipboard.writeText(generatedKey.plainKey);
+                  toast.success(t("integrations.key_copied"));
+                }}
+              >
+                {t("common.copy")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
