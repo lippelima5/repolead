@@ -55,6 +55,7 @@ export default function WorkspaceSelect() {
 
             if (data.success) {
                 logger.success("Workspace selecionado com sucesso")
+                window.localStorage.setItem("leadvault.workspace_id", String(workspace.id))
 
                 // Reload the page to apply the new workspace context
                 window.location.reload()

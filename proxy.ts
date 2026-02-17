@@ -13,6 +13,7 @@ const publicRoutes = new Set([
   "/api/auth/magic",
   "/api/auth/magic/consume",
   "/api/stripe/webhook",
+  "/api/v1/leads/ingest",
 ]);
 
 const mutatingMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -28,7 +29,12 @@ function withSecurityHeaders(response: NextResponse) {
 }
 
 function shouldSkipOriginCheck(pathname: string) {
-  return pathname.startsWith("/api/stripe/webhook") || pathname.startsWith("/api/cron") || pathname.startsWith("/api/worker");
+  return (
+    pathname.startsWith("/api/stripe/webhook") ||
+    pathname.startsWith("/api/cron") ||
+    pathname.startsWith("/api/worker") ||
+    pathname.startsWith("/api/internal/cron")
+  );
 }
 
 function normalizeOrigin(value: string | null | undefined) {
@@ -208,7 +214,7 @@ export async function proxy(request: NextRequest) {
     return withSecurityHeaders(NextResponse.next());
   }
 
-  if (pathname.startsWith("/api/cron") || pathname.startsWith("/api/worker")) {
+  if (pathname.startsWith("/api/cron") || pathname.startsWith("/api/worker") || pathname.startsWith("/api/internal/cron")) {
     return handleWorkerRoute(request);
   }
 
@@ -228,7 +234,20 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*", "/admin", "/admin/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/integrations/:path*",
+    "/sources/:path*",
+    "/destinations/:path*",
+    "/leads/:path*",
+    "/ingestions/:path*",
+    "/deliveries/:path*",
+    "/alerts/:path*",
+    "/settings/:path*",
+    "/api/:path*",
+    "/admin",
+    "/admin/:path*",
+  ],
 };
 
 

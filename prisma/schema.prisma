@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
   output   = "./generated"
@@ -33,6 +30,73 @@ enum invite_status {
   expired
 }
 
+enum source_status {
+  active
+  inactive
+}
+
+enum source_environment {
+  production
+  staging
+  development
+}
+
+enum ingestion_status {
+  pending
+  processed
+  duplicate
+  needs_identity
+  failed
+}
+
+enum lead_status {
+  new
+  contacted
+  qualified
+  won
+  lost
+  needs_identity
+}
+
+enum lead_identity_type {
+  email
+  phone
+  external
+}
+
+enum lead_event_type {
+  ingested
+  normalized
+  merged
+  delivered
+  delivery_failed
+  replayed
+  lead_updated
+}
+
+enum actor_type {
+  system
+  user
+}
+
+enum destination_method {
+  post
+  put
+  patch
+}
+
+enum delivery_status {
+  pending
+  success
+  failed
+  dead_letter
+}
+
+enum alert_rule_type {
+  error_spike
+  silent_source
+}
+
 model user {
   id                            Int                @id @default(autoincrement())
   name                          String?
@@ -51,22 +115,38 @@ model user {
   workspaces                    workspace_user[]
   invites_sent                  workspace_invite[] @relation("workspace_invite_invited_by")
   invites_accepted              workspace_invite[] @relation("workspace_invite_accepted_by")
+  lead_events_authored          lead_event[]       @relation("lead_event_actor")
   created_at                    DateTime           @default(now())
   updated_at                    DateTime           @updatedAt
 }
 
 model workspace {
-  id                     Int                @id @default(autoincrement())
-  name                   String
-  description            String?
-  users                  workspace_user[]
-  plan_status            plan_status        @default(trialing)
-  plan_expires_at        DateTime?
-  stripe_customer_id     String?            @unique
-  stripe_subscription_id String?            @unique
-  invites                workspace_invite[]
-  created_at             DateTime           @default(now())
-  updated_at             DateTime           @updatedAt
+  id                        Int                        @id @default(autoincrement())
+  name                      String
+  slug                      String?                    @unique
+  description               String?
+  retention_days            Int                        @default(180)
+  idempotency_window_hours  Int                        @default(24)
+  users                     workspace_user[]
+  plan_status               plan_status                @default(trialing)
+  plan_expires_at           DateTime?
+  stripe_customer_id        String?                    @unique
+  stripe_subscription_id    String?                    @unique
+  invites                   workspace_invite[]
+  sources                   source[]
+  api_keys                  api_key[]
+  ingestions                ingestion[]
+  leads                     lead[]
+  lead_identities           lead_identity[]
+  lead_events               lead_event[]
+  destinations              destination[]
+  deliveries                delivery[]
+  delivery_attempts         delivery_attempt[]
+  alert_rules               alert_rule[]
+  alert_events              alert_event[]
+  source_rate_limit_buckets source_rate_limit_bucket[]
+  created_at                DateTime                   @default(now())
+  updated_at                DateTime                   @updatedAt
 }
 
 model workspace_user {
@@ -102,6 +182,236 @@ model workspace_invite {
   @@index([email, status])
 }
 
+model source {
+  id                 String                     @id @default(cuid())
+  workspace_id       Int
+  workspace          workspace                  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  name               String
+  type               String
+  environment        source_environment         @default(production)
+  rate_limit_per_min Int                        @default(60)
+  status             source_status              @default(active)
+  api_keys           api_key[]
+  ingestions         ingestion[]
+  lead_identities    lead_identity[]
+  rate_limit_buckets source_rate_limit_bucket[]
+  created_at         DateTime                   @default(now())
+  updated_at         DateTime                   @updatedAt
+
+  @@index([workspace_id])
+}
+
+model api_key {
+  id           String    @id @default(cuid())
+  source_id    String
+  source       source    @relation(fields: [source_id], references: [id], onDelete: Cascade)
+  workspace_id Int
+  workspace    workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  name         String
+  hashed_key   String    @unique
+  prefix       String
+  last_used_at DateTime?
+  revoked_at   DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@index([workspace_id, source_id])
+  @@index([source_id, revoked_at])
+}
+
+model ingestion {
+  id               String           @id @default(cuid())
+  workspace_id     Int
+  workspace        workspace        @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  source_id        String
+  source           source           @relation(fields: [source_id], references: [id], onDelete: Cascade)
+  received_at      DateTime         @default(now())
+  content_type     String?
+  raw_payload_json Json?
+  raw_payload_text String?
+  headers_json     Json?
+  idempotency_key  String?
+  size_bytes       Int
+  status           ingestion_status @default(pending)
+  duplicate_of_id  String?
+  duplicate_of     ingestion?       @relation("ingestion_duplicate", fields: [duplicate_of_id], references: [id], onDelete: SetNull)
+  duplicates       ingestion[]      @relation("ingestion_duplicate")
+  lead_events      lead_event[]
+  deliveries       delivery[]
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  @@unique([workspace_id, source_id, idempotency_key])
+  @@index([workspace_id, received_at])
+  @@index([workspace_id, status])
+}
+
+model lead {
+  id             String          @id @default(cuid())
+  workspace_id   Int
+  workspace      workspace       @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  name           String?
+  email          String?
+  phone          String?
+  status         lead_status     @default(new)
+  tags_json      Json?
+  needs_identity Boolean         @default(false)
+  identities     lead_identity[]
+  events         lead_event[]
+  deliveries     delivery[]
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+
+  @@index([workspace_id, status])
+  @@index([workspace_id, created_at])
+}
+
+model lead_identity {
+  id               String             @id @default(cuid())
+  lead_id          String
+  lead             lead               @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  workspace_id     Int
+  workspace        workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  type             lead_identity_type
+  value            String
+  normalized_value String
+  source_id        String?
+  source           source?            @relation(fields: [source_id], references: [id], onDelete: SetNull)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+
+  @@unique([workspace_id, type, normalized_value])
+  @@index([lead_id])
+  @@index([workspace_id, source_id])
+}
+
+model lead_event {
+  id             String          @id @default(cuid())
+  workspace_id   Int
+  workspace      workspace       @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  lead_id        String
+  lead           lead            @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  type           lead_event_type
+  ingest_id      String?
+  ingestion      ingestion?      @relation(fields: [ingest_id], references: [id], onDelete: SetNull)
+  delivery_id    String?
+  delivery       delivery?       @relation(fields: [delivery_id], references: [id], onDelete: SetNull)
+  actor_type     actor_type      @default(system)
+  actor_user_id  Int?
+  actor_user     user?           @relation("lead_event_actor", fields: [actor_user_id], references: [id], onDelete: SetNull)
+  timestamp      DateTime        @default(now())
+  old_value_json Json?
+  new_value_json Json?
+  reason         String?
+
+  @@index([workspace_id, lead_id, timestamp])
+}
+
+model destination {
+  id                     String             @id @default(cuid())
+  workspace_id           Int
+  workspace              workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  name                   String
+  url                    String
+  method                 destination_method @default(post)
+  headers_json           Json?
+  signing_secret_hash    String?
+  signing_secret_prefix  String?
+  enabled                Boolean            @default(true)
+  subscribed_events_json Json?
+  deliveries             delivery[]
+  created_at             DateTime           @default(now())
+  updated_at             DateTime           @updatedAt
+
+  @@index([workspace_id])
+}
+
+model delivery {
+  id              String             @id @default(cuid())
+  workspace_id    Int
+  workspace       workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  destination_id  String
+  destination     destination        @relation(fields: [destination_id], references: [id], onDelete: Cascade)
+  lead_id         String?
+  lead            lead?              @relation(fields: [lead_id], references: [id], onDelete: SetNull)
+  ingest_id       String?
+  ingestion       ingestion?         @relation(fields: [ingest_id], references: [id], onDelete: SetNull)
+  event_type      String
+  status          delivery_status    @default(pending)
+  attempt_count   Int                @default(0)
+  last_attempt_at DateTime?
+  next_attempt_at DateTime?
+  last_error      String?
+  attempts        delivery_attempt[]
+  lead_events     lead_event[]
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+
+  @@index([workspace_id, status])
+  @@index([workspace_id, next_attempt_at])
+  @@index([workspace_id, destination_id])
+}
+
+model delivery_attempt {
+  id                   String    @id @default(cuid())
+  delivery_id          String
+  delivery             delivery  @relation(fields: [delivery_id], references: [id], onDelete: Cascade)
+  workspace_id         Int
+  workspace            workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  attempt_number       Int
+  request_payload_json Json
+  response_status      Int?
+  response_body_text   String?
+  error                String?
+  started_at           DateTime  @default(now())
+  finished_at          DateTime?
+
+  @@index([workspace_id, started_at])
+  @@index([delivery_id, attempt_number])
+}
+
+model alert_rule {
+  id           String          @id @default(cuid())
+  workspace_id Int
+  workspace    workspace       @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  type         alert_rule_type
+  config_json  Json
+  enabled      Boolean         @default(true)
+  events       alert_event[]
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+
+  @@index([workspace_id, enabled])
+}
+
+model alert_event {
+  id                      String     @id @default(cuid())
+  workspace_id            Int
+  workspace               workspace  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  rule_id                 String
+  rule                    alert_rule @relation(fields: [rule_id], references: [id], onDelete: Cascade)
+  triggered_at            DateTime   @default(now())
+  payload_json            Json
+  delivered_channels_json Json?
+  created_at              DateTime   @default(now())
+
+  @@index([workspace_id, triggered_at])
+}
+
+model source_rate_limit_bucket {
+  key          String    @id
+  source_id    String
+  source       source    @relation(fields: [source_id], references: [id], onDelete: Cascade)
+  workspace_id Int
+  workspace    workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  window_start DateTime
+  count        Int       @default(0)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@index([workspace_id, source_id, window_start])
+}
+
 model rate_limit_window {
   key        String   @id
   count      Int      @default(0)
@@ -128,5 +438,3 @@ model billing_plan {
 
   @@index([is_active, sort_order])
 }
-
-

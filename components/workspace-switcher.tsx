@@ -1,147 +1,109 @@
-﻿"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Check, ChevronsUpDown, PlusCircle, Building } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import api from "@/lib/api"
-import logger from "@/lib/logger.client"
-import { useAuth } from "@/contexts/auth-context"
-import { WorkspaceUserRelations } from "@/types"
-import { workspace } from "@/prisma/generated/client"
+import { useEffect, useMemo, useState } from "react";
+import { Building, Check, ChevronDown, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/api";
+import logger from "@/lib/logger.client";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface WorkspaceSwitcherProps {
-  className?: string
-}
+type WorkspaceOption = {
+  workspace_id: number;
+  role: "owner" | "admin" | "user" | "viewer";
+  workspace: {
+    id: number;
+    name: string;
+    slug: string | null;
+  };
+};
 
-export function WorkspaceSwitcher({ className }: WorkspaceSwitcherProps) {
-  const router = useRouter()
-  const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [workspaces, setWorkspaces] = useState<WorkspaceUserRelations[]>([])
-  const [selectedWorkspace, setSelectedWorkspace] = useState<workspace | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+export function WorkspaceSwitcher() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [items, setItems] = useState<WorkspaceOption[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchWorkspaces = async () => {
-      setIsLoading(true)
+    const load = async () => {
+      setLoading(true);
       try {
-        const { data } = await api.get("/workspace")
-        if (data.success) {
-          setWorkspaces(data.data)
-
-          // Se houver um workspace ativo, selecione-o 
-          if (user?.workspace_active_id) {
-            const activeWorkspace = data.data.find((w: WorkspaceUserRelations) => w.workspace_id === user.workspace_active_id)
-            if (activeWorkspace) {
-              setSelectedWorkspace(activeWorkspace.workspace)
-            }
-          }
-
+        const { data } = await api.get("/workspaces");
+        if (data?.success) {
+          setItems(data.data as WorkspaceOption[]);
         }
       } catch (error) {
-        logger.error("Erro ao carregar workspaces", error)
+        logger.error("Failed to load workspaces", error);
       } finally {
-        setIsLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchWorkspaces()
-  }, [user])
+    void load();
+  }, []);
 
-  const handleSelectWorkspace = async (workspace: workspace) => {
+  const selected = useMemo(() => items.find((item) => item.workspace_id === user?.workspace_active_id) || null, [items, user]);
+
+  const changeWorkspace = async (workspaceId: number) => {
     try {
-      const { data } = await api.put("/profile", {
-        workspace_active_id: workspace.id,
-      })
-
-      if (data.success) {
-        setSelectedWorkspace(workspace)
-        // Recarregar a pÃ¡gina para aplicar o contexto do novo workspace
-        window.location.reload()
+      const { data } = await api.put("/profile", { workspace_active_id: workspaceId });
+      if (data?.success) {
+        window.localStorage.setItem("leadvault.workspace_id", String(workspaceId));
+        window.location.reload();
       }
     } catch (error) {
-      logger.error("Erro ao trocar de workspace", error)
-    } finally {
-      setOpen(false)
+      logger.error("Failed to change workspace", error);
     }
-  }
+  };
 
-  const handleCreateWorkspace = () => {
-    router.push("/dashboard/settings/workspace/create")
-    setOpen(false)
-  }
-
-  const handleManageWorkspaces = () => {
-    router.push("/dashboard/settings/workspace")
-    setOpen(false)
-  }
+  useEffect(() => {
+    if (selected?.workspace_id) {
+      window.localStorage.setItem("leadvault.workspace_id", String(selected.workspace_id));
+    }
+  }, [selected?.workspace_id]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          aria-label="Selecione um workspace"
-          className={cn("w-[300px] justify-between", className)}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            "Carregando..."
-          ) : selectedWorkspace ? (
-            <>
-              <Building className="mr-2 h-4 w-4" />
-              {selectedWorkspace.name}
-            </>
-          ) : (
-            "Selecione um workspace"
+          variant="ghost"
+          className={cn(
+            "h-9 w-full justify-between rounded-lg border border-border bg-background px-2.5 text-left",
+            "hover:bg-accent/50",
           )}
-          <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+          disabled={loading}
+        >
+          <span className="flex items-center gap-2 min-w-0">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Building className="h-3.5 w-3.5" />
+            </span>
+            <span className="truncate text-[12px] font-medium">{selected?.workspace?.name || "Select workspace"}</span>
+          </span>
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandList>
-            <CommandInput placeholder="Buscar workspace..." />
-            <CommandEmpty>Nenhum workspace encontrado.</CommandEmpty>
-            {workspaces.length > 0 && (
-              <CommandGroup heading="Workspaces">
-                {workspaces.map((workspace) => (
-                  <CommandItem key={workspace.workspace_id} onSelect={() => handleSelectWorkspace(workspace.workspace)} className="text-sm">
-                    <Building className="mr-2 h-4 w-4" />
-                    {workspace.workspace.name}
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        selectedWorkspace?.id === workspace.workspace_id ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-          <CommandSeparator />
-          <CommandList>
-            <CommandGroup>
-              <CommandItem onSelect={handleCreateWorkspace}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Criar Workspace
-              </CommandItem>
-              <CommandItem onSelect={handleManageWorkspaces}>
-                <Building className="mr-2 h-4 w-4" />
-                Gerenciar Workspaces
-              </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-[240px]">
+        {items.map((item) => (
+          <DropdownMenuItem key={item.workspace_id} onSelect={() => changeWorkspace(item.workspace_id)} className="text-[12px]">
+            <Building className="h-3.5 w-3.5" />
+            <span className="flex-1 truncate">{item.workspace.name}</span>
+            {selected?.workspace_id === item.workspace_id ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-[12px]" onSelect={() => router.push("/settings")}>
+          <Plus className="h-3.5 w-3.5" />
+          Manage workspaces
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
-

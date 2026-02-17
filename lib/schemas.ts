@@ -33,8 +33,11 @@ export const workspaceCreateBodySchema = z.object({
 });
 
 export const workspaceUpdateBodySchema = z.object({
-  name: z.string().trim().min(1).max(120),
+  name: z.string().trim().min(1).max(120).optional(),
+  slug: z.string().trim().min(2).max(120).regex(/^[a-z0-9-]+$/).optional().nullable(),
   description: z.string().trim().max(400).optional().nullable(),
+  retention_days: z.number().int().min(1).max(3650).optional(),
+  idempotency_window_hours: z.number().int().min(1).max(720).optional(),
 });
 
 export const profileUpdateBodySchema = z.object({
@@ -82,11 +85,97 @@ const billingPlanBaseSchema = z.object({
 });
 
 export const adminBillingPlanCreateBodySchema = billingPlanBaseSchema;
-
 export const adminBillingPlanUpdateBodySchema = billingPlanBaseSchema.partial().refine(
   (value) => Object.keys(value).length > 0,
   { message: "At least one field must be provided" },
 );
 
+export const workspaceMemberCreateBodySchema = z.object({
+  email: z.string().trim().email().toLowerCase(),
+  role: roleSchema.exclude(["owner"]).default("user"),
+});
 
+export const workspaceMemberUpdateBodySchema = z.object({
+  role: roleSchema.exclude(["owner"]),
+});
+
+export const sourceEnvironmentSchema = z.enum(["production", "staging", "development"]);
+export const sourceStatusSchema = z.enum(["active", "inactive"]);
+export const sourceCreateBodySchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  type: z.string().trim().min(2).max(80),
+  environment: sourceEnvironmentSchema.optional().default("production"),
+  rate_limit_per_min: z.number().int().min(1).max(20000).optional().default(60),
+  status: sourceStatusSchema.optional().default("active"),
+});
+export const sourceUpdateBodySchema = sourceCreateBodySchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field must be provided",
+  });
+
+export const sourceKeyCreateBodySchema = z.object({
+  name: z.string().trim().min(1).max(120).optional().default("Default key"),
+});
+
+export const destinationMethodSchema = z.enum(["post", "put", "patch"]);
+export const destinationCreateBodySchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  url: z.string().trim().url(),
+  method: destinationMethodSchema.optional().default("post"),
+  headers_json: z.record(z.string(), z.string()).optional().default({}),
+  signing_secret: z.string().trim().min(8).max(200).optional(),
+  enabled: z.boolean().optional().default(true),
+  subscribed_events_json: z.array(z.string().trim().min(1).max(120)).optional().default([]),
+});
+
+export const destinationUpdateBodySchema = destinationCreateBodySchema
+  .omit({ signing_secret: true })
+  .extend({
+    signing_secret: z.string().trim().min(8).max(200).optional().nullable(),
+  })
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field must be provided",
+  });
+
+export const destinationTestBodySchema = z.object({
+  event_type: z.string().trim().min(1).max(120).optional().default("test_event"),
+  payload: z.record(z.string(), z.unknown()).optional().default({ test: true }),
+});
+
+export const leadStatusSchema = z.enum(["new", "contacted", "qualified", "won", "lost", "needs_identity"]);
+export const leadUpdateBodySchema = z
+  .object({
+    status: leadStatusSchema.optional(),
+    tags: z.array(z.string().trim().min(1).max(40)).max(30).optional(),
+  })
+  .refine((value) => value.status !== undefined || value.tags !== undefined, {
+    message: "At least one field must be provided",
+  });
+
+export const deliveryReplayBulkBodySchema = z.object({
+  status: z.enum(["pending", "success", "failed", "dead_letter"]).optional(),
+  destination_id: z.string().trim().min(1).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.number().int().min(1).max(500).optional().default(100),
+});
+
+export const alertRuleTypeSchema = z.enum(["error_spike", "silent_source"]);
+export const alertRuleCreateBodySchema = z.object({
+  type: alertRuleTypeSchema,
+  config_json: z.record(z.string(), z.unknown()),
+  enabled: z.boolean().optional().default(true),
+});
+
+export const alertRuleUpdateBodySchema = z
+  .object({
+    type: alertRuleTypeSchema.optional(),
+    config_json: z.record(z.string(), z.unknown()).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field must be provided",
+  });
 
