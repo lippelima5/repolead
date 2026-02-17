@@ -1,9 +1,17 @@
 import { NextRequest } from "next/server";
+import SendWorkspaceInvite from "@/emails/send-workspace-invite";
 import prisma from "@/lib/prisma";
-import { apiError, apiSuccess } from "@/lib/api-response";
+import { apiError, apiRateLimit, apiSuccess } from "@/lib/api-response";
 import { onError, verifyUserWorkspace } from "@/lib/helper";
+import { createInviteToken } from "@/lib/invite-token";
+import logger from "@/lib/logger.server";
+import { getRequestIp } from "@/lib/request";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { canInviteRole } from "@/lib/workspace-permissions";
 import { parseJsonBody } from "@/lib/validation";
 import { workspaceMemberCreateBodySchema } from "@/lib/schemas";
+
+const INVITE_EXPIRATION_DAYS = 7;
 
 function parseId(value: string) {
   const parsed = Number(value);
@@ -51,43 +59,123 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return apiError("Workspace id is required", 400);
     }
 
-    await verifyUserWorkspace(request, true, workspaceId);
-    const { email, role } = await parseJsonBody(request, workspaceMemberCreateBodySchema);
+    const ip = getRequestIp(request);
+    const ipLimit = await checkRateLimit({
+      namespace: "workspaces:members:invite:ip",
+      identifier: ip,
+      limit: 20,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (ipLimit.limited) {
+      return apiRateLimit("Too many invite attempts. Try again later.", ipLimit.retryAfterSeconds);
+    }
 
-    const user = await prisma.user.findUnique({
+    const { email, role } = await parseJsonBody(request, workspaceMemberCreateBodySchema);
+    const { user, workspaceUser } = await verifyUserWorkspace(request, true, workspaceId);
+
+    if (!canInviteRole(workspaceUser.role, role)) {
+      return apiError("No permission to invite this role", 403);
+    }
+
+    if (email === user.email.toLowerCase()) {
+      return apiError("You cannot invite your own email", 400);
+    }
+
+    const emailLimit = await checkRateLimit({
+      namespace: "workspaces:members:invite:email",
+      identifier: `${workspaceId}:${email}`,
+      limit: 8,
+      windowMs: 10 * 60 * 1000,
+    });
+    if (emailLimit.limited) {
+      return apiRateLimit("Too many invite attempts. Try again later.", emailLimit.retryAfterSeconds);
+    }
+
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { id: true, name: true },
+    });
+    if (!workspace) {
+      return apiError("Workspace not found", 404);
+    }
+
+    const invitedUser = await prisma.user.findUnique({
       where: { email },
       select: { id: true, email: true, name: true, avatar: true, created_at: true },
     });
 
-    if (!user) {
-      return apiError("User not found. Use invite flow for non-existing users.", 404);
+    if (invitedUser) {
+      const existingMember = await prisma.workspace_user.findUnique({
+        where: {
+          workspace_id_user_id: {
+            workspace_id: workspaceId,
+            user_id: invitedUser.id,
+          },
+        },
+      });
+
+      if (existingMember) {
+        return apiError("User already belongs to this workspace", 409);
+      }
     }
 
-    const membership = await prisma.workspace_user.upsert({
+    await prisma.workspace_invite.updateMany({
       where: {
-        workspace_id_user_id: {
-          workspace_id: workspaceId,
-          user_id: user.id,
-        },
-      },
-      create: {
         workspace_id: workspaceId,
-        user_id: user.id,
-        role,
+        email,
+        status: "pending",
       },
-      update: {
-        role,
+      data: {
+        status: "revoked",
       },
     });
 
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRATION_DAYS * 24 * 60 * 60 * 1000);
+    const { rawToken, tokenHash } = createInviteToken();
+
+    const invite = await prisma.workspace_invite.create({
+      data: {
+        workspace_id: workspaceId,
+        email,
+        role,
+        invited_by_id: user.id,
+        token: tokenHash,
+        expires_at: expiresAt,
+      },
+    });
+
+    const appUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    const inviteUrl = `${appUrl}/invite/${rawToken}`;
+
+    if (!process.env.SMTP_HOST) {
+      logger.info(`SMTP is not configured. Invite URL generated for ${email}: ${inviteUrl}`);
+    } else {
+      try {
+        const mail = new SendWorkspaceInvite({
+          workspaceName: workspace.name,
+          inviterName: user.name || user.email,
+          inviteUrl,
+          receivers: email,
+        });
+
+        await mail.sendSafe(`Invite to workspace ${workspace.name}`);
+      } catch (mailError) {
+        logger.error("Failed to send workspace invite email", mailError);
+      }
+    }
+
     return apiSuccess(
       {
-        ...membership,
-        user,
+        id: invite.id,
+        email: invite.email,
+        role: invite.role,
+        status: invite.status,
+        expires_at: invite.expires_at,
+        invite_url: inviteUrl,
       },
       {
         status: 201,
-        message: "Member added",
+        message: "Invite created successfully",
       },
     );
   } catch (error) {

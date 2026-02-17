@@ -1,140 +1,86 @@
-# VibeKit - Regras de Engenharia (Estado Atual)
+# LeadVault - Regras de Engenharia
 
-Este documento define as convencoes obrigatorias para evoluir o projeto sem regressao.
+Este arquivo define as regras de referencia para evolucao do projeto.
 
-## 1. Regras Arquiteturais Obrigatorias
+## 1) Arquitetura obrigatoria
+
 - Nao usar Server Actions.
-- Toda leitura/mutacao protegida deve ser feita em Route Handlers (`app/api/**`).
-- Frontend deve consumir API via `lib/api.ts` (axios) e contexts/hooks existentes.
-- Nao remover nada de `components/ui`.
-- Preferir padroes ja existentes no repositorio antes de criar alternativa nova.
+- Toda operacao protegida deve estar em `app/api/**` (Route Handlers).
+- Frontend deve consumir APIs por `lib/api.ts` (axios).
+- Respeitar padroes existentes antes de criar alternativas.
 
-## 2. Stack Atual
+## 2) Stack oficial
+
 - Next.js 16 (App Router)
 - React 19
-- TypeScript (strict)
+- TypeScript strict
 - PostgreSQL
-- Prisma 7 (client gerado em `prisma/generated`)
-- Auth com `bcryptjs` + `jose` (JWT)
-- Validacao com Zod
-- Stripe, Nodemailer, Winston
+- Prisma 7 (`prisma/generated`)
+- Auth JWT (`bcryptjs` + `jose`)
+- Zod para validacao
 
-## 3. Estrutura de Pastas
-```txt
-app/
-  api/
-components/
-  ui/
-  sections/
-  shared/
-content/
-contexts/
-emails/
-hooks/
-lib/
-prisma/
-types/
-```
+## 3) API: padrao unico
 
-Notas:
-- `components/sections`: secoes de landing page.
-- `components/shared`: componentes reutilizaveis pequenos.
+- Validacao com `parseJsonBody` + schemas em `lib/schemas.ts`.
+- Resposta com `apiSuccess`, `apiError`, `apiRateLimit` (`lib/api-response.ts`).
+- Tratamento de erro central via `onError` (`lib/helper.ts`).
+- Autenticacao/autorizacao:
+  - `verifyUser`
+  - `verifyUserWorkspace`
 
-## 4. Padrao de API
-### 4.1 Validacao de input
-- Definir schemas em `lib/schemas.ts`.
-- Validar payload com `parseJsonBody` (`lib/validation.ts`).
-- Nao fazer parsing manual repetitivo em cada rota.
+## 4) Multi-tenant (workspace)
 
-### 4.2 Resposta JSON
-- Usar `lib/api-response.ts`:
-  - `apiSuccess(data, { message?, status? })`
-  - `apiError(message, status, errors?)`
-  - `apiRateLimit(message, retryAfterSeconds)`
-- Erros devem passar por `onError` (`lib/helper.ts`).
+- Membership: `workspace_user`.
+- Workspace ativo: `user.workspace_active_id`.
+- Toda query mutavel de tenant deve respeitar `workspace_id`.
+- Roles: `owner`, `admin`, `user`, `viewer`.
 
-### 4.3 Auth/Autorizacao em API
-- Usar `verifyUser(request, isAdmin?)` para autenticacao.
-- Usar `verifyUserWorkspace(request, isAdmin?, workspaceId?)` para escopo de workspace.
-- Nao depender de validacao client-side para autorizacao.
+## 5) Rotas canonicas de produto
 
-## 5. Sessao e Protecao de Paginas
-- Cookie de sessao: `auth.token` (httpOnly, sameSite=lax, secure em producao).
-- Verificacao server-side de sessao em renderizacao:
-  - `app/dashboard/layout.tsx` usa `requireServerSession`.
-  - `app/admin/layout.tsx` usa `requireServerSession({ requireAdmin: true })`.
-- `proxy.ts` aplica protecao de rotas web e API.
+- `/dashboard`
+- `/sources`, `/destinations`, `/leads`, `/ingestions`, `/deliveries`
+- `/settings` (readonly com atalhos)
+- `/workspaces`, `/workspaces/create`, `/workspaces/[workspaceId]`, `/workspaces/[workspaceId]/edit`, `/workspaces/[workspaceId]/billing`
+- `/profile`
+- `/alerts` (acesso via Settings)
 
-## 6. Seguranca
-- Headers de seguranca aplicados em:
-  - `proxy.ts`
-  - `next.config.ts`
-- Checagem de origem (`Origin`) em mutacoes de API com cookie para hardening CSRF.
-- Senhas sempre com hash forte (`bcryptjs`).
+## 6) Endpoints canonicos de workspace
 
-## 7. Multi-Tenant (Workspace)
-- Membership em `workspace_user`.
-- Workspace ativo em `user.workspace_active_id`.
-- Guards de workspace sao obrigatorios em endpoints de tenant.
-- Roles por workspace:
-  - `owner`, `admin`, `user`, `viewer`.
+- `GET/POST /api/workspaces`
+- `GET/PATCH/DELETE /api/workspaces/[id]`
+- `GET/POST /api/workspaces/[id]/members`
+- `PATCH/DELETE /api/workspaces/[id]/members/[memberId]`
+- `GET /api/workspaces/invite/[token]`
+- `POST /api/workspaces/invite/[token]/accept`
 
-## 8. Billing (Stripe)
-- Catalogo de planos e mantido no banco (`billing_plan`), nao em env de payment links.
-- `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET` permanecem em env.
-- Cadastro/manutencao de `price_id` e feito no painel admin (`/admin/billing`).
-- Ao criar plano, priorizar input minimo (`key` + `stripe_price_id`) e sincronizar metadados a partir da Stripe.
-- Setup Stripe deve ser feito/validado no admin:
-  - `GET /api/admin/stripe/setup` para status de chave, webhook, eventos e price IDs.
-  - `POST /api/admin/stripe/setup` para criar/atualizar webhook automaticamente.
-- Checkout deve usar `POST /api/stripe/checkout` criando `Checkout Session` com `price_id`.
-- Workspace com assinatura ativa deve gerenciar mudancas via Stripe Portal.
-- Workspace sem assinatura ativa deve ver CTA de assinatura.
-- Helper de regra de plano: `lib/workspace-plan.ts`.
-- Helper de setup Stripe: `lib/stripe-setup.ts`.
-- Helper de sync de price/produto Stripe: `lib/stripe-plan.ts`.
+## 7) Convites
 
-## 9. Convites
-- Token de convite nao deve ser salvo em plaintext novo.
-- Geracao/hash centralizada em `lib/invite-token.ts`:
-  - `createInviteToken()`
-  - `hashInviteToken()`
-- Banco armazena hash em `workspace_invite.token`.
-- Lookup de convite aceita fallback legado para tokens antigos plaintext.
+- Token de convite nunca em plaintext no banco.
+- Geracao/hash via `lib/invite-token.ts`.
+- Em ambiente sem SMTP, URL de convite deve aparecer no log do servidor.
 
-Fluxo esperado:
-- Criacao: `POST /api/workspace/[workspaceId]/user`
-- Consulta publica: `GET /api/workspace/invite/[token]`
-- Aceite: `POST /api/workspace/invite/[token]/accept`
-- Reenvio admin: `POST /api/admin/user/[userId]/invite/resend`
+## 8) Integracoes modulares
 
-## 10. Rate Limit
-- Implementacao unica: `lib/rate-limit.ts` (assincrona).
-- Ambiente de desenvolvimento: in-memory.
-- Producao: persistencia em PostgreSQL (`rate_limit_window`).
+- Catalogo unico em `lib/integrations/catalog.ts`.
+- Modulo ativo em arquivo unico:
+  - `lib/integrations/source/<id>.tsx`
+  - `lib/integrations/destination/<id>.tsx`
+- Cada modulo deve exportar schema, defaults, form e mapeadores de payload.
 
-## 11. Prisma e Banco
-- Manter geracao do Prisma Client em `prisma/generated`.
-- Alteracao de schema sempre com migration versionada.
-- Respeitar naming atual (models/enums em lowercase; colunas em snake_case).
+## 9) Convencoes de codigo
 
-## 12. Convencoes de Codigo
 - Imports absolutos com `@/`.
-- Componentes e arquivos em kebab-case.
-- Evitar componentes grandes com multiplas responsabilidades.
-- Reutilizar helpers existentes antes de criar novo helper paralelo.
+- Nomes de arquivos/componentes em kebab-case.
+- Evitar duplicidade de regras de negocio em multiplos lugares.
+- Nao remover nada de `components/ui`.
 
-## 13. Qualidade e CI local
+## 10) Qualidade minima antes de entrega
 
-Antes de finalizar mudancas:
 1. `npm run lint`
 2. `npm run build`
 
-Se alterar schema:
-1. gerar migration
-2. validar build
-3. atualizar docs quando necessario
+Se houver mudanca de Prisma schema:
 
-## 14. Documentacao
-- README deve refletir fluxos atuais (auth, workspace ativo, convites, rate-limit).
-- Atualize este `AGENTS.md` quando padroes mudarem.
+1. gerar migration versionada
+2. validar build
+3. atualizar documentacao

@@ -29,7 +29,10 @@ export const consumeMagicBodySchema = z.object({
 
 export const workspaceCreateBodySchema = z.object({
   name: z.string().trim().min(1).max(120),
+  slug: z.string().trim().min(2).max(120).regex(/^[a-z0-9-]+$/).optional().nullable(),
   description: z.string().trim().max(400).optional().nullable(),
+  retention_days: z.number().int().min(1).max(3650).optional(),
+  idempotency_window_hours: z.number().int().min(1).max(720).optional(),
 });
 
 export const workspaceUpdateBodySchema = z.object({

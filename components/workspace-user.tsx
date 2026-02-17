@@ -42,7 +42,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
 
     setIsLoading(true);
     try {
-      const { data } = await api.get(`/workspace/${workspace.id}/user`);
+      const { data } = await api.get(`/workspaces/${workspace.id}/members`);
       if (data.success) {
         setWorkspaceUsers(data.data);
       }
@@ -78,7 +78,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
 
     setIsAddingUser(true);
     try {
-      const { data } = await api.post(`/workspace/${workspace.id}/user`, {
+      const { data } = await api.post(`/workspaces/${workspace.id}/members`, {
         email: newUserEmail,
         role: newUserRole,
       });
@@ -109,7 +109,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
     }
 
     try {
-      const { data } = await api.delete(`/workspace/${workspace.id}/user/${selectedUser.user_id}`);
+      const { data } = await api.delete(`/workspaces/${workspace.id}/members/${selectedUser.user_id}`);
       if (data.success) {
         logger.success("Usuario removido do workspace com sucesso");
         await fetchWorkspaceUsers();

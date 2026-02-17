@@ -39,14 +39,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, description } = await parseJsonBody(request, workspaceCreateBodySchema);
+    const { name, slug, description, retention_days, idempotency_window_hours } = await parseJsonBody(
+      request,
+      workspaceCreateBodySchema,
+    );
     const { user } = await verifyUser(request);
 
     const workspace = await prisma.$transaction(async (tx) => {
       const created = await tx.workspace.create({
         data: {
           name,
+          slug: slug || null,
           description: description || null,
+          ...(retention_days !== undefined ? { retention_days } : {}),
+          ...(idempotency_window_hours !== undefined ? { idempotency_window_hours } : {}),
         },
       });
 

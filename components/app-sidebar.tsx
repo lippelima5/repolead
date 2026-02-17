@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   Activity,
-  Bell,
   ChevronLeft,
   ChevronRight,
   Globe,
@@ -36,7 +35,6 @@ const navItems = [
   { href: "/leads", icon: Users, labelKey: "nav.leads" },
   { href: "/ingestions", icon: Activity, labelKey: "nav.ingestions" },
   { href: "/deliveries", icon: Send, labelKey: "nav.deliveries" },
-  { href: "/alerts", icon: Bell, labelKey: "nav.alerts" },
   { href: "/settings", icon: Settings, labelKey: "nav.settings" },
 ] as const;
 

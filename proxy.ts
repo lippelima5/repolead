@@ -198,7 +198,7 @@ async function handleWebRoute(request: NextRequest): Promise<NextResponse> {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isWorkspaceInviteGet =
-    pathname.startsWith("/api/workspace/invite/") && (request.method === "GET" || request.method === "HEAD");
+    pathname.startsWith("/api/workspaces/invite/") && (request.method === "GET" || request.method === "HEAD");
 
   if (pathname.startsWith("/api") && mutatingMethods.has(request.method) && !shouldSkipOriginCheck(pathname)) {
     const hasBearer = request.headers.get("authorization")?.startsWith("Bearer ");
@@ -236,6 +236,8 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/profile/:path*",
+    "/workspaces/:path*",
     "/sources/:path*",
     "/destinations/:path*",
     "/leads/:path*",

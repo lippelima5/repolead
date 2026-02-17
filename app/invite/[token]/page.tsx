@@ -81,7 +81,7 @@ export default function InvitePage() {
       setIsLoading(true);
 
       try {
-        const response = await fetch(`/api/workspace/invite/${token}`, { cache: "no-store" });
+        const response = await fetch(`/api/workspaces/invite/${token}`, { cache: "no-store" });
         const data = await response.json();
 
         if (!response.ok || !data.success) {
@@ -113,7 +113,7 @@ export default function InvitePage() {
   const acceptInvite = useCallback(async () => {
     try {
       setIsAccepting(true);
-      const { data } = await api.post(`/workspace/invite/${token}/accept`);
+      const { data } = await api.post(`/workspaces/invite/${token}/accept`);
 
       if (!data?.success) {
         throw new Error(data?.message || "Falha ao aceitar convite");

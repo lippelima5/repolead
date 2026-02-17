@@ -16,13 +16,19 @@ import { workspace } from "@/prisma/generated/client";
 export default function WorkspaceModal({ workspace }: { workspace: workspace | undefined }) {
   const router = useRouter();
   const [name, setName] = useState(workspace?.name || "");
+  const [slug, setSlug] = useState(workspace?.slug || "");
   const [description, setDescription] = useState(workspace?.description || "");
+  const [retentionDays, setRetentionDays] = useState<number>(workspace?.retention_days || 180);
+  const [idempotencyWindowHours, setIdempotencyWindowHours] = useState<number>(workspace?.idempotency_window_hours || 24);
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     if (workspace) {
       setName(workspace?.name || "");
+      setSlug(workspace?.slug || "");
       setDescription(workspace?.description || "");
+      setRetentionDays(workspace?.retention_days || 180);
+      setIdempotencyWindowHours(workspace?.idempotency_window_hours || 24);
     }
   }, [workspace]);
 
@@ -37,7 +43,10 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
 
       const { data } = await api.post("/workspaces", {
         name,
+        slug: slug.trim() || null,
         description,
+        retention_days: retentionDays,
+        idempotency_window_hours: idempotencyWindowHours,
       });
       if (data.success) {
         // Redireciona para o workspace manager para padrao unico de rotas.
@@ -61,7 +70,10 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
 
       const { data } = await api.patch(`/workspaces/${workspace?.id}`, {
         name,
+        slug: slug.trim() || null,
         description,
+        retention_days: retentionDays,
+        idempotency_window_hours: idempotencyWindowHours,
       });
 
       if (data.success) {
@@ -88,8 +100,49 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="slug">Slug (opcional)</Label>
+            <Input
+              id="slug"
+              name="slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.toLowerCase())}
+              placeholder="ex: time-comercial"
+              disabled={isSending}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description">Descrição</Label>
             <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Digite uma descrição para o workspace" rows={4} disabled={isSending} />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="retention_days">Retenção (dias)</Label>
+              <Input
+                id="retention_days"
+                name="retention_days"
+                type="number"
+                min={1}
+                max={3650}
+                value={retentionDays}
+                onChange={(e) => setRetentionDays(Number(e.target.value || 180))}
+                disabled={isSending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="idempotency_window_hours">Janela de idempotência (horas)</Label>
+              <Input
+                id="idempotency_window_hours"
+                name="idempotency_window_hours"
+                type="number"
+                min={1}
+                max={720}
+                value={idempotencyWindowHours}
+                onChange={(e) => setIdempotencyWindowHours(Number(e.target.value || 24))}
+                disabled={isSending}
+              />
+            </div>
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
