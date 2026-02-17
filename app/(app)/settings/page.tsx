@@ -209,14 +209,14 @@ export default function SettingsPage() {
               <div className="bg-card border border-border rounded-xl p-5 space-y-3 h-fit">
                 <h3 className="text-[13px] font-medium text-foreground">{t("settings.workspace_actions")}</h3>
                 <p className="text-[12px] text-muted-foreground">{t("settings.workspace_actions_description")}</p>
-                <Button size="sm" className="h-8 text-[13px] w-full" onClick={() => router.push("/dashboard/settings/workspace/create")}>
+                <Button size="sm" className="h-8 text-[13px] w-full" onClick={() => router.push("/workspaces/create")}>
                   {t("settings.create_workspace")}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="h-8 text-[13px] w-full"
-                  onClick={() => router.push("/dashboard/settings/workspace")}
+                  onClick={() => router.push("/workspaces")}
                 >
                   {t("settings.open_workspace_manager")}
                 </Button>

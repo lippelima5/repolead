@@ -32,7 +32,7 @@ export default function WorkspaceSelect() {
     const fetchWorkspaces = async () => {
         setIsLoading(true)
         try {
-            const { data } = await api.get("/workspace")
+            const { data } = await api.get("/workspaces")
             if (data.success) {
                 setWorkspaces(data.data || [])
                 // If no workspaces, show create form automatically
@@ -73,7 +73,7 @@ export default function WorkspaceSelect() {
 
         setIsCreating(true)
         try {
-            const { data } = await api.post("/workspace", newWorkspace)
+            const { data } = await api.post("/workspaces", newWorkspace)
             if (data.success) {
                 logger.success("Workspace criado com sucesso")
 

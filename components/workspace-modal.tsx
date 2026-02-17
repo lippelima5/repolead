@@ -35,13 +35,13 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
         return;
       }
 
-      const { data } = await api.post("/workspace", {
+      const { data } = await api.post("/workspaces", {
         name,
         description,
       });
       if (data.success) {
-        // Redirecionar para a pÃ¡gina de workspaces recarregando a pÃ¡gina
-        window.location.href = "/dashboard/settings/workspace";
+        // Redireciona para o workspace manager para padrao unico de rotas.
+        window.location.href = "/workspaces";
       }
     } catch (error) {
       logger.error("Erro ao criar workspace", error);
@@ -59,13 +59,13 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
         return;
       }
 
-      const { data } = await api.put(`/workspace/${workspace?.id}`, {
+      const { data } = await api.patch(`/workspaces/${workspace?.id}`, {
         name,
         description,
       });
 
       if (data.success) {
-        router.push("/dashboard/settings/workspace");
+        router.push("/workspaces");
       }
     } catch (error) {
       logger.error("Erro ao atualizar workspace", error);

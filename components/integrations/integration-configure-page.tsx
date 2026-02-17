@@ -242,6 +242,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
   const sourcePayload = { name: "Jane Doe", email: "jane@example.com", phone: "+5511999999999" };
   const canConfigure = integration.availability === "active" && Boolean(activeModule);
   const ModuleForm = activeModule?.Form;
+  const isFormReady = Object.keys(formValues).length > 0;
 
   return (
     <AppLayout
@@ -273,7 +274,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
 
             {canConfigure && ModuleForm ? (
               <>
-                {isLoadingEntity ? (
+                {isLoadingEntity || !isFormReady ? (
                   <p className="text-[13px] text-muted-foreground">{t("common.loading")}</p>
                 ) : (
                   <ModuleForm
@@ -390,4 +391,3 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
     </AppLayout>
   );
 }
-

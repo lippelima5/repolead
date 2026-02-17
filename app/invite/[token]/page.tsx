@@ -120,7 +120,7 @@ export default function InvitePage() {
       }
 
       logger.success("Convite aceito com sucesso");
-      router.push(`/dashboard/settings/workspace/${data.data.workspace_id}`);
+      router.push(`/workspaces/${data.data.workspace_id}`);
       router.refresh();
     } catch (error) {
       logger.error("Erro ao aceitar convite", error);

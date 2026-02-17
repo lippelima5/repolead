@@ -147,7 +147,7 @@ export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
                   <p className="truncate text-muted-foreground">{user.email}</p>
                 </div>
                 <Link
-                  href="/dashboard/profile"
+                  href="/profile"
                   className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
                   aria-label={t("common.profile")}
                 >

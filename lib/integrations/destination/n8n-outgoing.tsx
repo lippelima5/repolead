@@ -62,6 +62,7 @@ export const n8nOutgoingDestinationModule: DestinationIntegrationModule = {
   },
   Form({ values, onChange, locale, mode }) {
     const formValues = values as N8nOutgoingValues;
+    const selectedEvents = Array.isArray(formValues.subscribed_events_json) ? formValues.subscribed_events_json : [];
     const update = (patch: Partial<N8nOutgoingValues>) => onChange({ ...formValues, ...patch });
     return (
       <div className="space-y-3">
@@ -109,17 +110,17 @@ export const n8nOutgoingDestinationModule: DestinationIntegrationModule = {
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-border bg-background"
-                  checked={formValues.subscribed_events_json.includes(eventName)}
+                  checked={selectedEvents.includes(eventName)}
                   onChange={(event) => {
                     if (event.target.checked) {
                       update({
-                        subscribed_events_json: [...new Set([...formValues.subscribed_events_json, eventName])],
+                        subscribed_events_json: [...new Set([...selectedEvents, eventName])],
                       });
                       return;
                     }
 
                     update({
-                      subscribed_events_json: formValues.subscribed_events_json.filter((item) => item !== eventName),
+                      subscribed_events_json: selectedEvents.filter((item) => item !== eventName),
                     });
                   }}
                 />
@@ -162,12 +163,13 @@ export const n8nOutgoingDestinationModule: DestinationIntegrationModule = {
   },
   toCreatePayload(values) {
     const formValues = values as N8nOutgoingValues;
+    const selectedEvents = Array.isArray(formValues.subscribed_events_json) ? formValues.subscribed_events_json : [];
     return {
       name: formValues.name.trim(),
       url: formValues.url.trim(),
       method: formValues.method,
       enabled: formValues.enabled,
-      subscribed_events_json: formValues.subscribed_events_json,
+      subscribed_events_json: selectedEvents,
       integration_id: "n8n-outgoing",
       integration_config_json: {
         retry_on_429: formValues.retry_on_429,
@@ -177,12 +179,13 @@ export const n8nOutgoingDestinationModule: DestinationIntegrationModule = {
   },
   toUpdatePayload(values) {
     const formValues = values as N8nOutgoingValues;
+    const selectedEvents = Array.isArray(formValues.subscribed_events_json) ? formValues.subscribed_events_json : [];
     return {
       name: formValues.name.trim(),
       url: formValues.url.trim(),
       method: formValues.method,
       enabled: formValues.enabled,
-      subscribed_events_json: formValues.subscribed_events_json,
+      subscribed_events_json: selectedEvents,
       integration_id: "n8n-outgoing",
       integration_config_json: {
         retry_on_429: formValues.retry_on_429,

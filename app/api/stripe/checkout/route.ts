@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
         workspaceId: String(workspace.id),
         planKey: selectedPlan.key,
       },
-      success_url: `${appUrl}/dashboard/settings/workspace/${workspace.id}?billing=success`,
-      cancel_url: `${appUrl}/dashboard/settings/workspace/${workspace.id}/billing?billing=cancelled`,
+      success_url: `${appUrl}/workspaces/${workspace.id}?billing=success`,
+      cancel_url: `${appUrl}/workspaces/${workspace.id}/billing?billing=cancelled`,
     });
 
     if (!session.url) {

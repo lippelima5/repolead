@@ -63,7 +63,7 @@ export function NavUser() {
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/profile" >
+                <Link href="/profile" >
                   <IconUserCircle />
                   Perfil
                 </Link>
