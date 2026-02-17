@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,9 @@ type SourceRecord = {
 };
 
 export default function SourcesPage() {
+  const searchParams = useSearchParams();
   const { t } = useI18n();
-  const [tab, setTab] = useState<"installed" | "browse">("installed");
+  const [tab, setTab] = useState<"installed" | "browse">(() => (searchParams.get("tab") === "browse" ? "browse" : "installed"));
   const [rows, setRows] = useState<SourceRecord[]>([]);
 
   const loadSources = async () => {
@@ -105,7 +107,7 @@ export default function SourcesPage() {
             onBrowse={() => setTab("browse")}
           />
         ) : (
-          <IntegrationGrid filterDirection="source" returnTo="/sources" />
+          <IntegrationGrid filterDirection="source" configureBasePath="/sources/configure" returnTo="/sources?tab=browse" />
         )}
       </div>
     </AppLayout>

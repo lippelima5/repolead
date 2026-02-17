@@ -34,20 +34,13 @@ export function IntegrationCard({
   const { locale, t } = useI18n();
   const Icon = iconMap[integration.icon] || Webhook;
   const isSoon = integration.availability === "soon";
-  const directionLabel =
-    integration.direction === "both"
-      ? t("integrations.both")
-      : integration.direction === "source"
-        ? t("integrations.source")
-        : t("integrations.destination");
+  const directionLabel = integration.direction === "source" ? t("integrations.source") : t("integrations.destination");
   const badgeLabel =
     integration.badge === "popular"
       ? t("integrations.badge_popular")
-      : integration.badge === "beta"
-        ? t("integrations.badge_beta")
-        : integration.badge === "soon"
-          ? t("integrations.badge_soon")
-          : null;
+      : integration.badge === "soon"
+        ? t("integrations.badge_soon")
+        : null;
 
   return (
     <div
@@ -63,7 +56,7 @@ export function IntegrationCard({
             <Icon className="w-4 h-4 text-foreground" />
           </div>
           <div>
-            <h3 className="text-[13px] font-semibold text-foreground leading-tight">{integration.name}</h3>
+            <h3 className="text-[13px] font-semibold text-foreground leading-tight">{integration.title}</h3>
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">
               {directionLabel}
             </span>
@@ -75,9 +68,7 @@ export function IntegrationCard({
               "text-[10px] font-semibold px-2 py-0.5 rounded-full",
               integration.badge === "popular"
                 ? "bg-primary/10 text-primary"
-                : integration.badge === "beta"
-                  ? "bg-warning/10 text-warning"
-                  : "bg-muted text-muted-foreground",
+                : "bg-muted text-muted-foreground",
             )}
           >
             {badgeLabel}
@@ -85,7 +76,7 @@ export function IntegrationCard({
         ) : null}
       </div>
 
-      <p className="text-[12px] text-muted-foreground leading-relaxed flex-1 mb-4">{integration.description[locale]}</p>
+      <p className="text-[12px] text-muted-foreground leading-relaxed flex-1 mb-4">{integration.short_description[locale]}</p>
 
       {isSoon ? (
         <Button

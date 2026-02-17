@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import AppLayout from "@/components/app-layout";
 import { Button } from "@/components/ui/button";
@@ -21,8 +22,9 @@ type DestinationRecord = {
 };
 
 export default function DestinationsPage() {
+  const searchParams = useSearchParams();
   const { t } = useI18n();
-  const [tab, setTab] = useState<"installed" | "browse">("installed");
+  const [tab, setTab] = useState<"installed" | "browse">(() => (searchParams.get("tab") === "browse" ? "browse" : "installed"));
   const [rows, setRows] = useState<DestinationRecord[]>([]);
 
   const loadDestinations = async () => {
@@ -101,7 +103,11 @@ export default function DestinationsPage() {
             onBrowse={() => setTab("browse")}
           />
         ) : (
-          <IntegrationGrid filterDirection="destination" returnTo="/destinations" />
+          <IntegrationGrid
+            filterDirection="destination"
+            configureBasePath="/destinations/configure"
+            returnTo="/destinations?tab=browse"
+          />
         )}
       </div>
     </AppLayout>

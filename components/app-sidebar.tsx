@@ -22,7 +22,6 @@ import {
   Webhook,
   X,
   Zap,
-  PlugZap,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
@@ -38,7 +37,6 @@ const navItems = [
   { href: "/ingestions", icon: Activity, labelKey: "nav.ingestions" },
   { href: "/deliveries", icon: Send, labelKey: "nav.deliveries" },
   { href: "/alerts", icon: Bell, labelKey: "nav.alerts" },
-  { href: "/integrations", icon: PlugZap, labelKey: "nav.integrations" },
   { href: "/settings", icon: Settings, labelKey: "nav.settings" },
 ] as const;
 

@@ -12,9 +12,11 @@ import { useI18n } from "@/contexts/i18n-context";
 
 export function IntegrationGrid({
   filterDirection,
-  returnTo = "/integrations",
+  configureBasePath,
+  returnTo,
 }: {
-  filterDirection?: IntegrationDirection;
+  filterDirection: IntegrationDirection;
+  configureBasePath: string;
   returnTo?: string;
 }) {
   const router = useRouter();
@@ -25,7 +27,7 @@ export function IntegrationGrid({
   const filtered = useMemo(
     () =>
       integrationsCatalog.filter((item) => {
-        if (filterDirection && item.direction !== filterDirection && item.direction !== "both") {
+        if (item.direction !== filterDirection) {
           return false;
         }
 
@@ -36,9 +38,9 @@ export function IntegrationGrid({
         if (search.trim()) {
           const query = search.toLowerCase();
           return (
-            item.name.toLowerCase().includes(query) ||
-            item.description.pt.toLowerCase().includes(query) ||
-            item.description.en.toLowerCase().includes(query)
+            item.title.toLowerCase().includes(query) ||
+            item.short_description.pt.toLowerCase().includes(query) ||
+            item.short_description.en.toLowerCase().includes(query)
           );
         }
 
@@ -68,9 +70,10 @@ export function IntegrationGrid({
             key={integration.id}
             integration={integration}
             onSetup={(item) => {
-              router.push(`/integrations/configure/${item.id}?returnTo=${encodeURIComponent(returnTo)}`);
+              const targetReturnTo = returnTo || `/${filterDirection}s?tab=browse`;
+              router.push(`${configureBasePath}/${item.id}?returnTo=${encodeURIComponent(targetReturnTo)}`);
             }}
-            onNotify={(item) => toast.success(`${item.name}: ${t("integrations.notify_waitlist")}`)}
+            onNotify={(item) => toast.success(`${item.title}: ${t("integrations.notify_waitlist")}`)}
           />
         ))}
       </div>
