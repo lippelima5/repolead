@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/contexts/i18n-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -29,6 +30,7 @@ type WorkspaceOption = {
 export function WorkspaceSwitcher() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [items, setItems] = useState<WorkspaceOption[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -85,7 +87,7 @@ export function WorkspaceSwitcher() {
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
               <Building className="h-3.5 w-3.5" />
             </span>
-            <span className="truncate text-[12px] font-medium">{selected?.workspace?.name || "Select workspace"}</span>
+            <span className="truncate text-[12px] font-medium">{selected?.workspace?.name || t("sidebar.select_workspace")}</span>
           </span>
           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
@@ -101,7 +103,7 @@ export function WorkspaceSwitcher() {
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-[12px]" onSelect={() => router.push("/settings")}>
           <Plus className="h-3.5 w-3.5" />
-          Manage workspaces
+          {t("sidebar.manage_workspaces")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,31 +1,41 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import en from "@/content/i18n/en.json";
+import pt from "@/content/i18n/pt.json";
 
 type Locale = "pt" | "en";
-type Dictionary = Record<string, { pt: string; en: string }>;
+type TranslationParams = Record<string, string | number>;
+type DictionaryNode = string | { [key: string]: DictionaryNode };
 
-const dictionary: Dictionary = {
-  "nav.dashboard": { pt: "Dashboard", en: "Dashboard" },
-  "nav.integrations": { pt: "Integracoes", en: "Integrations" },
-  "nav.sources": { pt: "Sources", en: "Sources" },
-  "nav.destinations": { pt: "Destinos", en: "Destinations" },
-  "nav.leads": { pt: "Leads", en: "Leads" },
-  "nav.ingestions": { pt: "Ingestoes", en: "Ingestions" },
-  "nav.deliveries": { pt: "Entregas", en: "Deliveries" },
-  "nav.alerts": { pt: "Alertas", en: "Alerts" },
-  "nav.settings": { pt: "Settings", en: "Settings" },
-  "common.search": { pt: "Buscar...", en: "Search..." },
-  "common.save": { pt: "Salvar", en: "Save" },
-  "common.cancel": { pt: "Cancelar", en: "Cancel" },
-  "common.create": { pt: "Criar", en: "Create" },
-  "common.replay": { pt: "Replay", en: "Replay" },
-};
+const dictionaries: Record<Locale, DictionaryNode> = { pt, en };
+
+function getPathValue(dictionary: DictionaryNode, key: string): string | null {
+  const result = key.split(".").reduce<DictionaryNode | undefined>((acc, part) => {
+    if (!acc || typeof acc === "string") {
+      return undefined;
+    }
+    return acc[part];
+  }, dictionary);
+
+  return typeof result === "string" ? result : null;
+}
+
+function interpolate(template: string, params?: TranslationParams) {
+  if (!params) {
+    return template;
+  }
+
+  return template.replace(/\{(\w+)\}/g, (fullMatch, key: string) => {
+    const value = params[key];
+    return value === undefined || value === null ? fullMatch : String(value);
+  });
+}
 
 type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: TranslationParams) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -42,13 +52,18 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem("leadvault.locale", locale);
+    document.documentElement.lang = locale === "pt" ? "pt-BR" : "en-US";
   }, [locale]);
 
   const value = useMemo<I18nContextValue>(
     () => ({
       locale,
       setLocale,
-      t: (key) => dictionary[key]?.[locale] || key,
+      t: (key, params) => {
+        const localized = getPathValue(dictionaries[locale], key);
+        const fallback = getPathValue(dictionaries.en, key);
+        return interpolate(localized || fallback || key, params);
+      },
     }),
     [locale],
   );

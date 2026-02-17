@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/status-badge";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/contexts/i18n-context";
 
 type DeliveryRow = {
   id: string;
@@ -25,6 +26,7 @@ type DeliveryRow = {
 const statusFilters = ["all", "success", "pending", "failed", "dead_letter"] as const;
 
 export default function DeliveriesPage() {
+  const { t } = useI18n();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [rows, setRows] = useState<DeliveryRow[]>([]);
@@ -66,12 +68,12 @@ export default function DeliveriesPage() {
     try {
       const response = await api.post(`/deliveries/${id}/replay`);
       if (response.data?.success) {
-        toast.success("Replay scheduled");
+        toast.success(t("deliveries.scheduled"));
         await load();
       }
     } catch (error) {
       logger.error("Failed to replay delivery", error);
-      toast.error("Failed to replay");
+      toast.error(t("deliveries.replay_failed"));
     }
   };
 
@@ -82,12 +84,12 @@ export default function DeliveriesPage() {
         limit: 200,
       });
       if (response.data?.success) {
-        toast.success(`${response.data.data.replayed} deliveries scheduled`);
+        toast.success(t("deliveries.bulk_scheduled", { count: response.data.data.replayed }));
         await load();
       }
     } catch (error) {
       logger.error("Failed to schedule bulk replay", error);
-      toast.error("Failed to schedule bulk replay");
+      toast.error(t("deliveries.bulk_failed"));
     }
   };
 
@@ -103,15 +105,15 @@ export default function DeliveriesPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">Deliveries</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Fan-out, retries and dead-letter queue</p>
+            <h1 className="text-xl font-semibold text-foreground">{t("deliveries.title")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{t("deliveries.subtitle")}</p>
           </div>
-          <Button variant="outline" size="sm" className="gap-2 h-8 text-[13px]" onClick={replayBulk}>
+          <Button variant="outline" size="sm" className="gap-2 h-8 text-[13px] w-full sm:w-auto" onClick={replayBulk}>
             <RotateCcw className="w-3.5 h-3.5" />
-            Bulk replay
+            {t("common.batch_replay")}
           </Button>
         </div>
 
@@ -119,7 +121,7 @@ export default function DeliveriesPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by lead or destination..."
+              placeholder={t("deliveries.search_placeholder")}
               className="pl-9 h-9 text-[13px] bg-surface-2 border-border"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -143,9 +145,9 @@ export default function DeliveriesPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "Total", value: summary.total, cls: "text-foreground" },
-            { label: "Success", value: summary.success, cls: "text-success" },
-            { label: "Failed", value: summary.failed, cls: "text-destructive" },
+            { label: t("common.total"), value: summary.total, cls: "text-foreground" },
+            { label: t("common.success"), value: summary.success, cls: "text-success" },
+            { label: t("common.failed"), value: summary.failed, cls: "text-destructive" },
             { label: "DLQ", value: summary.dead_letter, cls: "text-warning" },
           ].map((item) => (
             <div key={item.label} className="bg-card border border-border rounded-xl p-3 text-center">
@@ -160,14 +162,14 @@ export default function DeliveriesPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-surface-2">
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">ID</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Lead</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Destination</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Event</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Status</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Attempts</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Created</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Actions</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.id")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.lead")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.destination")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.event")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.status")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.attempts")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.created")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("deliveries.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -182,7 +184,7 @@ export default function DeliveriesPage() {
                           {row.lead.name || row.lead.email || row.lead.id}
                         </Link>
                       ) : (
-                        <span className="text-[13px] text-muted-foreground">-</span>
+                        <span className="text-[13px] text-muted-foreground">{t("common.unknown")}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-[13px] text-foreground">{row.destination.name}</td>
@@ -197,7 +199,7 @@ export default function DeliveriesPage() {
                         {row.status === "failed" || row.status === "dead_letter" ? (
                           <Button variant="ghost" size="sm" className="h-7 text-[12px] text-primary gap-1" onClick={() => replayOne(row.id)}>
                             <RotateCcw className="w-3 h-3" />
-                            Replay
+                            {t("common.replay")}
                           </Button>
                         ) : null}
                         {row.lead ? (

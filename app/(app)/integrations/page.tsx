@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import AppLayout from "@/components/app-layout";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { cn } from "@/lib/utils";
 import { InstalledList, InstalledIntegrationItem } from "@/components/integrations/installed-list";
 import { IntegrationGrid } from "@/components/integrations/integration-grid";
+import { useI18n } from "@/contexts/i18n-context";
+import { IntegrationDirection } from "@/content/integrations-catalog";
 
 type InstalledResponse = {
   sources: Array<{ id: string; name: string; status: "connected" | "needs_attention" | "disabled"; last_activity: string; events_today: number }>;
@@ -14,8 +17,11 @@ type InstalledResponse = {
 };
 
 export default function IntegrationsPage() {
-  const [tab, setTab] = useState<"installed" | "browse">("installed");
+  const searchParams = useSearchParams();
+  const { t } = useI18n();
+  const [tab, setTab] = useState<"installed" | "browse">(() => (searchParams.get("tab") === "browse" ? "browse" : "installed"));
   const [data, setData] = useState<InstalledResponse>({ sources: [], destinations: [] });
+  const filterDirection = searchParams.get("direction") as IntegrationDirection | null;
 
   useEffect(() => {
     const load = async () => {
@@ -42,16 +48,16 @@ export default function IntegrationsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Integrations Hub</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Installed integrations and browse catalog</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("integrations.hub_title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("integrations.hub_subtitle")}</p>
         </div>
 
-        <div className="flex items-center gap-1 border-b border-border">
+        <div className="flex items-center gap-1 border-b border-border overflow-x-auto">
           {[
-            { key: "installed" as const, label: "Installed", count: installedItems.length },
-            { key: "browse" as const, label: "Browse" },
+            { key: "installed" as const, label: t("common.installed"), count: installedItems.length },
+            { key: "browse" as const, label: t("common.browse") },
           ].map((item) => (
             <button
               key={item.key}
@@ -72,12 +78,12 @@ export default function IntegrationsPage() {
         {tab === "installed" ? (
           <InstalledList
             items={installedItems}
-            emptyTitle="No integrations installed"
-            emptyDescription="Browse the catalog and connect your first source or destination."
+            emptyTitle={t("integrations.empty_title")}
+            emptyDescription={t("integrations.empty_description")}
             onBrowse={() => setTab("browse")}
           />
         ) : (
-          <IntegrationGrid />
+          <IntegrationGrid filterDirection={filterDirection ?? undefined} returnTo="/integrations" />
         )}
       </div>
     </AppLayout>

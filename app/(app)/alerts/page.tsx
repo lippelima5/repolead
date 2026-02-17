@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { StatusBadge } from "@/components/status-badge";
+import { useI18n } from "@/contexts/i18n-context";
 
 type AlertRule = {
   id: string;
@@ -29,6 +30,7 @@ type AlertEvent = {
 };
 
 export default function AlertsPage() {
+  const { t } = useI18n();
   const [rules, setRules] = useState<AlertRule[]>([]);
   const [events, setEvents] = useState<AlertEvent[]>([]);
   const [newRuleType, setNewRuleType] = useState<"error_spike" | "silent_source">("error_spike");
@@ -67,12 +69,12 @@ export default function AlertsPage() {
       });
 
       if (response.data?.success) {
-        toast.success("Alert rule created");
+        toast.success(t("alerts.rule_created"));
         await load();
       }
     } catch (error) {
       logger.error("Failed to create alert rule", error);
-      toast.error("Failed to create alert rule");
+      toast.error(t("alerts.rule_create_failed"));
     }
   };
 
@@ -82,26 +84,26 @@ export default function AlertsPage() {
         params: { ruleId },
       });
       if (response.data?.success) {
-        toast.success("Alert rule deleted");
+        toast.success(t("alerts.rule_deleted"));
         await load();
       }
     } catch (error) {
       logger.error("Failed to delete alert rule", error);
-      toast.error("Failed to delete alert rule");
+      toast.error(t("alerts.rule_delete_failed"));
     }
   };
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Alerts</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Alert rules and triggered events</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("alerts.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("alerts.subtitle")}</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4 flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-[12px] font-medium text-foreground">Rule type</label>
+            <label className="text-[12px] font-medium text-foreground">{t("alerts.rule_type")}</label>
             <select
               className="mt-1 h-9 rounded-md border border-border bg-background px-2 text-[13px]"
               value={newRuleType}
@@ -112,70 +114,74 @@ export default function AlertsPage() {
             </select>
           </div>
           <div>
-            <label className="text-[12px] font-medium text-foreground">Threshold</label>
+            <label className="text-[12px] font-medium text-foreground">{t("alerts.threshold")}</label>
             <Input className="mt-1 h-9 text-[13px]" value={newThreshold} onChange={(event) => setNewThreshold(event.target.value)} />
           </div>
           <Button className="h-9 text-[13px] gap-2" onClick={createRule}>
             <Plus className="w-3.5 h-3.5" />
-            Add rule
+            {t("alerts.add_rule")}
           </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-surface-2">
-              <h2 className="text-[13px] font-semibold text-foreground">Rules</h2>
+              <h2 className="text-[13px] font-semibold text-foreground">{t("alerts.rules")}</h2>
             </div>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-surface-2">
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Type</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Config</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider" />
-                </tr>
-              </thead>
-              <tbody>
-                {rules.map((rule) => (
-                  <tr key={rule.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 text-[12px] font-mono text-foreground">{rule.type}</td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={rule.enabled ? "active" : "inactive"} label={rule.enabled ? "enabled" : "disabled"} />
-                    </td>
-                    <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">{JSON.stringify(rule.config_json)}</td>
-                    <td className="px-4 py-3">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeRule(rule.id)}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2">
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("alerts.rule_type")}</th>
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("common.status")}</th>
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Config</th>
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {rules.map((rule) => (
+                    <tr key={rule.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 text-[12px] font-mono text-foreground">{rule.type}</td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={rule.enabled ? "active" : "inactive"} label={rule.enabled ? "enabled" : "disabled"} />
+                      </td>
+                      <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">{JSON.stringify(rule.config_json)}</td>
+                      <td className="px-4 py-3">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeRule(rule.id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-border bg-surface-2">
-              <h2 className="text-[13px] font-semibold text-foreground">Recent events</h2>
+              <h2 className="text-[13px] font-semibold text-foreground">{t("alerts.recent_events")}</h2>
             </div>
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-surface-2">
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Rule</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Triggered</th>
-                  <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Payload</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((event) => (
-                  <tr key={event.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 text-[12px] font-mono text-foreground">{event.rule.type}</td>
-                    <td className="px-4 py-3 text-[12px] text-muted-foreground">{new Date(event.triggered_at).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">{JSON.stringify(event.payload_json)}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2">
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("alerts.rule_type")}</th>
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("alerts.triggered")}</th>
+                    <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("alerts.payload")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {events.map((event) => (
+                    <tr key={event.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 text-[12px] font-mono text-foreground">{event.rule.type}</td>
+                      <td className="px-4 py-3 text-[12px] text-muted-foreground">{new Date(event.triggered_at).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">{JSON.stringify(event.payload_json)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

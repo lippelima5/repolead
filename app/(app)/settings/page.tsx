@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/contexts/i18n-context";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 
@@ -34,6 +35,7 @@ type MemberData = {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const workspaceId = user?.workspace_active_id ?? null;
   const [workspace, setWorkspace] = useState<WorkspaceData | null>(null);
   const [members, setMembers] = useState<MemberData[]>([]);
@@ -80,11 +82,11 @@ export default function SettingsPage() {
         idempotency_window_hours: workspace.idempotency_window_hours,
       });
       if (response.data?.success) {
-        toast.success("Workspace updated");
+        toast.success(t("settings.workspace_updated"));
       }
     } catch (error) {
       logger.error("Failed to update workspace", error);
-      toast.error("Failed to update workspace");
+      toast.error(t("settings.workspace_update_failed"));
     }
   };
 
@@ -99,49 +101,49 @@ export default function SettingsPage() {
         role: inviteRole,
       });
       if (response.data?.success) {
-        toast.success("Member added");
+        toast.success(t("settings.member_added"));
         setInviteEmail("");
         await loadWorkspace();
       }
     } catch (error) {
       logger.error("Failed to invite member", error);
-      toast.error("User not found or permission denied");
+      toast.error(t("settings.member_add_failed"));
     }
   };
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Settings</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Workspace, members, security and alerts</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("settings.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("settings.subtitle")}</p>
         </div>
 
         <Tabs defaultValue="workspace" className="space-y-4">
           <TabsList className="bg-surface-2 border border-border rounded-lg p-1 h-auto">
             <TabsTrigger value="workspace" className="text-[12px] rounded-md px-3 py-1.5">
               <Globe className="w-3.5 h-3.5 mr-1.5" />
-              Workspace
+              {t("settings.workspace")}
             </TabsTrigger>
             <TabsTrigger value="members" className="text-[12px] rounded-md px-3 py-1.5">
               <Users className="w-3.5 h-3.5 mr-1.5" />
-              Members
+              {t("settings.members")}
             </TabsTrigger>
             <TabsTrigger value="security" className="text-[12px] rounded-md px-3 py-1.5">
               <Shield className="w-3.5 h-3.5 mr-1.5" />
-              Security
+              {t("settings.security")}
             </TabsTrigger>
             <TabsTrigger value="alerts" className="text-[12px] rounded-md px-3 py-1.5">
               <Bell className="w-3.5 h-3.5 mr-1.5" />
-              Alerts
+              {t("settings.alerts")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="workspace">
             <div className="bg-card border border-border rounded-xl p-5 space-y-4 max-w-lg">
-              <h3 className="text-[13px] font-medium text-foreground">Workspace configuration</h3>
+              <h3 className="text-[13px] font-medium text-foreground">{t("settings.workspace_configuration")}</h3>
               <div>
-                <label className="text-[13px] font-medium text-foreground">Name</label>
+                <label className="text-[13px] font-medium text-foreground">{t("common.name")}</label>
                 <Input
                   value={workspace?.name || ""}
                   className="mt-1.5 h-9 text-[13px]"
@@ -149,7 +151,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="text-[13px] font-medium text-foreground">Slug</label>
+                <label className="text-[13px] font-medium text-foreground">{t("settings.slug")}</label>
                 <Input
                   value={workspace?.slug || ""}
                   className="mt-1.5 h-9 text-[13px]"
@@ -157,7 +159,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="text-[13px] font-medium text-foreground">Data retention (days)</label>
+                <label className="text-[13px] font-medium text-foreground">{t("settings.retention_days")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -177,7 +179,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="text-[13px] font-medium text-foreground">Idempotency window (hours)</label>
+                <label className="text-[13px] font-medium text-foreground">{t("settings.idempotency_window")}</label>
                 <Input
                   type="number"
                   min={1}
@@ -197,7 +199,7 @@ export default function SettingsPage() {
                 />
               </div>
               <Button size="sm" className="h-8 text-[13px]" onClick={saveWorkspace}>
-                Save
+                {t("common.save")}
               </Button>
             </div>
           </TabsContent>
@@ -206,7 +208,7 @@ export default function SettingsPage() {
             <div className="space-y-4 max-w-2xl">
               <div className="flex items-end gap-2 p-4 bg-surface-2 rounded-xl border border-border">
                 <div className="flex-1">
-                  <label className="text-[12px] font-medium text-foreground">Member email</label>
+                  <label className="text-[12px] font-medium text-foreground">{t("settings.member_email")}</label>
                   <Input
                     value={inviteEmail}
                     placeholder="email@example.com"
@@ -215,7 +217,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="w-32">
-                  <label className="text-[12px] font-medium text-foreground">Role</label>
+                  <label className="text-[12px] font-medium text-foreground">{t("common.role")}</label>
                   <select
                     className="mt-1 h-8 w-full text-[12px] rounded-md border border-border bg-background px-2 text-foreground"
                     value={inviteRole}
@@ -228,33 +230,35 @@ export default function SettingsPage() {
                 </div>
                 <Button size="sm" className="h-8 text-[12px] gap-1.5" onClick={inviteMember}>
                   <UserPlus className="w-3 h-3" />
-                  Add
+                  {t("settings.add_member")}
                 </Button>
               </div>
 
               <div className="border border-border rounded-xl overflow-hidden">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border bg-surface-2">
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Email</th>
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Joined</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((member) => (
-                      <tr key={member.user_id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors duration-100">
-                        <td className="px-4 py-3 text-[13px] font-medium text-foreground">{member.user.name || "Unnamed"}</td>
-                        <td className="px-4 py-3 text-[12px] text-muted-foreground font-mono">{member.user.email}</td>
-                        <td className="px-4 py-3">
-                          <StatusBadge status={member.role} />
-                        </td>
-                        <td className="px-4 py-3 text-[12px] text-muted-foreground">{new Date(member.created_at).toLocaleDateString()}</td>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-surface-2">
+                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("common.name")}</th>
+                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("common.email")}</th>
+                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("common.role")}</th>
+                        <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t("common.joined")}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {members.map((member) => (
+                        <tr key={member.user_id} className="border-b border-border last:border-0 hover:bg-accent/30 transition-colors duration-100">
+                          <td className="px-4 py-3 text-[13px] font-medium text-foreground">{member.user.name || t("leads.unnamed")}</td>
+                          <td className="px-4 py-3 text-[12px] text-muted-foreground font-mono">{member.user.email}</td>
+                          <td className="px-4 py-3">
+                            <StatusBadge status={member.role} />
+                          </td>
+                          <td className="px-4 py-3 text-[12px] text-muted-foreground">{new Date(member.created_at).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </TabsContent>
@@ -262,16 +266,16 @@ export default function SettingsPage() {
           <TabsContent value="security">
             <div className="bg-card border border-border rounded-xl p-5 space-y-3 max-w-lg">
               {[
-                { title: "TLS 1.2+ required", description: "All outgoing webhooks use HTTPS transport." },
-                { title: "HMAC-SHA256 signatures", description: "Delivery signature includes timestamp and payload digest." },
-                { title: "Workspace isolation", description: "Every read/write is scoped by workspace_id." },
+                { title: t("settings.security_tls_title"), description: t("settings.security_tls_desc") },
+                { title: t("settings.security_hmac_title"), description: t("settings.security_hmac_desc") },
+                { title: t("settings.security_isolation_title"), description: t("settings.security_isolation_desc") },
               ].map((item) => (
                 <div key={item.title} className="flex items-center justify-between p-3 bg-surface-2 rounded-xl">
                   <div>
                     <p className="text-[13px] text-foreground">{item.title}</p>
                     <p className="text-[11px] text-muted-foreground">{item.description}</p>
                   </div>
-                  <StatusBadge status="active" label="active" />
+                  <StatusBadge status="active" label={t("common.active")} />
                 </div>
               ))}
             </div>
@@ -279,11 +283,9 @@ export default function SettingsPage() {
 
           <TabsContent value="alerts">
             <div className="bg-card border border-border rounded-xl p-5 space-y-4 max-w-lg">
-              <p className="text-[13px] text-muted-foreground">
-                Configure alert rules in this workspace. Use the Alerts page to view triggered events.
-              </p>
+              <p className="text-[13px] text-muted-foreground">{t("settings.alerts_description")}</p>
               <Button asChild size="sm" className="h-8 text-[13px]">
-                <a href="/alerts">Open alerts center</a>
+                <a href="/alerts">{t("settings.open_alerts_center")}</a>
               </Button>
             </div>
           </TabsContent>

@@ -20,6 +20,7 @@ import {
   User,
   Users,
   Webhook,
+  X,
   Zap,
   PlugZap,
 } from "lucide-react";
@@ -31,22 +32,28 @@ import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, labelKey: "nav.dashboard" },
-  { href: "/integrations", icon: PlugZap, labelKey: "nav.integrations" },
   { href: "/sources", icon: Radio, labelKey: "nav.sources" },
   { href: "/destinations", icon: Webhook, labelKey: "nav.destinations" },
   { href: "/leads", icon: Users, labelKey: "nav.leads" },
   { href: "/ingestions", icon: Activity, labelKey: "nav.ingestions" },
   { href: "/deliveries", icon: Send, labelKey: "nav.deliveries" },
   { href: "/alerts", icon: Bell, labelKey: "nav.alerts" },
+  { href: "/integrations", icon: PlugZap, labelKey: "nav.integrations" },
   { href: "/settings", icon: Settings, labelKey: "nav.settings" },
 ] as const;
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  mobile?: boolean;
+  onClose?: () => void;
+};
+
+export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useI18n();
   const { user, logout } = useAuth();
+  const isCollapsed = mobile ? false : collapsed;
 
   const themeIconMap = { light: Sun, dark: Moon, system: Monitor } as const;
   const nextTheme = { light: "dark", dark: "system", system: "light" } as const;
@@ -55,18 +62,28 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-border bg-card transition-all duration-200 h-screen sticky top-0",
-        collapsed ? "w-[56px]" : "w-[240px]",
+        "flex flex-col border-r border-border bg-card transition-all duration-200",
+        mobile ? "h-dvh w-[280px]" : "h-screen sticky top-0",
+        isCollapsed ? "w-[56px]" : "w-[240px]",
       )}
     >
       <div className="flex items-center gap-2.5 px-3.5 h-[56px] border-b border-border">
         <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
           <Zap className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
-        {!collapsed ? <span className="font-semibold text-sm text-foreground tracking-tight">LeadVault</span> : null}
+        {!isCollapsed ? <span className="font-semibold text-sm text-foreground tracking-tight">LeadVault</span> : null}
+        {mobile ? (
+          <button
+            onClick={onClose}
+            className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+            aria-label={t("sidebar.close_sidebar")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
-      {!collapsed ? (
+      {!isCollapsed ? (
         <div className="px-2 pt-2 pb-1">
           <WorkspaceSwitcher />
         </div>
@@ -87,9 +104,10 @@ export function AppSidebar() {
                   ? "bg-accent text-foreground"
                   : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
               )}
+              onClick={mobile ? onClose : undefined}
             >
               <item.icon className="w-4 h-4 shrink-0" />
-              {!collapsed ? <span>{t(item.labelKey)}</span> : null}
+              {!isCollapsed ? <span>{t(item.labelKey)}</span> : null}
             </Link>
           );
         })}
@@ -99,27 +117,29 @@ export function AppSidebar() {
         <button
           onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
           className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13px] font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors duration-150 w-full"
+          aria-label={t("sidebar.language")}
         >
           <Globe className="w-4 h-4 shrink-0" />
-          {!collapsed ? <span>{locale === "pt" ? "EN" : "PT"}</span> : null}
+          {!isCollapsed ? <span>{locale === "pt" ? "EN" : "PT"}</span> : null}
         </button>
 
         <button
           onClick={() => setTheme(nextTheme[theme])}
           className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13px] font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors duration-150 w-full"
+          aria-label={t("sidebar.theme")}
         >
           <ThemeIcon className="w-4 h-4 shrink-0" />
-          {!collapsed ? <span className="capitalize">{theme}</span> : null}
+          {!isCollapsed ? <span className="capitalize">{theme}</span> : null}
         </button>
 
         {user ? (
           <div
             className={cn(
               "flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-border bg-surface-2 text-[12px]",
-              collapsed && "justify-center",
+              isCollapsed && "justify-center",
             )}
           >
-            {!collapsed ? (
+            {!isCollapsed ? (
               <>
                 <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[11px] font-semibold">
                   {getInitials(user.name || user.email)}
@@ -131,33 +151,35 @@ export function AppSidebar() {
                 <Link
                   href="/dashboard/profile"
                   className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-                  aria-label="Profile"
+                  aria-label={t("common.profile")}
                 >
                   <User className="w-4 h-4" />
                 </Link>
                 <button
                   onClick={logout}
                   className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-                  aria-label="Logout"
+                  aria-label={t("common.logout")}
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
               </>
             ) : (
-              <button onClick={logout} className="text-muted-foreground hover:text-foreground" aria-label="Logout">
+              <button onClick={logout} className="text-muted-foreground hover:text-foreground" aria-label={t("common.logout")}>
                 <LogOut className="w-4 h-4" />
               </button>
             )}
           </div>
         ) : null}
 
-        <button
-          onClick={() => setCollapsed((prev) => !prev)}
-          className="flex items-center justify-center w-full py-[7px] rounded-lg text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors duration-150"
-          aria-label="Toggle sidebar"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {!mobile ? (
+          <button
+            onClick={() => setCollapsed((prev) => !prev)}
+            className="flex items-center justify-center w-full py-[7px] rounded-lg text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors duration-150"
+            aria-label={t("sidebar.toggle_sidebar")}
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        ) : null}
       </div>
     </aside>
   );

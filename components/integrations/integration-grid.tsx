@@ -1,18 +1,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { CategoryPills } from "@/components/integrations/category-pills";
 import { IntegrationCard } from "@/components/integrations/integration-card";
-import { IntegrationDetailModal } from "@/components/integrations/integration-detail-modal";
-import { integrationsCatalog, IntegrationDirection, IntegrationCatalogItem } from "@/content/integrations-catalog";
+import { integrationsCatalog, IntegrationDirection } from "@/content/integrations-catalog";
+import { useI18n } from "@/contexts/i18n-context";
 
-export function IntegrationGrid({ filterDirection }: { filterDirection?: IntegrationDirection }) {
+export function IntegrationGrid({
+  filterDirection,
+  returnTo = "/integrations",
+}: {
+  filterDirection?: IntegrationDirection;
+  returnTo?: string;
+}) {
+  const router = useRouter();
+  const { t } = useI18n();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
-  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationCatalogItem | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -45,7 +53,7 @@ export function IntegrationGrid({ filterDirection }: { filterDirection?: Integra
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search integrations..."
+            placeholder={t("integrations.search_placeholder")}
             className="pl-9 h-8 text-[12px] bg-surface-2 border-border"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -59,19 +67,15 @@ export function IntegrationGrid({ filterDirection }: { filterDirection?: Integra
           <IntegrationCard
             key={integration.id}
             integration={integration}
-            onSetup={setSelectedIntegration}
-            onNotify={(item) => toast.success(`${item.name} waitlist joined`)}
+            onSetup={(item) => {
+              router.push(`/integrations/configure/${item.id}?returnTo=${encodeURIComponent(returnTo)}`);
+            }}
+            onNotify={(item) => toast.success(`${item.name}: ${t("integrations.notify_waitlist")}`)}
           />
         ))}
       </div>
 
-      {filtered.length === 0 ? <div className="text-center py-12 text-[13px] text-muted-foreground">No results</div> : null}
-
-      <IntegrationDetailModal
-        integration={selectedIntegration}
-        open={Boolean(selectedIntegration)}
-        onOpenChange={(open) => (!open ? setSelectedIntegration(null) : undefined)}
-      />
+      {filtered.length === 0 ? <div className="text-center py-12 text-[13px] text-muted-foreground">{t("integrations.no_results")}</div> : null}
     </div>
   );
 }

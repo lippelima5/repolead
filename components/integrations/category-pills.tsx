@@ -2,13 +2,13 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/contexts/i18n-context";
 
 const categories = [
-  { key: "all", label: "All" },
-  { key: "webhooks", label: "Webhooks" },
-  { key: "forms", label: "Forms" },
-  { key: "automation", label: "Automation" },
-  { key: "ads", label: "Ads" },
-  { key: "sdk", label: "SDK" },
-  { key: "custom", label: "Custom" },
+  { key: "all", labelKey: "integrations.categories.all" },
+  { key: "webhooks", labelKey: "integrations.categories.webhooks" },
+  { key: "forms", labelKey: "integrations.categories.forms" },
+  { key: "automation", labelKey: "integrations.categories.automation" },
+  { key: "ads", labelKey: "integrations.categories.ads" },
+  { key: "sdk", labelKey: "integrations.categories.sdk" },
+  { key: "custom", labelKey: "integrations.categories.custom" },
 ] as const;
 
 export function CategoryPills({
@@ -18,7 +18,7 @@ export function CategoryPills({
   selected: string;
   onSelect: (category: string) => void;
 }) {
-  const { locale } = useI18n();
+  const { t } = useI18n();
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -33,7 +33,7 @@ export function CategoryPills({
               : "bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground",
           )}
         >
-          {locale === "pt" ? item.label : item.label}
+          {t(item.labelKey)}
         </button>
       ))}
     </div>

@@ -8,6 +8,7 @@ import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
+import { useI18n } from "@/contexts/i18n-context";
 
 type OverviewResponse = {
   ingestions_today: number;
@@ -29,6 +30,7 @@ type OverviewResponse = {
 };
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const [data, setData] = useState<OverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,34 +56,34 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-6">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-6">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Operations overview</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("dashboard.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("dashboard.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard
-            title="Ingestions today"
+            title={t("dashboard.ingestions_today")}
             value={data?.ingestions_today?.toLocaleString() || "0"}
             change={data?.ingestions_change || 0}
             icon={Activity}
           />
           <MetricCard
-            title="Total leads"
+            title={t("dashboard.total_leads")}
             value={data?.leads_total?.toLocaleString() || "0"}
             change={data?.leads_change || 0}
             icon={Users}
             iconClassName="bg-success/10 text-success"
           />
           <MetricCard
-            title="Delivery rate"
+            title={t("dashboard.delivery_rate")}
             value={`${data?.delivery_rate || 0}%`}
             icon={CheckCircle}
             iconClassName="bg-primary/10 text-primary"
           />
           <MetricCard
-            title="Dead letter queue"
+            title={t("dashboard.dead_letter_queue")}
             value={data?.dlq_count || 0}
             icon={AlertTriangle}
             iconClassName="bg-warning/10 text-warning"
@@ -90,7 +92,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
-            <h3 className="text-[13px] font-medium text-foreground mb-4">Ingestions by hour</h3>
+            <h3 className="text-[13px] font-medium text-foreground mb-4">{t("dashboard.ingestions_by_hour")}</h3>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={data?.ingestions_chart || []}>
                 <defs>
@@ -117,7 +119,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-[13px] font-medium text-foreground mb-4">Delivery status</h3>
+            <h3 className="text-[13px] font-medium text-foreground mb-4">{t("dashboard.delivery_status")}</h3>
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" strokeWidth={0}>
@@ -157,7 +159,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-[13px] font-medium text-foreground mb-4">Top sources (today)</h3>
+            <h3 className="text-[13px] font-medium text-foreground mb-4">{t("dashboard.top_sources_today")}</h3>
             <div className="space-y-3">
               {(data?.top_sources || []).map((source) => (
                 <div key={source.source_id} className="flex items-center justify-between">
@@ -172,12 +174,12 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="text-[13px] font-medium text-foreground mb-4">Recent failures</h3>
+            <h3 className="text-[13px] font-medium text-foreground mb-4">{t("dashboard.recent_failures")}</h3>
             <div className="space-y-3">
               {(data?.recent_failures || []).map((delivery) => (
                 <div key={delivery.id} className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <p className="text-[13px] text-foreground">{delivery.lead?.name || delivery.lead?.email || "Unknown lead"}</p>
+                    <p className="text-[13px] text-foreground">{delivery.lead?.name || delivery.lead?.email || t("common.unknown")}</p>
                     <p className="text-xs text-muted-foreground">{delivery.destination.name}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -189,7 +191,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {loading ? <p className="text-xs text-muted-foreground">Loading metrics...</p> : null}
+        {loading ? <p className="text-xs text-muted-foreground">{t("dashboard.loading")}</p> : null}
       </div>
     </AppLayout>
   );

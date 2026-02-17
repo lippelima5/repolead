@@ -9,6 +9,7 @@ import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { StatusBadge } from "@/components/status-badge";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/contexts/i18n-context";
 
 type LeadItem = {
   id: string;
@@ -27,6 +28,7 @@ type LeadItem = {
 const statusFilters = ["all", "new", "contacted", "qualified", "won", "lost", "needs_identity"] as const;
 
 export default function LeadsPage() {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [rows, setRows] = useState<LeadItem[]>([]);
@@ -69,17 +71,17 @@ export default function LeadsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Leads</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{total.toLocaleString()} leads in workspace</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("leads.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("leads.subtitle", { count: total.toLocaleString() })}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search by email, phone or name..."
+              placeholder={t("leads.search_placeholder")}
               className="pl-9 h-9 text-[13px] bg-surface-2 border-border"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -95,7 +97,7 @@ export default function LeadsPage() {
                 )}
                 onClick={() => setStatus(item)}
               >
-                {item}
+                {item === "all" ? t("leads.all") : item}
               </button>
             ))}
           </div>
@@ -106,12 +108,12 @@ export default function LeadsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-surface-2">
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Lead</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Identities</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Status</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Tags</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Deliveries</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Created</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.lead")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.identities")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.status")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.tags")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.deliveries")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("leads.created")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,7 +124,7 @@ export default function LeadsPage() {
                     <tr key={lead.id} className="border-b border-border last:border-0 hover:bg-accent/50 transition-colors duration-150">
                       <td className="px-4 py-3">
                         <Link href={`/leads/${lead.id}`} className="block">
-                          <p className="text-[13px] font-medium text-foreground hover:underline">{lead.name || "Unnamed lead"}</p>
+                          <p className="text-[13px] font-medium text-foreground hover:underline">{lead.name || t("leads.unnamed")}</p>
                           <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{lead.id}</p>
                         </Link>
                       </td>
@@ -147,11 +149,15 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {tags.map((tag) => (
-                            <span key={tag} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] bg-accent text-accent-foreground">
-                              {tag}
-                            </span>
-                          ))}
+                          {tags.length ? (
+                            tags.map((tag) => (
+                              <span key={tag} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] bg-accent text-accent-foreground">
+                                {tag}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground">{t("leads.no_tags")}</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-3">

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/status-badge";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
+import { useI18n } from "@/contexts/i18n-context";
 
 type IngestionRow = {
   id: string;
@@ -20,6 +21,7 @@ type IngestionRow = {
 };
 
 export default function IngestionsPage() {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<IngestionRow[]>([]);
 
@@ -50,16 +52,16 @@ export default function IngestionsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Ingestions</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Raw inbound events and idempotency status</p>
+          <h1 className="text-xl font-semibold text-foreground">{t("ingestions.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{t("ingestions.subtitle")}</p>
         </div>
 
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search by ingest id..."
+            placeholder={t("ingestions.search_placeholder")}
             className="pl-9 h-9 text-[13px] bg-surface-2 border-border"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -71,13 +73,13 @@ export default function IngestionsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-surface-2">
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Ingest ID</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Source</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Status</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Type</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Size</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Idempotency</th>
-                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">Received</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.ingest_id")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.source")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.status")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.type")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.size")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.idempotency")}</th>
+                  <th className="text-left text-[11px] font-medium text-muted-foreground px-4 py-2.5 uppercase tracking-wider">{t("ingestions.received")}</th>
                 </tr>
               </thead>
               <tbody>
