@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && next build",
-    "start": "npx prisma migrate deploy && next start",
+    "start": "node scripts/start-production.mjs",
+    "start:app": "next start",
+    "start:worker": "node scripts/delivery-worker.mjs",
+    "db:migrate:deploy": "npx prisma migrate deploy",
     "lint": "eslint"
   },
   "dependencies": {

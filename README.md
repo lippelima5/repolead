@@ -52,6 +52,20 @@ npm run lint
 npm run build
 ```
 
+## Execucao em container (producao)
+
+- A imagem sobe dois processos no mesmo container:
+  - app Next.js (`next start`)
+  - worker de deliveries (cron interno autenticado por `CRON_SECRET`)
+- O bootstrap aplica `prisma migrate deploy` antes de iniciar os processos.
+- Healthcheck interno: `GET /api/internal/health`.
+
+Com Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
 ## Rotas principais (app)
 
 - `/dashboard`

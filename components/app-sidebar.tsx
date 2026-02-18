@@ -20,13 +20,13 @@ import {
   Users,
   Webhook,
   X,
-  Zap,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { useAuth } from "@/contexts/auth-context";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import Image from "next/image";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, labelKey: "nav.dashboard" },
@@ -64,8 +64,8 @@ export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
       )}
     >
       <div className="flex items-center gap-2.5 px-3.5 h-[56px] border-b border-border">
-        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
-          <Zap className="w-3.5 h-3.5 text-primary-foreground" />
+        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10">
+          <Image src="/logo.png" alt="RepoLead" width={28} height={28} className="w-7 h-7 rounded-lg object-contain" priority />
         </div>
         {!isCollapsed ? <span className="font-semibold text-sm text-foreground tracking-tight">RepoLead</span> : null}
         {mobile ? (

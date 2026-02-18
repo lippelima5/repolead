@@ -14,6 +14,8 @@ import { useI18n } from "@/contexts/i18n-context";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 type IntegrationConfigurePageProps = {
   direction: IntegrationDirection;
   defaultReturnTo: string;
@@ -339,7 +341,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
                   </>
                 ) : null}
                 <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
-                  {`curl -X POST "$APP_URL/api/v1/leads/ingest" \\
+                  {`curl -X POST "${APP_URL}/api/v1/leads/ingest" \\
 -H "Authorization: Bearer ${sourceResult.plainKey || "lv_api_key"}" \\
 -H "Idempotency-Key: sample-001" \\
 -H "Content-Type: application/json" \\
