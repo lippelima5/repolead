@@ -56,7 +56,7 @@ npm run build
 
 - A imagem sobe dois processos no mesmo container:
   - app Next.js (`next start`)
-  - worker de deliveries (cron interno autenticado por `CRON_SECRET`)
+  - worker de deliveries e resumos diarios (cron interno autenticado por `CRON_SECRET`)
 - O bootstrap aplica `prisma migrate deploy` antes de iniciar os processos.
 - Healthcheck interno: `GET /api/internal/health`.
 
@@ -134,6 +134,12 @@ RepoLead pipeline:
 - `GET/POST/PATCH/DELETE /api/alerts/rules`
 - `GET /api/alerts/events`
 
+Cron interno:
+
+- `GET|POST /api/internal/cron/deliveries`
+- `GET|POST /api/internal/cron/lead-summaries`
+- alias publicos internos: `/api/cron/deliveries` e `/api/cron/lead-summaries`
+
 ## Convites de workspace
 
 - Convite cria token com hash em banco (`workspace_invite.token`).
@@ -162,6 +168,13 @@ RepoLead pipeline:
 - API publica de leitura autenticada por `Read API key` (workspace-scoped):
   - header `Authorization: Bearer lv_rk_xxx` ou `X-Api-Key`.
   - limite inicial: 120 req/min por chave.
+
+## Resumo diario por email
+
+- Cada workspace tem a flag `daily_lead_summary_enabled` (default: `true`).
+- O envio diario vai para todos os membros do workspace.
+- O resumo so e enviado quando existem leads novos no dia.
+- O toggle pode ser alterado em `/workspaces/[workspaceId]/edit`.
 
 ## Documentacao publica
 

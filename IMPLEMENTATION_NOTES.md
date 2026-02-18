@@ -37,6 +37,7 @@
   - `prisma/migrations/20260217120001_init/migration.sql`
   - `prisma/migrations/20260217151429_integration_modules/migration.sql`
   - `prisma/migrations/20260217193000_workspace_read_api_keys/migration.sql`
+  - `prisma/migrations/20260218110000_workspace_daily_lead_summary/migration.sql`
 - Client gerado em `prisma/generated`.
 
 ## 3) Endpoints principais
@@ -88,7 +89,9 @@
 
 - Cron route:
   - `GET|POST /api/internal/cron/deliveries`
+  - `GET|POST /api/internal/cron/lead-summaries`
   - alias: `GET|POST /api/cron/deliveries`
+  - alias: `GET|POST /api/cron/lead-summaries`
 - Autenticacao:
   - header `Authorization: Bearer <CRON_SECRET>`
 - O worker processa entregas `pending/failed` com `next_attempt_at <= now`.
@@ -96,6 +99,11 @@
   - backoff exponencial com jitter
   - max attempts = 50
   - excedeu max -> `dead_letter`
+- Resumo diario por email:
+  - habilitacao por workspace (`daily_lead_summary_enabled`, default true)
+  - envio para todos os membros do workspace
+  - envia apenas quando ha leads novos no dia
+  - atualiza `last_lead_summary_sent_at` no envio com sucesso
 
 ## 5) Como rodar local
 

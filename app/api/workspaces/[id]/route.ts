@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return apiError("Workspace id is required", 400);
     }
 
-    const { name, slug, description, retention_days, idempotency_window_hours } = await parseJsonBody(
+    const { name, slug, description, retention_days, idempotency_window_hours, daily_lead_summary_enabled } = await parseJsonBody(
       request,
       workspaceUpdateBodySchema,
     );
@@ -72,6 +72,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(description !== undefined ? { description: description || null } : {}),
         ...(retention_days !== undefined ? { retention_days } : {}),
         ...(idempotency_window_hours !== undefined ? { idempotency_window_hours } : {}),
+        ...(daily_lead_summary_enabled !== undefined ? { daily_lead_summary_enabled } : {}),
       },
     });
 

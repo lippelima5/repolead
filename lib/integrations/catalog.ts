@@ -4,6 +4,7 @@ import { n8nIngoingSourceModule } from "@/lib/integrations/source/n8n-ingoing";
 import { phpFormHandlerSourceModule } from "@/lib/integrations/source/php-form-handler";
 import { universalWebhookSourceModule } from "@/lib/integrations/source/universal-webhook";
 import { n8nOutgoingDestinationModule } from "@/lib/integrations/destination/n8n-outgoing";
+import { sendyDestinationModule } from "@/lib/integrations/destination/sendy";
 
 export const integrationsCatalog: IntegrationCatalogItem[] = [
   {
@@ -170,6 +171,49 @@ Outbound integration to trigger n8n workflows from RepoLead events.
 4. Run a delivery test.`,
     },
     module: n8nOutgoingDestinationModule,
+  },
+  {
+    id: "sendy",
+    title: "Sendy",
+    icon: "MessageSquare",
+    category: "automation",
+    direction: "destination",
+    availability: "active",
+    short_description: {
+      pt: "Inscreva leads automaticamente em listas do Sendy.",
+      en: "Automatically subscribe leads into Sendy lists.",
+    },
+    full_description_md: {
+      pt: `## Overview
+Integracao de saida para enviar leads do RepoLead para o endpoint \`/subscribe\` do Sendy.
+
+## Requisitos
+- URL do endpoint \`/subscribe\` no Sendy.
+- \`api_key\` valida (Settings no Sendy).
+- \`list id\` da lista alvo no Sendy.
+- Lead com \`email\` valido.
+
+## Passo a passo
+1. Crie a destination Sendy.
+2. Configure URL, API key e list ID.
+3. Defina eventos assinados (ex: \`lead_created\`).
+4. Execute teste de delivery e valide retorno \`true\`.`,
+      en: `## Overview
+Outbound integration to send RepoLead leads to the Sendy \`/subscribe\` endpoint.
+
+## Requirements
+- Sendy \`/subscribe\` endpoint URL.
+- Valid \`api_key\` (Sendy Settings).
+- Target \`list id\` from Sendy.
+- Lead with a valid \`email\`.
+
+## Setup steps
+1. Create the Sendy destination.
+2. Configure URL, API key and list ID.
+3. Select subscribed events (for example \`lead_created\`).
+4. Run a delivery test and validate the \`true\` response.`,
+    },
+    module: sendyDestinationModule,
   },
   {
     id: "meta-lead-ads",

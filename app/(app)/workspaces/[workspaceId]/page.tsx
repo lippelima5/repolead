@@ -122,6 +122,13 @@ export default function WorkspaceDetailsPage() {
                   <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">CONFIGURACOES</h3>
                   <p className="text-[13px] text-foreground">Retencao: {workspace.retention_days} dias</p>
                   <p className="text-[13px] text-foreground">Janela de idempotencia: {workspace.idempotency_window_hours} horas</p>
+                  <p className="text-[13px] text-foreground">
+                    Resumo diario por email: {workspace.daily_lead_summary_enabled ? "habilitado" : "desabilitado"}
+                  </p>
+                  <p className="text-[13px] text-foreground">
+                    Ultimo resumo enviado:{" "}
+                    {workspace.last_lead_summary_sent_at ? formatDateTime(String(workspace.last_lead_summary_sent_at)) : "-"}
+                  </p>
                   <p className="text-[13px] text-foreground">Slug: {workspace.slug || "-"}</p>
                 </div>
 

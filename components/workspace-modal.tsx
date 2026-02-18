@@ -20,6 +20,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
   const [description, setDescription] = useState(workspace?.description || "");
   const [retentionDays, setRetentionDays] = useState<number>(workspace?.retention_days || 180);
   const [idempotencyWindowHours, setIdempotencyWindowHours] = useState<number>(workspace?.idempotency_window_hours || 24);
+  const [dailyLeadSummaryEnabled, setDailyLeadSummaryEnabled] = useState<boolean>(workspace?.daily_lead_summary_enabled ?? true);
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
       setDescription(workspace?.description || "");
       setRetentionDays(workspace?.retention_days || 180);
       setIdempotencyWindowHours(workspace?.idempotency_window_hours || 24);
+      setDailyLeadSummaryEnabled(workspace?.daily_lead_summary_enabled ?? true);
     }
   }, [workspace]);
 
@@ -47,6 +49,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
         description,
         retention_days: retentionDays,
         idempotency_window_hours: idempotencyWindowHours,
+        daily_lead_summary_enabled: dailyLeadSummaryEnabled,
       });
       if (data.success) {
         // Redireciona para o workspace manager para padrao unico de rotas.
@@ -74,6 +77,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
         description,
         retention_days: retentionDays,
         idempotency_window_hours: idempotencyWindowHours,
+        daily_lead_summary_enabled: dailyLeadSummaryEnabled,
       });
 
       if (data.success) {
@@ -147,6 +151,17 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
               />
             </div>
           </div>
+
+          <label className="inline-flex items-center gap-2 text-[13px] text-foreground">
+            <input
+              type="checkbox"
+              checked={dailyLeadSummaryEnabled}
+              onChange={(event) => setDailyLeadSummaryEnabled(event.target.checked)}
+              className="h-4 w-4 rounded border-border bg-background"
+              disabled={isSending}
+            />
+            Enviar resumo diario de leads por email para membros do workspace
+          </label>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button type="submit" disabled={isSending} className="h-9 text-[13px]">

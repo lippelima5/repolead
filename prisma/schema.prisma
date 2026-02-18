@@ -127,6 +127,8 @@ model workspace {
   description               String?
   retention_days            Int                        @default(180)
   idempotency_window_hours  Int                        @default(24)
+  daily_lead_summary_enabled Boolean                   @default(true)
+  last_lead_summary_sent_at DateTime?
   users                     workspace_user[]
   plan_status               plan_status                @default(trialing)
   plan_expires_at           DateTime?

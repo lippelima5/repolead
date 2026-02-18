@@ -15,6 +15,16 @@ type EnqueueDeliveriesParams = {
   tx?: PrismaClientLike;
 };
 
+type SendyConfig = {
+  apiKey: string;
+  listId: string;
+  gdpr: boolean;
+  silent: boolean;
+  country?: string;
+  referrer?: string;
+  honeypot?: string;
+};
+
 function getJsonRecord(value: Prisma.JsonValue | null | undefined): Record<string, string> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
@@ -22,6 +32,107 @@ function getJsonRecord(value: Prisma.JsonValue | null | undefined): Record<strin
 
   const entries = Object.entries(value as Record<string, unknown>).filter(([, item]) => typeof item === "string");
   return Object.fromEntries(entries) as Record<string, string>;
+}
+
+function getUnknownRecord(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function getJsonObject(value: Prisma.JsonValue | null | undefined) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function getTrimmedString(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolveSendyConfig(destinationItem: destination): SendyConfig | { error: string } {
+  const config = getJsonObject(destinationItem.integration_config_json);
+  const apiKey = getTrimmedString(config.api_key);
+  if (!apiKey) {
+    return { error: "Sendy configuration is missing api_key" };
+  }
+
+  const listId = getTrimmedString(config.list_id);
+  if (!listId) {
+    return { error: "Sendy configuration is missing list_id" };
+  }
+
+  const country = getTrimmedString(config.country);
+  if (country && !/^[a-zA-Z]{2}$/.test(country)) {
+    return { error: "Sendy configuration has invalid country code" };
+  }
+
+  const referrer = getTrimmedString(config.referrer);
+  const honeypot = getTrimmedString(config.hp);
+
+  return {
+    apiKey,
+    listId,
+    gdpr: config.gdpr === true,
+    silent: config.silent === true,
+    ...(country ? { country: country.toUpperCase() } : {}),
+    ...(referrer ? { referrer } : {}),
+    ...(honeypot ? { honeypot } : {}),
+  };
+}
+
+function buildSendyBody(payload: Record<string, unknown>, config: SendyConfig): { bodyText: string } | { error: string } {
+  const lead = getUnknownRecord(payload.lead);
+  if (!lead) {
+    return { error: "Sendy delivery requires lead payload" };
+  }
+
+  const email = getTrimmedString(lead.email);
+  if (!email) {
+    return { error: "Lead email is required for Sendy delivery" };
+  }
+
+  const name = getTrimmedString(lead.name);
+  const body = new URLSearchParams();
+  body.set("api_key", config.apiKey);
+  body.set("list", config.listId);
+  body.set("email", email);
+  body.set("boolean", "true");
+
+  if (name) {
+    body.set("name", name);
+  }
+
+  if (config.country) {
+    body.set("country", config.country);
+  }
+
+  if (config.referrer) {
+    body.set("referrer", config.referrer);
+  }
+
+  if (config.gdpr) {
+    body.set("gdpr", "true");
+  }
+
+  if (config.silent) {
+    body.set("silent", "true");
+  }
+
+  if (config.honeypot) {
+    body.set("hp", config.honeypot);
+  }
+
+  return { bodyText: body.toString() };
 }
 
 function getSubscribedEvents(value: Prisma.JsonValue | null | undefined) {
@@ -108,7 +219,27 @@ async function createAttemptResult(
   attemptNumber: number,
 ) {
   const startedAt = new Date();
-  const bodyText = JSON.stringify(payload);
+  let bodyText = JSON.stringify(payload);
+  let method = destinationItem.method.toUpperCase();
+  let contentType = "application/json";
+  let failedMessage: string | null = null;
+
+  if (destinationItem.integration_id === "sendy") {
+    const resolvedConfig = resolveSendyConfig(destinationItem);
+    if ("error" in resolvedConfig) {
+      failedMessage = resolvedConfig.error;
+    } else {
+      const sendyBody = buildSendyBody(payload, resolvedConfig);
+      if ("error" in sendyBody) {
+        failedMessage = sendyBody.error;
+      } else {
+        bodyText = sendyBody.bodyText;
+        method = "POST";
+        contentType = "application/x-www-form-urlencoded";
+      }
+    }
+  }
+
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = destinationItem.signing_secret_hash
     ? createWebhookSignature(destinationItem.signing_secret_hash, timestamp, bodyText)
@@ -116,8 +247,8 @@ async function createAttemptResult(
 
   const customHeaders = getJsonRecord(destinationItem.headers_json);
   const headers: Record<string, string> = {
-    "content-type": "application/json",
     ...customHeaders,
+    "content-type": contentType,
     "x-repolead-timestamp": timestamp,
     "x-repolead-event": deliveryItem.event_type,
     "x-repolead-delivery-id": deliveryItem.id,
@@ -129,27 +260,33 @@ async function createAttemptResult(
 
   let responseStatus: number | null = null;
   let responseBody = "";
-  let failedMessage: string | null = null;
 
-  try {
-    const response = await fetchWithTimeout(
-      destinationItem.url,
-      {
-        method: destinationItem.method.toUpperCase(),
-        headers,
-        body: bodyText,
-      },
-      DELIVERY_TIMEOUT_MS,
-    );
+  if (!failedMessage) {
+    try {
+      const response = await fetchWithTimeout(
+        destinationItem.url,
+        {
+          method,
+          headers,
+          body: bodyText,
+        },
+        DELIVERY_TIMEOUT_MS,
+      );
 
-    responseStatus = response.status;
-    responseBody = (await response.text()).slice(0, 5000);
+      responseStatus = response.status;
+      responseBody = (await response.text()).slice(0, 5000);
 
-    if (!response.ok) {
-      failedMessage = `HTTP ${response.status}`;
+      if (!response.ok) {
+        failedMessage = `HTTP ${response.status}`;
+      } else if (destinationItem.integration_id === "sendy") {
+        const normalizedBody = responseBody.trim().toLowerCase();
+        if (normalizedBody !== "true" && normalizedBody !== "1") {
+          failedMessage = responseBody.trim() || "Sendy returned an unexpected response";
+        }
+      }
+    } catch (error) {
+      failedMessage = error instanceof Error ? error.message : "Unknown delivery error";
     }
-  } catch (error) {
-    failedMessage = error instanceof Error ? error.message : "Unknown delivery error";
   }
 
   const finishedAt = new Date();

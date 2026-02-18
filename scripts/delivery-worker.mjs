@@ -21,6 +21,7 @@ const intervalMs = toInt(process.env.DELIVERY_WORKER_INTERVAL_MS, 5000, 1000);
 const requestTimeoutMs = toInt(process.env.DELIVERY_WORKER_REQUEST_TIMEOUT_MS, 15000, 1000);
 const maxBackoffMs = toInt(process.env.DELIVERY_WORKER_MAX_BACKOFF_MS, 60000, 2000);
 const limit = toInt(process.env.DELIVERY_WORKER_LIMIT, 100, 1);
+const leadSummaryIntervalMs = toInt(process.env.LEAD_SUMMARY_WORKER_INTERVAL_MS, 60 * 60 * 1000, 60 * 1000);
 const cronSecret = process.env.CRON_SECRET;
 
 if (!cronSecret) {
@@ -31,6 +32,7 @@ if (!cronSecret) {
 const controller = new AbortController();
 let stopping = false;
 let consecutiveFailures = 0;
+let nextLeadSummaryRunAt = Date.now();
 
 process.on("SIGTERM", () => {
   stopping = true;
@@ -42,10 +44,42 @@ process.on("SIGINT", () => {
   controller.abort();
 });
 
-function buildEndpoint() {
+function buildDeliveryEndpoint() {
   const url = new URL("/api/internal/cron/deliveries", baseUrl);
   url.searchParams.set("limit", String(limit));
   return url.toString();
+}
+
+function buildLeadSummaryEndpoint() {
+  return new URL("/api/internal/cron/lead-summaries", baseUrl).toString();
+}
+
+async function runAuthorizedPost(url, label) {
+  const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(requestTimeoutMs)]);
+  const startedAt = Date.now();
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${cronSecret}`,
+    },
+    signal,
+  });
+
+  const durationMs = Date.now() - startedAt;
+
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
+    const body = (await response.text()).slice(0, 300);
+    throw new FatalWorkerError(`[worker] ${label} fatal response ${response.status}: ${body}`);
+  }
+
+  if (!response.ok) {
+    const body = (await response.text()).slice(0, 300);
+    throw new Error(`[worker] ${label} failed status=${response.status} body=${body}`);
+  }
+
+  const payload = await response.json().catch(() => null);
+  return { payload, durationMs };
 }
 
 async function sleepWithAbort(ms) {
@@ -64,40 +98,33 @@ async function sleepWithAbort(ms) {
 }
 
 async function runCycle() {
-  const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(requestTimeoutMs)]);
-  const startedAt = Date.now();
-
-  const response = await fetch(buildEndpoint(), {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${cronSecret}`,
-    },
-    signal,
-  });
-
-  const durationMs = Date.now() - startedAt;
-
-  if (response.status === 401 || response.status === 403 || response.status === 404) {
-    const body = (await response.text()).slice(0, 300);
-    throw new FatalWorkerError(`[worker] fatal response ${response.status}: ${body}`);
-  }
-
-  if (!response.ok) {
-    const body = (await response.text()).slice(0, 300);
-    throw new Error(`[worker] cron failed status=${response.status} body=${body}`);
-  }
-
-  const payload = await response.json().catch(() => null);
-  const processed = Number(payload?.data?.processed ?? payload?.processed ?? 0);
+  const deliveriesResult = await runAuthorizedPost(buildDeliveryEndpoint(), "deliveries cron");
+  const processed = Number(deliveriesResult.payload?.data?.processed ?? deliveriesResult.payload?.processed ?? 0);
 
   // Log only if there were deliveries processed to reduce noise
   if (processed > 0) {
-    console.log(`[worker] cycle processed=${processed} duration_ms=${durationMs}`);
+    console.log(`[worker] deliveries processed=${processed} duration_ms=${deliveriesResult.durationMs}`);
+  }
+
+  const nowMs = Date.now();
+  if (nowMs >= nextLeadSummaryRunAt) {
+    const summaryResult = await runAuthorizedPost(buildLeadSummaryEndpoint(), "lead summaries cron");
+    nextLeadSummaryRunAt = nowMs + leadSummaryIntervalMs;
+
+    const sentSummaries = Number(
+      summaryResult.payload?.data?.sent_summaries ?? summaryResult.payload?.sent_summaries ?? 0,
+    );
+
+    if (sentSummaries > 0) {
+      console.log(`[worker] lead_summaries sent=${sentSummaries} duration_ms=${summaryResult.durationMs}`);
+    }
   }
 }
 
 async function main() {
-  console.log(`[worker] started base_url=${baseUrl} interval_ms=${intervalMs} limit=${limit}`);
+  console.log(
+    `[worker] started base_url=${baseUrl} interval_ms=${intervalMs} limit=${limit} lead_summary_interval_ms=${leadSummaryIntervalMs}`,
+  );
 
   while (!stopping) {
     const cycleStartedAt = Date.now();

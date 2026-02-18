@@ -33,6 +33,7 @@ export const workspaceCreateBodySchema = z.object({
   description: z.string().trim().max(400).optional().nullable(),
   retention_days: z.number().int().min(1).max(3650).optional(),
   idempotency_window_hours: z.number().int().min(1).max(720).optional(),
+  daily_lead_summary_enabled: z.boolean().optional().default(true),
 });
 
 export const workspaceUpdateBodySchema = z.object({
@@ -41,6 +42,7 @@ export const workspaceUpdateBodySchema = z.object({
   description: z.string().trim().max(400).optional().nullable(),
   retention_days: z.number().int().min(1).max(3650).optional(),
   idempotency_window_hours: z.number().int().min(1).max(720).optional(),
+  daily_lead_summary_enabled: z.boolean().optional(),
 });
 
 export const profileUpdateBodySchema = z.object({

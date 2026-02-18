@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, slug, description, retention_days, idempotency_window_hours } = await parseJsonBody(
+    const { name, slug, description, retention_days, idempotency_window_hours, daily_lead_summary_enabled } = await parseJsonBody(
       request,
       workspaceCreateBodySchema,
     );
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
           description: description || null,
           ...(retention_days !== undefined ? { retention_days } : {}),
           ...(idempotency_window_hours !== undefined ? { idempotency_window_hours } : {}),
+          ...(daily_lead_summary_enabled !== undefined ? { daily_lead_summary_enabled } : {}),
         },
       });
 
