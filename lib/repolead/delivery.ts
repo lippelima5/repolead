@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { createWebhookSignature } from "@/lib/repolead/security";
+import { CustomError } from "@/lib/errors";
 import { Prisma, delivery, destination } from "@/prisma/generated/client";
 
 const MAX_DELIVERY_ATTEMPTS = 50;
@@ -517,4 +518,73 @@ export async function replayDeliveriesBulk(filters: ReplayBulkFilters) {
   });
 
   return updateResult.count;
+}
+
+type EnqueueAllLeadsToDestinationParams = {
+  workspaceId: number;
+  destinationId: string;
+  delayMs: number;
+  eventType?: string;
+};
+
+export async function enqueueAllLeadsToDestination(params: EnqueueAllLeadsToDestinationParams) {
+  const targetDestination = await prisma.destination.findFirst({
+    where: {
+      id: params.destinationId,
+      workspace_id: params.workspaceId,
+    },
+    select: {
+      id: true,
+      enabled: true,
+    },
+  });
+
+  if (!targetDestination) {
+    throw new CustomError("Destination not found", 404);
+  }
+
+  if (!targetDestination.enabled) {
+    throw new CustomError("Destination is disabled", 422);
+  }
+
+  const batchSize = 500;
+  const baseTimestamp = Date.now();
+  const eventType = params.eventType?.trim() || "lead_created";
+  let cursorId: string | undefined;
+  let scheduled = 0;
+
+  while (true) {
+    const leads = await prisma.lead.findMany({
+      where: { workspace_id: params.workspaceId },
+      select: { id: true },
+      orderBy: { id: "asc" },
+      take: batchSize,
+      ...(cursorId
+        ? {
+            cursor: { id: cursorId },
+            skip: 1,
+          }
+        : {}),
+    });
+
+    if (leads.length === 0) {
+      break;
+    }
+
+    await prisma.delivery.createMany({
+      data: leads.map((lead, index) => ({
+        workspace_id: params.workspaceId,
+        destination_id: params.destinationId,
+        lead_id: lead.id,
+        event_type: eventType,
+        status: "pending",
+        next_attempt_at: new Date(baseTimestamp + (scheduled + index) * params.delayMs),
+      })),
+    });
+
+    scheduled += leads.length;
+    cursorId = leads[leads.length - 1]?.id;
+  }
+
+  return scheduled;
 }

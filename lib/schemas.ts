@@ -199,6 +199,11 @@ export const deliveryReplayBulkBodySchema = z.object({
   limit: z.number().int().min(1).max(500).optional().default(100),
 });
 
+export const deliverySendAllLeadsBodySchema = z.object({
+  destination_id: z.string().trim().min(1),
+  delay_ms: z.number().int().min(0).max(600000).optional().default(0),
+});
+
 export const alertRuleTypeSchema = z.enum(["error_spike", "silent_source"]);
 export const alertRuleCreateBodySchema = z.object({
   type: alertRuleTypeSchema,

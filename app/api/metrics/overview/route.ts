@@ -4,6 +4,8 @@ import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { requireWorkspace } from "@/lib/repolead/workspace";
 
+type ChartPeriod = "daily" | "monthly" | "yearly";
+
 function startOfToday() {
   const now = new Date();
   const start = new Date(now);
@@ -17,6 +19,80 @@ function startOfYesterday() {
   return start;
 }
 
+function startOfMonth(date: Date) {
+  const start = new Date(date);
+  start.setDate(1);
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
+
+function startOfYear(date: Date) {
+  const start = new Date(date);
+  start.setMonth(0, 1);
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
+
+function resolveChartPeriod(value: string | null): ChartPeriod {
+  if (value === "monthly" || value === "yearly") {
+    return value;
+  }
+
+  return "daily";
+}
+
+function buildChartBase(period: ChartPeriod, now: Date) {
+  const base = new Map<string, number>();
+
+  if (period === "daily") {
+    for (let index = 0; index < 24; index += 1) {
+      const key = `${index.toString().padStart(2, "0")}h`;
+      base.set(key, 0);
+    }
+    return base;
+  }
+
+  if (period === "monthly") {
+    const monthLastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    for (let index = 1; index <= monthLastDay; index += 1) {
+      const key = index.toString().padStart(2, "0");
+      base.set(key, 0);
+    }
+    return base;
+  }
+
+  for (let index = 1; index <= 12; index += 1) {
+    const key = index.toString().padStart(2, "0");
+    base.set(key, 0);
+  }
+
+  return base;
+}
+
+function getChartRangeStart(period: ChartPeriod, now: Date) {
+  if (period === "monthly") {
+    return startOfMonth(now);
+  }
+
+  if (period === "yearly") {
+    return startOfYear(now);
+  }
+
+  return startOfToday();
+}
+
+function buildChartKey(date: Date, period: ChartPeriod) {
+  if (period === "daily") {
+    return `${date.getHours().toString().padStart(2, "0")}h`;
+  }
+
+  if (period === "monthly") {
+    return date.getDate().toString().padStart(2, "0");
+  }
+
+  return (date.getMonth() + 1).toString().padStart(2, "0");
+}
+
 function toPercentDiff(current: number, previous: number) {
   if (!previous) {
     return current ? 100 : 0;
@@ -27,9 +103,11 @@ function toPercentDiff(current: number, previous: number) {
 export async function GET(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request);
+    const chartPeriod = resolveChartPeriod(request.nextUrl.searchParams.get("period"));
     const todayStart = startOfToday();
     const yesterdayStart = startOfYesterday();
     const now = new Date();
+    const chartRangeStart = getChartRangeStart(chartPeriod, now);
 
     const [ingestionsToday, ingestionsYesterday, leadsTotal, leadsYesterday, deliveriesToday, topSourcesRows, recentFailures] =
       await Promise.all([
@@ -104,27 +182,22 @@ export async function GET(request: NextRequest) {
     const dlqCount = deliveriesToday.find((row) => row.status === "dead_letter")?._count._all ?? 0;
     const deliveryRate = deliveriesTotal > 0 ? Number(((successCount / deliveriesTotal) * 100).toFixed(2)) : 0;
 
-    const hourlyBase = new Map<string, number>();
-    for (let index = 0; index < 24; index += 1) {
-      const key = `${index.toString().padStart(2, "0")}h`;
-      hourlyBase.set(key, 0);
-    }
+    const chartBase = buildChartBase(chartPeriod, now);
 
-    const todayIngestions = await prisma.ingestion.findMany({
+    const periodIngestions = await prisma.ingestion.findMany({
       where: {
         workspace_id: workspaceId,
-        received_at: { gte: todayStart, lte: now },
+        received_at: { gte: chartRangeStart, lte: now },
       },
       select: { received_at: true },
     });
 
-    for (const row of todayIngestions) {
-      const hour = row.received_at.getHours().toString().padStart(2, "0");
-      const key = `${hour}h`;
-      hourlyBase.set(key, (hourlyBase.get(key) || 0) + 1);
+    for (const row of periodIngestions) {
+      const key = buildChartKey(row.received_at, chartPeriod);
+      chartBase.set(key, (chartBase.get(key) || 0) + 1);
     }
 
-    const ingestionsChart = [...hourlyBase.entries()].map(([hour, count]) => ({ hour, count }));
+    const ingestionsChart = [...chartBase.entries()].map(([label, count]) => ({ label, count }));
 
     return apiSuccess({
       ingestions_today: ingestionsToday,
@@ -134,6 +207,7 @@ export async function GET(request: NextRequest) {
       delivery_rate: deliveryRate,
       dlq_count: dlqCount,
       failed_count: failedCount,
+      ingestions_chart_period: chartPeriod,
       deliveries_by_status: deliveriesToday.map((item) => ({
         status: item.status,
         count: item._count._all,

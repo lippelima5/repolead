@@ -254,7 +254,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
         label: t("common.back"),
       }}
     >
-      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6  space-y-5">
         <div>
           <h1 className="text-xl font-semibold text-foreground">{integration.title}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{integration.short_description[locale]}</p>

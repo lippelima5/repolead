@@ -82,14 +82,14 @@ export default function ProfilePage() {
 
   return (
     <AppLayout isLoading={isLoading}>
-      <div className="p-4 md:p-6 max-w-[1100px] space-y-5">
+      <div className="p-4 md:p-6 space-y-5">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Visualize e atualize suas informacoes pessoais.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <Card className="border-border bg-card">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-6">
+          <Card className="border-border bg-card lg:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-[14px]">Resumo</CardTitle>
               <CardDescription className="text-[12px]">Dados da conta logada</CardDescription>
@@ -130,7 +130,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card">
+          <Card className="border-border bg-card lg:col-span-4">
             <CardHeader className="pb-2">
               <CardTitle className="text-[14px]">Editar perfil</CardTitle>
               <CardDescription className="text-[12px]">Atualize nome, email e senha</CardDescription>
@@ -156,9 +156,9 @@ export default function ProfilePage() {
                       name="email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu.email@exemplo.com"
-                      required
+                      // onChange={(e) => setEmail(e.target.value)}
+                      // placeholder="seu.email@exemplo.com"
+                      readOnly
                     />
                   </div>
 
@@ -169,6 +169,7 @@ export default function ProfilePage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Digite a nova senha"
+                      autoComplete="off"
                     />
                   </div>
 

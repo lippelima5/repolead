@@ -95,7 +95,7 @@ export default function AlertsPage() {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6  space-y-5">
         <div>
           <h1 className="text-xl font-semibold text-foreground">{t("alerts.title")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{t("alerts.subtitle")}</p>

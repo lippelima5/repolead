@@ -97,7 +97,7 @@ export default function WorkspaceDetailsPage() {
       }
     >
       {workspace && (
-        <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+        <div className="p-4 md:p-6  space-y-5">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
             <Card className="border-border bg-card">
               <CardHeader>

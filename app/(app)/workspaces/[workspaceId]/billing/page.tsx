@@ -165,7 +165,7 @@ export default function BillingPage() {
         </Button>
       }
     >
-      <div className="p-4 md:p-6 max-w-[1200px] space-y-5">
+      <div className="p-4 md:p-6  space-y-5">
         {!isLoadingWorkspace && !canManage ? (
           <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
             Apenas administradores ou owners podem gerenciar billing deste workspace.

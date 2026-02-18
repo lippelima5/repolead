@@ -6,9 +6,12 @@ import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContaine
 import AppLayout from "@/components/app-layout";
 import { MetricCard } from "@/components/metric-card";
 import { StatusBadge } from "@/components/status-badge";
+import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { useI18n } from "@/contexts/i18n-context";
+
+type ChartPeriod = "daily" | "monthly" | "yearly";
 
 type OverviewResponse = {
   ingestions_today: number;
@@ -18,7 +21,8 @@ type OverviewResponse = {
   delivery_rate: number;
   dlq_count: number;
   deliveries_by_status: Array<{ status: string; count: number }>;
-  ingestions_chart: Array<{ hour: string; count: number }>;
+  ingestions_chart_period: ChartPeriod;
+  ingestions_chart: Array<{ label: string; count: number }>;
   top_sources: Array<{ source_id: string; name: string; count: number }>;
   recent_failures: Array<{
     id: string;
@@ -32,13 +36,16 @@ type OverviewResponse = {
 export default function DashboardPage() {
   const { t } = useI18n();
   const [data, setData] = useState<OverviewResponse | null>(null);
+  const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("daily");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const response = await api.get("/metrics/overview");
+        const response = await api.get("/metrics/overview", {
+          params: { period: chartPeriod },
+        });
         if (response.data?.success) {
           setData(response.data.data);
         }
@@ -50,13 +57,18 @@ export default function DashboardPage() {
     };
 
     void load();
-  }, []);
+  }, [chartPeriod]);
 
   const pieData = useMemo(() => data?.deliveries_by_status || [], [data?.deliveries_by_status]);
+  const chartTitle = useMemo(() => {
+    if (chartPeriod === "monthly") return t("dashboard.ingestions_by_day");
+    if (chartPeriod === "yearly") return t("dashboard.ingestions_by_month");
+    return t("dashboard.ingestions_by_hour");
+  }, [chartPeriod, t]);
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-6 max-w-[1200px] space-y-6">
+      <div className="p-4 md:p-6 space-y-6">
         <div>
           <h1 className="text-xl font-semibold text-foreground">{t("dashboard.title")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{t("dashboard.subtitle")}</p>
@@ -92,7 +104,20 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
-            <h3 className="text-[13px] font-medium text-foreground mb-4">{t("dashboard.ingestions_by_hour")}</h3>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-[13px] font-medium text-foreground">{chartTitle}</h3>
+              <div className="flex items-center gap-1">
+                <Button variant={chartPeriod === "daily" ? "default" : "outline"} size="sm" className="h-7 px-2.5 text-[12px]" onClick={() => setChartPeriod("daily")}>
+                  {t("dashboard.daily")}
+                </Button>
+                <Button variant={chartPeriod === "monthly" ? "default" : "outline"} size="sm" className="h-7 px-2.5 text-[12px]" onClick={() => setChartPeriod("monthly")}>
+                  {t("dashboard.monthly")}
+                </Button>
+                <Button variant={chartPeriod === "yearly" ? "default" : "outline"} size="sm" className="h-7 px-2.5 text-[12px]" onClick={() => setChartPeriod("yearly")}>
+                  {t("dashboard.yearly")}
+                </Button>
+              </div>
+            </div>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={data?.ingestions_chart || []}>
                 <defs>
@@ -102,7 +127,7 @@ export default function DashboardPage() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="hour" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{

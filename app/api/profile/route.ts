@@ -24,11 +24,8 @@ export async function PUT(request: NextRequest) {
   try {
     const { user } = await verifyUser(request);
 
-    const { name, email, password, workspace_active_id, workspace_id } = await parseJsonBody(
-      request,
-      profileUpdateBodySchema,
-    );
-    const normalizedEmail = email || undefined;
+    const { name, password, workspace_active_id, workspace_id } = await parseJsonBody(request, profileUpdateBodySchema,);
+    // const normalizedEmail = email || undefined;
     const nextWorkspaceActiveId = workspace_active_id ?? workspace_id;
 
     let workspaceActiveData: { workspace_active_id?: number | null } = {};
@@ -65,13 +62,9 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    if (
-      normalizedEmail &&
-      user.email !== normalizedEmail &&
-      (await prisma.user.findUnique({ where: { email: normalizedEmail } }))
-    ) {
-      return apiError("Email already exists", 409);
-    }
+    // if (normalizedEmail && user.email !== normalizedEmail && (await prisma.user.findUnique({ where: { email: normalizedEmail } }))) {
+    //   return apiError("Email already exists", 409);
+    // }
 
     const updatedUser = await prisma.user.update({
       where: {
@@ -79,7 +72,7 @@ export async function PUT(request: NextRequest) {
       },
       data: {
         ...(name ? { name } : {}),
-        ...(normalizedEmail ? { email: normalizedEmail } : {}),
+        // ...(normalizedEmail ? { email: normalizedEmail } : {}),
         ...workspaceActiveData,
         ...(password ? { password: await bcrypt.hash(password, 10) } : {}),
       },
