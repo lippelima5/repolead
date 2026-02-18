@@ -5,6 +5,7 @@ import { phpFormHandlerSourceModule } from "@/lib/integrations/source/php-form-h
 import { universalWebhookSourceModule } from "@/lib/integrations/source/universal-webhook";
 import { n8nOutgoingDestinationModule } from "@/lib/integrations/destination/n8n-outgoing";
 import { sendyDestinationModule } from "@/lib/integrations/destination/sendy";
+import { webhookOutgoingDestinationModule } from "@/lib/integrations/destination/webhook-outgoing";
 
 export const integrationsCatalog: IntegrationCatalogItem[] = [
   {
@@ -130,6 +131,48 @@ Inbound n8n integration to centralize leads in RepoLead.
 4. Send \`Idempotency-Key\` per execution.`,
     },
     module: n8nIngoingSourceModule,
+  },
+  {
+    id: "webhook-outgoing",
+    title: "Webhook Outgoing",
+    icon: "Webhook",
+    category: "webhooks",
+    direction: "destination",
+    availability: "active",
+    badge: "popular",
+    short_description: {
+      pt: "Envie eventos do RepoLead para qualquer endpoint webhook.",
+      en: "Send RepoLead events to any webhook endpoint.",
+    },
+    full_description_md: {
+      pt: `## Overview
+Conector de destination webhook generico para fan-out de eventos do RepoLead.
+
+## Requisitos
+- Endpoint HTTP ativo para receber eventos.
+- Validacao de assinatura HMAC no receptor (recomendado).
+- Resposta HTTP 2xx para confirmar entrega.
+
+## Passo a passo
+1. Crie a destination Webhook Outgoing.
+2. Configure URL, metodo HTTP e eventos assinados.
+3. (Opcional) Defina um rotulo para identificar o endpoint.
+4. Execute teste de delivery.`,
+      en: `## Overview
+Generic outbound webhook connector for RepoLead event fan-out.
+
+## Requirements
+- Active HTTP endpoint to receive events.
+- HMAC signature validation on the receiver (recommended).
+- Return HTTP 2xx to acknowledge delivery.
+
+## Setup steps
+1. Create the Webhook Outgoing destination.
+2. Configure URL, HTTP method and subscribed events.
+3. (Optional) Set an endpoint label for easier identification.
+4. Run a delivery test.`,
+    },
+    module: webhookOutgoingDestinationModule,
   },
   {
     id: "n8n-outgoing",
