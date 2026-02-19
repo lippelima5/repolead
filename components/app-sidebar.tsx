@@ -10,6 +10,7 @@ import {
   Globe,
   LayoutDashboard,
   LogOut,
+  MessageSquarePlus,
   Moon,
   Monitor,
   Radio,
@@ -25,6 +26,7 @@ import { cn, getInitials } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
 import { useI18n } from "@/contexts/i18n-context";
 import { useAuth } from "@/contexts/auth-context";
+import { FeedbackModal } from "@/components/feedback-modal";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import Image from "next/image";
 
@@ -128,6 +130,36 @@ export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
           {!isCollapsed ? <span className="capitalize">{theme}</span> : null}
         </button>
 
+
+            {!isCollapsed ? (
+              <div className="flex w-full flex-col gap-2"> 
+                <FeedbackModal
+                  trigger={
+                    <button
+                      className="inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-md border border-border bg-background text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+                      aria-label={locale === "pt" ? "Enviar feedback" : "Send feedback"}
+                    >
+                      <MessageSquarePlus className="h-3.5 w-3.5" />
+                      <span>{locale === "pt" ? "Feedback" : "Feedback"}</span>
+                    </button>
+                  }
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-1">
+                <FeedbackModal
+                  trigger={
+                    <button
+                      className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                      aria-label={locale === "pt" ? "Enviar feedback" : "Send feedback"}
+                    >
+                      <MessageSquarePlus className="w-4 h-4" />
+                    </button>
+                  }
+                />
+              </div>
+            )}
+
         {user ? (
           <div
             className={cn(
@@ -137,32 +169,32 @@ export function AppSidebar({ mobile = false, onClose }: AppSidebarProps) {
           >
             {!isCollapsed ? (
               <>
-                <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[11px] font-semibold">
-                  {getInitials(user.name || user.email)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-foreground font-medium">{user.name || user.email}</p>
-                  <p className="truncate text-muted-foreground">{user.email}</p>
-                </div>
-                <Link
-                  href="/profile"
-                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-                  aria-label={t("common.profile")}
-                >
-                  <User className="w-4 h-4" />
-                </Link>
-                <button
-                  onClick={logout}
-                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
-                  aria-label={t("common.logout")}
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                  <div className="h-7 w-7 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[11px] font-semibold">
+                    {getInitials(user.name || user.email)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-foreground font-medium">{user.name || user.email}</p>
+                    <p className="truncate text-muted-foreground">{user.email}</p>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+                    aria-label={t("common.profile")}
+                  >
+                    <User className="w-4 h-4" />
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+                    aria-label={t("common.logout")}
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
               </>
             ) : (
               <button onClick={logout} className="text-muted-foreground hover:text-foreground" aria-label={t("common.logout")}>
-                <LogOut className="w-4 h-4" />
-              </button>
+                  <LogOut className="w-4 h-4" />
+                </button>
             )}
           </div>
         ) : null}

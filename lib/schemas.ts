@@ -53,6 +53,16 @@ export const profileUpdateBodySchema = z.object({
   workspace_id: z.number().int().positive().nullable().optional(),
 });
 
+export const feedbackCategorySchema = z.enum(["feature", "improvement", "bug", "other"]);
+export const feedbackCreateBodySchema = z.object({
+  category: feedbackCategorySchema.optional().default("feature"),
+  title: z.string().trim().min(3).max(120),
+  description: z.string().trim().min(10).max(5000),
+  name: z.string().trim().min(2).max(120).optional(),
+  email: z.string().trim().email().toLowerCase().optional(),
+  page: z.string().trim().min(1).max(300).optional(),
+});
+
 export const workspaceInviteCreateBodySchema = z.object({
   email: z.string().trim().email().toLowerCase(),
   role: workspaceInviteRoleSchema.optional(),
