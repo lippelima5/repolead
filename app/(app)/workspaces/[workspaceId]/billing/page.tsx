@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Check, Crown, Star, Zap } from "lucide-react";
+import { Check, Crown, Heart, Star, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import AppLayout from "@/components/app-layout";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ type BillingPlan = {
 };
 
 const PLAN_ICONS = [Zap, Star, Crown];
+const DONATION_URL = process.env.NEXT_PUBLIC_STRIPE_DONATION?.trim() ?? "";
 
 export default function BillingPage() {
   const params = useParams();
@@ -84,10 +85,11 @@ export default function BillingPage() {
 
   const canManage = canManageWorkspace(currentWorkspaceRole);
   const hasPaidPlan = hasWorkspacePaidPlan(workspace);
+  const hasDonationLink = DONATION_URL.length > 0;
 
   async function startCheckout(planKey: string) {
     if (!canManage) {
-      logger.error("Voce nao tem permissao para alterar o plano deste workspace");
+      logger.error("Você não tem permissão para alterar o plano deste workspace");
       return;
     }
 
@@ -121,7 +123,7 @@ export default function BillingPage() {
 
   const openPortal = async () => {
     if (!canManage) {
-      logger.error("Voce nao tem permissao para gerenciar cobranca deste workspace");
+      logger.error("Você não tem permissão para gerenciar cobrança deste workspace");
       return;
     }
 
@@ -132,8 +134,17 @@ export default function BillingPage() {
       const redirectUrl = data?.data?.url;
       if (redirectUrl) window.location.href = redirectUrl;
     } catch (error) {
-      logger.error("Erro ao abrir portal de cobranca", error);
+      logger.error("Erro ao abrir portal de cobrança", error);
     }
+  };
+
+  const openDonation = () => {
+    if (!hasDonationLink) {
+      logger.error("Link de doação não configurado");
+      return;
+    }
+
+    window.open(DONATION_URL, "_blank", "noopener,noreferrer");
   };
 
   const orderedPlans = useMemo(
@@ -150,14 +161,40 @@ export default function BillingPage() {
 
     return [
       `Mais recursos para o time no plano ${plan.name}`,
-      "Suporte para crescimento continuo do workspace",
-      "Cobranca mensal simples e previsivel",
+      "Suporte para crescimento contínuo do workspace",
+      "Cobrança mensal simples e previsível",
     ];
   };
 
+  const renderDonationCard = (compact = false) => (
+    <Card className={compact ? "border-dashed border-border/70 bg-card/50" : "border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card shadow-lg"}>
+      <CardHeader className={compact ? "pb-2" : "items-center text-center pb-3"}>
+        <CardTitle className={compact ? "flex items-center gap-2 text-sm" : "flex items-center gap-2 text-xl"}>
+          <Heart className={compact ? "h-4 w-4 text-primary" : "h-5 w-5 text-primary"} />
+          {compact ? "Apoiar o beta" : "Ajude a construir o RepoLead"}
+        </CardTitle>
+        <CardDescription className={compact ? "text-[11px]" : "max-w-xl text-sm"}>
+          {compact
+            ? "Mesmo com planos ativos, a doação segue disponível neste atalho discreto."
+            : "Estamos evoluindo rápido. Sua doação apoia melhorias contínuas, correções, infraestrutura e novas integrações para entregar mais valor."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className={compact ? "pt-0" : "flex justify-center"}>
+        <Button
+          variant={compact ? "link" : "default"}
+          className={compact ? "h-auto p-0 text-[11px]" : "h-9 px-5 text-[12px]"}
+          onClick={openDonation}
+          disabled={!hasDonationLink}
+        >
+          {hasDonationLink ? "Quero apoiar com doação" : "Link de doação indisponível"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <AppLayout
-      title={hasPaidPlan ? "Gerenciar assinatura" : "Escolha seu plano"}
+      title={hasPaidPlan ? "Assinatura do workspace" : "Faturamento do workspace"}
       isLoading={isLoadingWorkspace}
       rightComponent={
         <Button variant="outline" className="h-8 text-[12px]" onClick={() => router.back()}>
@@ -168,7 +205,7 @@ export default function BillingPage() {
       <div className="p-4 md:p-6  space-y-5">
         {!isLoadingWorkspace && !canManage ? (
           <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-            Apenas administradores ou owners podem gerenciar billing deste workspace.
+            Apenas administradores ou owners podem gerenciar o faturamento deste workspace.
           </div>
         ) : null}
 
@@ -177,7 +214,7 @@ export default function BillingPage() {
             <CardHeader>
               <CardTitle>Assinatura ativa</CardTitle>
               <CardDescription>
-                Seu workspace ja esta com um plano ativo. Voce pode revisar faturamento, forma de pagamento e renovacao em um unico lugar.
+                Seu workspace já está com um plano ativo. Você pode revisar faturamento, forma de pagamento e renovação em um único lugar.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -188,74 +225,65 @@ export default function BillingPage() {
           </Card>
         ) : (
           <>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Planos disponiveis</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Escolha o plano ideal para liberar recursos premium e escalar seu workspace com tranquilidade.
-              </p>
-            </div>
-
             {isLoadingPlans ? (
               <div className="text-sm text-muted-foreground">Carregando planos...</div>
             ) : orderedPlans.length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Nenhum plano disponivel</CardTitle>
-                  <CardDescription>
-                    Um administrador precisa cadastrar planos no painel /admin/billing.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <div className="mx-auto w-full max-w-2xl py-8">
+                {renderDonationCard()}
+              </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {orderedPlans.map((plan, index) => {
-                  const IconComponent = PLAN_ICONS[index % PLAN_ICONS.length];
-                  const isLoading = loadingKey === plan.key;
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {orderedPlans.map((plan, index) => {
+                    const IconComponent = PLAN_ICONS[index % PLAN_ICONS.length];
+                    const isLoading = loadingKey === plan.key;
 
-                  return (
-                    <Card key={plan.id} className="relative overflow-hidden border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-sm">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-30  " />
+                    return (
+                      <Card key={plan.id} className="relative overflow-hidden border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl min-w-sm">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-30  " />
 
-                      <CardHeader className="relative items-center justify-center pb-4 text-center">
-                        <div className="mx-auto mb-4 w-fit rounded-full bg-primary p-3">
-                          <IconComponent className="h-6 w-6 text-primary-foreground" />
-                        </div>
+                        <CardHeader className="relative items-center justify-center pb-4 text-center">
+                          <div className="mx-auto mb-4 w-fit rounded-full bg-primary p-3">
+                            <IconComponent className="h-6 w-6 text-primary-foreground" />
+                          </div>
 
-                        <CardTitle className="mb-2 text-xl font-bold text-foreground">{plan.name}</CardTitle>
+                          <CardTitle className="mb-2 text-xl font-bold text-foreground">{plan.name}</CardTitle>
 
-                        <div className="mb-2">
-                          <span className="text-2xl font-bold text-foreground">{formatPrice(plan.amount_cents, plan.currency || "BRL")}</span>
-                          <span className="text-sm text-muted-foreground">/{plan.interval}</span>
-                        </div>
+                          <div className="mb-2">
+                            <span className="text-2xl font-bold text-foreground">{formatPrice(plan.amount_cents, plan.currency || "BRL")}</span>
+                            <span className="text-sm text-muted-foreground">/{plan.interval}</span>
+                          </div>
 
-                        <div>
-                          <Badge variant="outline">{plan.key}</Badge>
-                          {plan.description ? <CardDescription className="mt-2 text-sm text-muted-foreground">{plan.description}</CardDescription> : null}
-                        </div>
+                          <div>
+                            <Badge variant="outline">{plan.key}</Badge>
+                            {plan.description ? <CardDescription className="mt-2 text-sm text-muted-foreground">{plan.description}</CardDescription> : null}
+                          </div>
 
-                      </CardHeader>
+                        </CardHeader>
 
-                      <CardContent className="relative z-10">
-                        <ul className="mb-6 space-y-2">
-                          {getPlanHighlights(plan).map((feature) => (
-                            <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
-                              <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
+                        <CardContent className="relative z-10">
+                          <ul className="mb-6 space-y-2">
+                            {getPlanHighlights(plan).map((feature) => (
+                              <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
+                                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
 
-                        <Button
-                          className="w-full h-9 text-[13px]"
-                          disabled={isLoading || !canManage}
-                          onClick={() => void startCheckout(plan.key)}
-                        >
-                          {isLoading ? "Abrindo checkout..." : "Quero este plano"}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                          <Button
+                            className="w-full h-9 text-[13px]"
+                            disabled={isLoading || !canManage}
+                            onClick={() => void startCheckout(plan.key)}
+                          >
+                            {isLoading ? "Abrindo checkout..." : "Quero este plano"}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+                {renderDonationCard(true)}
               </div>
             )}
           </>
