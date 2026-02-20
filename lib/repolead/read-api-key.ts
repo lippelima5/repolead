@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { hashValue, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
+import { hashValue, isWorkspaceReadApiKey, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
 import { CustomError } from "@/lib/errors";
 
 export const PUBLIC_READ_RATE_LIMIT_PER_MIN = 120;
@@ -26,6 +26,10 @@ export async function requireWorkspaceReadApiKey(request: Request): Promise<Work
   const plainApiKey = resolveApiKeyFromHeaders(request);
   if (!plainApiKey) {
     throw new CustomError("Missing API key", 401);
+  }
+
+  if (!isWorkspaceReadApiKey(plainApiKey)) {
+    throw new CustomError("This API key does not allow read operations", 403);
   }
 
   const hashedKey = hashValue(plainApiKey);

@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@/prisma/generated/client";
 import { apiError, apiRateLimit, apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
-import { hashValue, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
+import { hashValue, isSourceApiKey, isWorkspaceReadApiKey, resolveApiKeyFromHeaders } from "@/lib/repolead/security";
 import { checkSourceRateLimit } from "@/lib/repolead/source-rate-limit";
 import { enqueueIngestionProcessing, parseFormUrlEncodedBody } from "@/lib/repolead/ingest";
 
@@ -128,6 +128,14 @@ export async function POST(request: NextRequest) {
 
     if (!plainApiKey) {
       return withCors(apiError("Missing API key", 401));
+    }
+
+    if (isWorkspaceReadApiKey(plainApiKey)) {
+      return withCors(apiError("Read API key cannot ingest leads", 403));
+    }
+
+    if (!isSourceApiKey(plainApiKey)) {
+      return withCors(apiError("This API key does not allow ingestion", 403));
     }
 
     const hashedApiKey = hashValue(plainApiKey);

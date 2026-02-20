@@ -31,6 +31,14 @@ export function resolveApiKeyFromHeaders(request: Request) {
   return request.headers.get("x-api-key")?.trim() ?? null;
 }
 
+export function isSourceApiKey(value: string) {
+  return value.startsWith("lv_sk_");
+}
+
+export function isWorkspaceReadApiKey(value: string) {
+  return value.startsWith("lv_rk_");
+}
+
 export function createWebhookSignature(secretHash: string, timestamp: string, payload: string) {
   const signatureBase = `${timestamp}.${payload}`;
   return createHmac("sha256", secretHash).update(signatureBase).digest("hex");
