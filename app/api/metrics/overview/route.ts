@@ -1,23 +1,12 @@
 import { NextRequest } from "next/server";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { requireWorkspace } from "@/lib/repolead/workspace";
 
 type ChartPeriod = "daily" | "monthly" | "yearly";
-
-function startOfToday() {
-  const now = new Date();
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  return start;
-}
-
-function startOfYesterday() {
-  const start = startOfToday();
-  start.setDate(start.getDate() - 1);
-  return start;
-}
+const METRICS_TIME_ZONE = process.env.APP_TIME_ZONE?.trim() || "America/Sao_Paulo";
 
 function startOfMonth(date: Date) {
   const start = new Date(date);
@@ -69,19 +58,25 @@ function buildChartBase(period: ChartPeriod, now: Date) {
   return base;
 }
 
-function getChartRangeStart(period: ChartPeriod, now: Date) {
+function getChartRangeStart(period: ChartPeriod, nowUtc: Date) {
+  const zonedNow = toZonedTime(nowUtc, METRICS_TIME_ZONE);
+
   if (period === "monthly") {
-    return startOfMonth(now);
+    return fromZonedTime(startOfMonth(zonedNow), METRICS_TIME_ZONE);
   }
 
   if (period === "yearly") {
-    return startOfYear(now);
+    return fromZonedTime(startOfYear(zonedNow), METRICS_TIME_ZONE);
   }
 
-  return startOfToday();
+  const start = new Date(zonedNow);
+  start.setHours(0, 0, 0, 0);
+  return fromZonedTime(start, METRICS_TIME_ZONE);
 }
 
-function buildChartKey(date: Date, period: ChartPeriod) {
+function buildChartKey(dateUtc: Date, period: ChartPeriod) {
+  const date = toZonedTime(dateUtc, METRICS_TIME_ZONE);
+
   if (period === "daily") {
     return `${date.getHours().toString().padStart(2, "0")}h`;
   }
@@ -91,6 +86,20 @@ function buildChartKey(date: Date, period: ChartPeriod) {
   }
 
   return (date.getMonth() + 1).toString().padStart(2, "0");
+}
+
+function getDayWindow(dayOffset: number, nowUtc: Date) {
+  const startZoned = toZonedTime(nowUtc, METRICS_TIME_ZONE);
+  startZoned.setHours(0, 0, 0, 0);
+  startZoned.setDate(startZoned.getDate() + dayOffset);
+
+  const endZoned = new Date(startZoned);
+  endZoned.setDate(endZoned.getDate() + 1);
+
+  return {
+    startUtc: fromZonedTime(startZoned, METRICS_TIME_ZONE),
+    endUtc: fromZonedTime(endZoned, METRICS_TIME_ZONE),
+  };
 }
 
 function toPercentDiff(current: number, previous: number) {
@@ -104,23 +113,24 @@ export async function GET(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request);
     const chartPeriod = resolveChartPeriod(request.nextUrl.searchParams.get("period"));
-    const todayStart = startOfToday();
-    const yesterdayStart = startOfYesterday();
-    const now = new Date();
-    const chartRangeStart = getChartRangeStart(chartPeriod, now);
+    const nowUtc = new Date();
+    const zonedNow = toZonedTime(nowUtc, METRICS_TIME_ZONE);
+    const todayWindow = getDayWindow(0, nowUtc);
+    const yesterdayWindow = getDayWindow(-1, nowUtc);
+    const chartRangeStart = getChartRangeStart(chartPeriod, nowUtc);
 
     const [ingestionsToday, ingestionsYesterday, leadsTotal, leadsYesterday, deliveriesToday, topSourcesRows, recentFailures] =
       await Promise.all([
         prisma.ingestion.count({
           where: {
             workspace_id: workspaceId,
-            received_at: { gte: todayStart },
+            received_at: { gte: todayWindow.startUtc },
           },
         }),
         prisma.ingestion.count({
           where: {
             workspace_id: workspaceId,
-            received_at: { gte: yesterdayStart, lt: todayStart },
+            received_at: { gte: yesterdayWindow.startUtc, lt: yesterdayWindow.endUtc },
           },
         }),
         prisma.lead.count({
@@ -129,14 +139,14 @@ export async function GET(request: NextRequest) {
         prisma.lead.count({
           where: {
             workspace_id: workspaceId,
-            created_at: { lt: todayStart },
+            created_at: { lt: todayWindow.startUtc },
           },
         }),
         prisma.delivery.groupBy({
           by: ["status"],
           where: {
             workspace_id: workspaceId,
-            created_at: { gte: todayStart },
+            created_at: { gte: todayWindow.startUtc },
           },
           _count: { _all: true },
         }),
@@ -144,7 +154,7 @@ export async function GET(request: NextRequest) {
           by: ["source_id"],
           where: {
             workspace_id: workspaceId,
-            received_at: { gte: todayStart },
+            received_at: { gte: todayWindow.startUtc },
           },
           _count: { _all: true },
           orderBy: { _count: { source_id: "desc" } },
@@ -182,12 +192,12 @@ export async function GET(request: NextRequest) {
     const dlqCount = deliveriesToday.find((row) => row.status === "dead_letter")?._count._all ?? 0;
     const deliveryRate = deliveriesTotal > 0 ? Number(((successCount / deliveriesTotal) * 100).toFixed(2)) : 0;
 
-    const chartBase = buildChartBase(chartPeriod, now);
+    const chartBase = buildChartBase(chartPeriod, zonedNow);
 
     const periodIngestions = await prisma.ingestion.findMany({
       where: {
         workspace_id: workspaceId,
-        received_at: { gte: chartRangeStart, lte: now },
+        received_at: { gte: chartRangeStart, lte: nowUtc },
       },
       select: { received_at: true },
     });
@@ -208,6 +218,7 @@ export async function GET(request: NextRequest) {
       dlq_count: dlqCount,
       failed_count: failedCount,
       ingestions_chart_period: chartPeriod,
+      metrics_timezone: METRICS_TIME_ZONE,
       deliveries_by_status: deliveriesToday.map((item) => ({
         status: item.status,
         count: item._count._all,
