@@ -45,6 +45,40 @@ function extractZodMessage(error: unknown) {
   return issues[0]?.message || null;
 }
 
+function buildFrontendHtmlExample(appUrl: string, apiKey: string) {
+  return `<form id="lead-form">
+  <input type="text" name="name" placeholder="Seu nome" required />
+  <input type="email" name="email" placeholder="seu@email.com" required />
+  <input type="tel" name="phone" placeholder="+5511999999999" />
+
+  <button type="submit">Enviar</button>
+</form>
+
+<script>
+  const form = document.getElementById("lead-form");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const body = new URLSearchParams(new FormData(form));
+    body.set("api_key", "${apiKey}");
+    body.set("idempotency_key", crypto.randomUUID());
+
+    const response = await fetch("${appUrl}/api/v1/leads/ingest", {
+      method: "POST",
+      body
+    });
+
+    if (!response.ok) {
+      console.error("Falha ao enviar lead", await response.text());
+      return;
+    }
+
+    console.log("Lead enviado com sucesso");
+  });
+</script>`;
+}
+
 export function IntegrationConfigurePage({ direction, defaultReturnTo }: IntegrationConfigurePageProps) {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
@@ -245,6 +279,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
   const canConfigure = integration.availability === "active" && Boolean(activeModule);
   const ModuleForm = activeModule?.Form;
   const isFormReady = Object.keys(formValues).length > 0;
+  const isFormFrontendIntegration = integration.id === "form-backend";
 
   return (
     <AppLayout
@@ -340,13 +375,38 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
                     </div>
                   </>
                 ) : null}
-                <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
-                  {`curl -X POST "${appUrl}/api/v1/leads/ingest" \\
+                {isFormFrontendIntegration ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[12px] font-medium text-foreground">{t("integrations.frontend_html_example")}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[11px]"
+                        onClick={() => {
+                          const htmlExample = buildFrontendHtmlExample(appUrl, sourceResult.plainKey || "lv_sk_your_source_key");
+                          navigator.clipboard.writeText(htmlExample);
+                          toast.success(t("integrations.frontend_html_copied"));
+                        }}
+                      >
+                        <Copy className="mr-1 h-3.5 w-3.5" />
+                        {t("common.copy")}
+                      </Button>
+                    </div>
+                    <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
+                      {buildFrontendHtmlExample(appUrl, sourceResult.plainKey || "lv_sk_your_source_key")}
+                    </code>
+                  </div>
+                ) : (
+                  <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
+                    {`curl -X POST "${appUrl}/api/v1/leads/ingest" \\
 -H "Authorization: Bearer ${sourceResult.plainKey || "lv_api_key"}" \\
 -H "Idempotency-Key: sample-001" \\
 -H "Content-Type: application/json" \\
 -d '${JSON.stringify(sourcePayload)}'`}
-                </code>
+                  </code>
+                )}
               </div>
             ) : null}
 

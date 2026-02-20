@@ -95,6 +95,8 @@
     "test_destination": "Testar destination",
     "copy_key_now": "Copie a chave agora. Ela nao sera exibida novamente.",
     "copy_secret_now": "Copie o secret agora. Ele nao sera exibido novamente.",
+    "frontend_html_example": "Exemplo HTML para frontend",
+    "frontend_html_copied": "Exemplo HTML copiado",
     "generated_key": "API key gerada",
     "source_name": "Nome da source",
     "source_environment": "Ambiente",

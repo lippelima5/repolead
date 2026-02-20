@@ -47,11 +47,11 @@ export const formBackendSourceModule: SourceIntegrationModule = {
   configSchema,
   getDefaults(locale) {
     return {
-      name: "Form Backend",
+      name: "Form Frontend",
       environment: "production",
       rate_limit_per_min: 100,
       create_api_key: true,
-      key_name: localeText(locale, "Chave formulario", "Form key"),
+      key_name: localeText(locale, "Chave form frontend", "Frontend form key"),
       capture_utm: true,
       expected_form_name: "",
     };

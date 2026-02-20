@@ -52,41 +52,43 @@ Universal connector for any system able to send HTTP POST to the ingestion endpo
   },
   {
     id: "form-backend",
-    title: "Form Backend",
+    title: "Form Frontend",
     icon: "FileInput",
     category: "forms",
     direction: "source",
     availability: "active",
     short_description: {
-      pt: "Capture leads diretamente de formularios HTML via endpoint de ingestao.",
-      en: "Capture leads directly from HTML forms through the ingestion endpoint.",
+      pt: "Capture leads de formularios frontend direto no endpoint de ingestao.",
+      en: "Capture leads from frontend forms directly through the ingestion endpoint.",
     },
     full_description_md: {
       pt: `## Overview
-Use o RepoLead como backend de captura para formularios web.
+Use o RepoLead como backend de captura para formularios web no frontend.
 
 ## Requisitos
-- Formulario enviando \`POST\`.
+- Formulario frontend enviando \`POST\`.
 - Mapeamento minimo para \`email\` ou \`phone\`.
-- Controle de duplicidade com \`Idempotency-Key\`.
+- API key da source (header ou campo \`api_key\` no body).
+- Controle de duplicidade com \`idempotency_key\`.
 
 ## Passo a passo
 1. Crie a source de formulario.
 2. Gere API key dedicada para esse formulario.
-3. Envie os campos para o endpoint de ingestao.
+3. No frontend, envie os campos para \`POST /api/v1/leads/ingest\`.
 4. Verifique no dashboard de ingestoes e leads.`,
       en: `## Overview
-Use RepoLead as a capture backend for web forms.
+Use RepoLead as a capture backend for frontend web forms.
 
 ## Requirements
-- Form submitting with \`POST\`.
+- Frontend form sending \`POST\`.
 - Minimum mapping for \`email\` or \`phone\`.
-- Duplicate control using \`Idempotency-Key\`.
+- Source API key (header or \`api_key\` body field).
+- Duplicate control using \`idempotency_key\`.
 
 ## Setup steps
 1. Create the form source.
 2. Generate a dedicated API key for this form.
-3. Send fields to the ingestion endpoint.
+3. From frontend, send fields to \`POST /api/v1/leads/ingest\`.
 4. Verify ingestion and lead records in the dashboard.`,
     },
     module: formBackendSourceModule,
