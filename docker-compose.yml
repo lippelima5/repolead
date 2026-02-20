@@ -5,13 +5,6 @@ services:
     restart: always
     env_file:
       - stack.env
-    healthcheck:
-      test: ["CMD", "node", "scripts/healthcheck.mjs"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 45s
-    stop_grace_period: 30s
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
 
