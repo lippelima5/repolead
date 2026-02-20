@@ -158,7 +158,8 @@
     "status_active": "Ativa",
     "status_inactive": "Inativa",
     "key_dialog_title": "API key gerada",
-    "key_dialog_description": "Copie esta chave agora. Ela nao sera exibida novamente."
+    "key_dialog_description": "Copie esta chave agora. Ela nao sera exibida novamente.",
+    "key_scope_source_only": "Esta chave de source permite apenas envio para /api/v1/leads/ingest."
   },
   "destinations": {
     "title": "Destinations",

@@ -158,7 +158,8 @@
     "status_active": "Active",
     "status_inactive": "Inactive",
     "key_dialog_title": "Generated API key",
-    "key_dialog_description": "Copy this key now. It will not be shown again."
+    "key_dialog_description": "Copy this key now. It will not be shown again.",
+    "key_scope_source_only": "This source key only allows sending to /api/v1/leads/ingest."
   },
   "destinations": {
     "title": "Destinations",

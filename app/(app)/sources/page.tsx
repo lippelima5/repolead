@@ -217,7 +217,7 @@ export default function SourcesPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-xl border border-border bg-surface-2 p-3 space-y-2">
-            <p className="text-[12px] text-warning">{t("integrations.copy_key_now")}</p>
+            <p className="text-[12px] text-muted-foreground">{t("sources.key_scope_source_only")}</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px]">
                 {generatedKey?.plainKey || ""}
@@ -240,4 +240,3 @@ export default function SourcesPage() {
     </AppLayout>
   );
 }
-
