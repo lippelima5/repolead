@@ -15,8 +15,6 @@ import api from "@/lib/api";
 import logger from "@/lib/logger.client";
 import { getAppBaseUrl } from "@/lib/app-url";
 
-const APP_URL = getAppBaseUrl() || "http://localhost:3000";
-
 type IntegrationConfigurePageProps = {
   direction: IntegrationDirection;
   defaultReturnTo: string;
@@ -58,6 +56,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
   const sourceId = direction === "source" ? searchParams.get("sourceId") : null;
   const destinationId = direction === "destination" ? searchParams.get("destinationId") : null;
   const isEditMode = Boolean(sourceId || destinationId);
+  const appUrl = getAppBaseUrl();
 
   const sourceModule = useMemo(() => {
     if (!integration || integration.direction !== "source" || !integration.module || integration.module.direction !== "source") {
@@ -268,8 +267,8 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
           </section>
         ) : null}
 
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,460px)_minmax(0,1fr)] gap-4 items-start">
-          <section className="rounded-xl border border-border bg-card p-5 space-y-4 xl:sticky xl:top-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+          <section className="col-span-1 md:col-span-5 rounded-xl border border-border bg-card p-5 space-y-4 xl:sticky xl:top-4">
             <h2 className="text-[14px] font-semibold text-foreground">
               {direction === "source" ? t("integrations.source_config") : t("integrations.destination_config")}
             </h2>
@@ -342,7 +341,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
                   </>
                 ) : null}
                 <code className="block overflow-x-auto rounded-md border border-border bg-background px-3 py-2 text-[11px] whitespace-pre">
-                  {`curl -X POST "${APP_URL}/api/v1/leads/ingest" \\
+                  {`curl -X POST "${appUrl}/api/v1/leads/ingest" \\
 -H "Authorization: Bearer ${sourceResult.plainKey || "lv_api_key"}" \\
 -H "Idempotency-Key: sample-001" \\
 -H "Content-Type: application/json" \\
@@ -384,7 +383,7 @@ export function IntegrationConfigurePage({ direction, defaultReturnTo }: Integra
             ) : null}
           </section>
 
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section className="col-span-1 md:col-span-7 rounded-xl border border-border bg-card p-5">
             <div className="integration-markdown text-[13px] text-muted-foreground leading-relaxed space-y-3 [&_h2]:text-foreground [&_h2]:font-semibold [&_h2]:text-[15px] [&_h3]:text-foreground [&_h3]:font-semibold [&_h3]:text-[14px] [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1.5 [&_code]:bg-surface-2 [&_code]:border [&_code]:border-border [&_code]:rounded [&_code]:px-1.5 [&_code]:py-0.5 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-surface-2 [&_pre]:border [&_pre]:border-border [&_pre]:p-3">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
             </div>
