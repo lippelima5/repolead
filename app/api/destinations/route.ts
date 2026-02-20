@@ -7,12 +7,13 @@ import { parseJsonBody } from "@/lib/validation";
 import { destinationCreateBodySchema } from "@/lib/schemas";
 import { requireWorkspace } from "@/lib/repolead/workspace";
 import { createSigningSecret, hashValue } from "@/lib/repolead/security";
+import { assertPublicDestinationUrl } from "@/lib/repolead/destination-url-security";
 import { getDestinationModuleByIntegrationId } from "@/lib/integrations/catalog";
 import { Prisma } from "@/prisma/generated/client";
 
 export async function GET(request: NextRequest) {
   try {
-    const { workspaceId } = await requireWorkspace(request);
+    const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const search = request.nextUrl.searchParams.get("search")?.trim();
     const limit = Math.min(200, Number(request.nextUrl.searchParams.get("limit") || 20));
     const offset = Math.max(0, Number(request.nextUrl.searchParams.get("offset") || 0));
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const body = await parseJsonBody(request, destinationCreateBodySchema);
+    await assertPublicDestinationUrl(body.url);
     const integrationId = body.integration_id || "custom-destination";
     const integrationModule = getDestinationModuleByIntegrationId(integrationId);
     let integrationConfig = body.integration_config_json || {};

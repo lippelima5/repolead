@@ -7,12 +7,13 @@ import { parseJsonBody } from "@/lib/validation";
 import { destinationUpdateBodySchema } from "@/lib/schemas";
 import { requireWorkspace } from "@/lib/repolead/workspace";
 import { hashValue } from "@/lib/repolead/security";
+import { assertPublicDestinationUrl } from "@/lib/repolead/destination-url-security";
 import { getDestinationModuleByIntegrationId } from "@/lib/integrations/catalog";
 import { Prisma } from "@/prisma/generated/client";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { workspaceId } = await requireWorkspace(request);
+    const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const destinationId = (await params).id;
 
     const destination = await prisma.destination.findFirst({
@@ -37,6 +38,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const destinationId = (await params).id;
     const body = await parseJsonBody(request, destinationUpdateBodySchema);
+    if (body.url !== undefined) {
+      await assertPublicDestinationUrl(body.url);
+    }
 
     const existing = await prisma.destination.findFirst({
       where: {

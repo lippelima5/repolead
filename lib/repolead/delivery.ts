@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { createWebhookSignature } from "@/lib/repolead/security";
+import { assertPublicDestinationUrl } from "@/lib/repolead/destination-url-security";
 import { CustomError } from "@/lib/errors";
 import { Prisma, delivery, destination } from "@/prisma/generated/client";
 
@@ -166,6 +167,7 @@ async function fetchWithTimeout(input: string, init: RequestInit, timeoutMs: num
   try {
     return await fetch(input, {
       ...init,
+      redirect: "error",
       signal: controller.signal,
     });
   } finally {
@@ -261,6 +263,14 @@ async function createAttemptResult(
 
   let responseStatus: number | null = null;
   let responseBody = "";
+
+  if (!failedMessage) {
+    try {
+      await assertPublicDestinationUrl(destinationItem.url);
+    } catch (error) {
+      failedMessage = error instanceof Error ? error.message : "Destination URL blocked by security policy";
+    }
+  }
 
   if (!failedMessage) {
     try {

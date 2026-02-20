@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const invite = await prisma.workspace_invite.findFirst({
       where: {
-        OR: [{ token: tokenHash }, { token }],
+        token: tokenHash,
       },
       include: {
         workspace: {

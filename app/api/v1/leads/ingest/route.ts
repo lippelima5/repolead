@@ -10,6 +10,7 @@ import { enqueueIngestionProcessing, parseFormUrlEncodedBody } from "@/lib/repol
 const MAX_PAYLOAD_BYTES = 256 * 1024;
 const CORS_ALLOW_HEADERS = "Authorization, Content-Type, Idempotency-Key, X-Api-Key";
 const RESERVED_PAYLOAD_KEYS = ["api_key", "apiKey", "source_key", "sourceKey", "idempotency_key", "idempotencyKey"];
+const SENSITIVE_HEADER_PATTERN = /(authorization|api[-_]?key|cookie|token|secret)/i;
 
 function withCors<T>(response: NextResponse<T>) {
   response.headers.set("Access-Control-Allow-Origin", "*");
@@ -36,6 +37,30 @@ function sanitizePayload(payload: Record<string, unknown>) {
 
   for (const key of RESERVED_PAYLOAD_KEYS) {
     delete sanitized[key];
+  }
+
+  return sanitized;
+}
+
+function sanitizeRequestHeaders(request: NextRequest) {
+  const sanitized: Record<string, string> = {};
+
+  for (const [key, value] of request.headers.entries()) {
+    const normalized = key.trim().toLowerCase();
+    if (!normalized) {
+      continue;
+    }
+
+    if (normalized === "idempotency-key") {
+      sanitized[key] = value;
+      continue;
+    }
+
+    if (SENSITIVE_HEADER_PATTERN.test(normalized)) {
+      continue;
+    }
+
+    sanitized[key] = value;
   }
 
   return sanitized;
@@ -195,7 +220,7 @@ export async function POST(request: NextRequest) {
 
     const sanitizedPayload = sanitizePayload(parsedPayload);
     const sanitizedRawBody = sanitizeRawBody(rawBody, contentType, sanitizedPayload);
-    const headersJson = Object.fromEntries(request.headers.entries());
+    const headersJson = sanitizeRequestHeaders(request);
 
     const ingestion = await prisma.ingestion.create({
       data: {

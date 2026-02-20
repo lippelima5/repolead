@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const invite = await prisma.workspace_invite.findFirst({
       where: {
-        OR: [{ token: tokenHash }, { token }],
+        token: tokenHash,
       },
       include: {
         workspace: {
