@@ -31,6 +31,7 @@ function withSecurityHeaders(response: NextResponse) {
 function shouldSkipOriginCheck(pathname: string) {
   return (
     pathname.startsWith("/api/stripe/webhook") ||
+    pathname.startsWith("/api/v1/leads/ingest") ||
     pathname.startsWith("/api/cron") ||
     pathname.startsWith("/api/worker") ||
     pathname.startsWith("/api/internal/cron")
