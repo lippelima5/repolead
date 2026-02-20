@@ -13,8 +13,9 @@ import { DestinationIntegrationModule, IntegrationDirection, IntegrationFormValu
 import { useI18n } from "@/contexts/i18n-context";
 import api from "@/lib/api";
 import logger from "@/lib/logger.client";
+import { getAppBaseUrl } from "@/lib/app-url";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = getAppBaseUrl() || "http://localhost:3000";
 
 type IntegrationConfigurePageProps = {
   direction: IntegrationDirection;
