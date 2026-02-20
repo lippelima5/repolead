@@ -1,19 +1,10 @@
 services:
   app:
-    image: repolead:latest
     build:
       context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
+    restart: always
     env_file:
-      - .env
-    environment:
-      DELIVERY_WORKER_ENABLED: "true"
-      DELIVERY_WORKER_INTERVAL_MS: "5000"
-      DELIVERY_WORKER_LIMIT: "100"
-      DELIVERY_WORKER_REQUEST_TIMEOUT_MS: "15000"
-      DELIVERY_WORKER_MAX_BACKOFF_MS: "60000"
-      DELIVERY_WORKER_STARTUP_DELAY_MS: "5000"
+      - stack.env
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.mjs"]
       interval: 30s
@@ -23,3 +14,4 @@ services:
     stop_grace_period: 30s
     ports:
       - "${PORT:-3000}:3000"
+
