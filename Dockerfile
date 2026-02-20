@@ -22,6 +22,4 @@ COPY --from=builder /app ./
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=5 CMD ["node", "scripts/healthcheck.mjs"]
-
 CMD ["npm", "run", "start"]
