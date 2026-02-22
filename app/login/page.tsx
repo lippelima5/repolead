@@ -182,7 +182,8 @@ export default function Page() {
           </Card>
           <FieldDescription className="px-6 text-center">
             Ao clicar em continuar, voce concorda com nossos <a href="/terms">Termos de Servico</a>{" "}
-            e <a href="/privacy">Politica de Privacidade</a>.
+            , <a href="/privacy">Politica de Privacidade</a> e{" "}
+            <a href="/acceptable-use">Politica de Uso Aceitavel</a>.
           </FieldDescription>
         </div>
       </div>

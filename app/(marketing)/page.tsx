@@ -38,7 +38,7 @@ export default function Landing() {
             <a href="#usecases" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.usecases")}</a>
             <a href="#security" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.security")}</a>
             <a href="#faq" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.faq")}</a>
-            <a href="#" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.docs")}</a>
+            <Link href="/docs" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.docs")}</Link>
           </nav>
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => setLocale(locale === "pt" ? "en" : "pt")} className="px-2 py-1 rounded-md text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
@@ -339,15 +339,16 @@ X-Source-Key: sk_live_...
               </div>
               <div className="space-y-2">
                 <p className="font-semibold text-foreground">{t("lp.footer.resources")}</p>
-                <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.docs")}</a>
+                <Link href="/docs" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.docs")}</Link>
                 <a href="#faq" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.nav.faq")}</a>
-                <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.status")}</a>
+                <Link href="/changelog" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.status")}</Link>
               </div>
               <div className="space-y-2">
                 <p className="font-semibold text-foreground">{t("lp.footer.company")}</p>
-                <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.privacy")}</a>
-                <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.terms")}</a>
-                <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.contact")}</a>
+                <Link href="/privacy" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.privacy")}</Link>
+                <Link href="/terms" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.terms")}</Link>
+                <Link href="/acceptable-use" className="block text-muted-foreground hover:text-foreground transition-colors">Politica de Uso Aceitavel (AUP)</Link>
+                <a href="mailto:contato@repoleads.com" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.contact")}</a>
               </div>
             </div>
           </div>

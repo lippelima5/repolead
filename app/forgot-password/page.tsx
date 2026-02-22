@@ -68,7 +68,8 @@ export default function Page() {
                     </Card>
                     <FieldDescription className="px-6 text-center">
                         Ao clicar em continuar, você concorda com nossos <a href="/terms">Termos de Serviço</a>{" "}
-                        e <a href="/privacy">Política de Privacidade</a>.
+                        , <a href="/privacy">Política de Privacidade</a> e{" "}
+                        <a href="/acceptable-use">Política de Uso Aceitável</a>.
                     </FieldDescription>
                 </div>
             </div>

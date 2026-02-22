@@ -1,6 +1,6 @@
 # ROADMAP - RepoLead
 
-Ultima atualizacao: 2026-02-21
+Ultima atualizacao: 2026-02-22
 
 ## Concluido
 
@@ -21,16 +21,17 @@ Ultima atualizacao: 2026-02-21
 - [x] Centro de documentacao publica PT/EN em `/docs`.
 - [x] Catalogo modular de integracoes com modulos ativos para source e destination.
 - [x] Padronizacao base de documentacao tecnica e operacional (`README`, `DESCRIPTION`, `AGENTS`).
+- [x] Publicacao das paginas legais completas: `/privacy`, `/terms` e `/acceptable-use` (com alias `/aup`).
 
 ## Em andamento
 
 - [ ] Padrao continuo de governanca para `ROADMAP.md` e `CHANGELOG.md`.
 - [ ] Revisao de consistencia textual da UI (pt/en) e padronizacao de mensagens.
-- [ ] Revisao de qualidade de conteudo em paginas publicas placeholder (`/blog`, `/changelog`, `/terms`, `/privacy`).
+- [ ] Revisao de qualidade de conteudo em paginas publicas placeholder (`/blog`, `/changelog`).
 
 ## Proximas
 
-- [ ] Publicar conteudo real para Blog, Changelog publico e paginas legais.
+- [ ] Publicar conteudo real para Blog e Changelog publico.
 - [ ] Plugin WordPress junto com Elementor Forms para capturar de qualquer formulario sem webhook.
 - [ ] Expandir integracoes `soon` do catalogo: Meta Lead Ads.
 - [ ] Expandir integracoes `soon` do catalogo: Elementor Forms.
