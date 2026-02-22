@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         downloadUrl,
       });
 
-      await mail.sendSafe("Exportacao de leads pronta para download");
+      await mail.sendSafe("Exportação de leads pronta para download");
     }
 
     return apiSuccess(

@@ -152,7 +152,7 @@ export default function WorkspaceSelect() {
                                                 <div>
                                                     <p className="font-medium">{workspace?.workspace?.name}</p>
                                                     {workspace?.workspace?.description && (
-                                                        // corta a descricao para 30 caracteres
+                                                        // corta a descrição para 30 caracteres
                                                         <p className="text-sm text-muted-foreground">{workspace?.workspace?.description ? `${workspace?.workspace?.description.substring(0, 50).trim()}...` : ""}</p>
                                                     )}
                                                 </div>

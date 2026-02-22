@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         stripeSnapshot = await fetchStripePlanSnapshot(stripePriceId);
       } catch (error) {
         throw new CustomError(
-          error instanceof Error ? `Nao foi possivel validar price_id na Stripe: ${error.message}` : "Price ID invalido na Stripe",
+          error instanceof Error ? `Não foi possível validar price_id na Stripe: ${error.message}` : "Price ID inválido na Stripe",
           400,
         );
       }

@@ -47,7 +47,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
         setWorkspaceUsers(data.data);
       }
     } catch (error) {
-      logger.error("Erro ao carregar usuarios do workspace", error);
+      logger.error("Erro ao carregar usuários do workspace", error);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +70,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
     }
 
     if (!canManage) {
-      logger.error("Voce nao tem permissao para convidar usuarios");
+      logger.error("Você não tem permissao para convidar usuários");
       return;
     }
 
@@ -89,7 +89,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
         setNewUserEmail("");
       }
     } catch (error) {
-      logger.error("Erro ao adicionar usuario ao workspace", error);
+      logger.error("Erro ao adicionar usuário ao workspace", error);
     } finally {
       setIsAddingUser(false);
     }
@@ -104,19 +104,19 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
     if (!selectedUser || !workspace?.id) return;
 
     if (!canRemoveMember(currentUserRole, selectedUser.role, selectedUser.user_id === user?.id)) {
-      logger.error("Voce nao tem permissao para remover este usuario");
+      logger.error("Você não tem permissao para remover este usuário");
       return;
     }
 
     try {
       const { data } = await api.delete(`/workspaces/${workspace.id}/members/${selectedUser.user_id}`);
       if (data.success) {
-        logger.success("Usuario removido do workspace com sucesso");
+        logger.success("Usuário removido do workspace com sucesso");
         await fetchWorkspaceUsers();
         setOpenDeleteDialog(false);
       }
     } catch (error) {
-      logger.error("Erro ao remover usuario do workspace", error);
+      logger.error("Erro ao remover usuário do workspace", error);
     }
   }, [currentUserRole, fetchWorkspaceUsers, selectedUser, user?.id, workspace?.id]);
 
@@ -130,7 +130,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
     if (memberRole === "owner") return "Owner";
     if (memberRole === "admin") return "Administrador";
     if (memberRole === "viewer") return "Visualizador";
-    return "Usuario";
+    return "Usuário";
   };
 
   return (
@@ -139,9 +139,9 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-[14px] text-foreground">
             <Users className="h-5 w-5 text-muted-foreground" />
-            Gerenciar Usuarios do Workspace
+            Gerenciar Usuários do Workspace
           </CardTitle>
-          <CardDescription className="text-[12px]">Adicione, remova ou altere as funcoes dos usuarios neste workspace.</CardDescription>
+          <CardDescription className="text-[12px]">Adicione, remova ou altere as funções dos usuários neste workspace.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
@@ -150,7 +150,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
               <div className="flex items-end gap-2">
                 <div className="flex-1 space-y-2">
                   <label htmlFor="new-user-email" className="text-[12px] font-medium text-foreground">
-                    Adicionar usuario por email
+                    Adicionar usuário por email
                   </label>
                   <Input
                     id="new-user-email"
@@ -163,7 +163,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
 
                 <div className="w-[140px] space-y-2">
                   <label htmlFor="new-user-role" className="text-[12px] font-medium text-foreground">
-                    Funcao
+                    Função
                   </label>
                   <select
                     id="new-user-role"
@@ -186,7 +186,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Apenas administradores ou owners podem convidar e remover usuarios.
+                Apenas administradores ou owners podem convidar e remover usuários.
               </p>
             )}
 
@@ -194,7 +194,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Buscar usuarios..."
+                placeholder="Buscar usuários..."
                 className="pl-8 h-9 text-[13px]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -205,8 +205,8 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Funcao</TableHead>
+                    <TableHead>Usuário</TableHead>
+                    <TableHead>Função</TableHead>
                     <TableHead className="hidden md:table-cell">Adicionado em</TableHead>
                     <TableHead className="w-[80px]"></TableHead>
                   </TableRow>
@@ -224,7 +224,7 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="h-24 text-center">
-                        Nenhum usuario encontrado.
+                        Nenhum usuário encontrado.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -277,8 +277,8 @@ export default function WorkspaceUser({ workspace, className }: { workspace: Wor
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remover Usuario do Workspace</DialogTitle>
-            <DialogDescription>Tem certeza que deseja remover este usuario do workspace?</DialogDescription>
+            <DialogTitle>Remover Usuário do Workspace</DialogTitle>
+            <DialogDescription>Tem certeza que deseja remover este usuário do workspace?</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">

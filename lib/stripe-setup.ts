@@ -102,12 +102,12 @@ async function validateBillingPlanPrices(stripe: Stripe) {
         }
 
         if (price.type !== "recurring") {
-          return { ...plan, valid: false, reason: "Stripe price nao e recorrente (subscription)." };
+          return { ...plan, valid: false, reason: "Stripe price não e recorrente (subscription)." };
         }
 
         return { ...plan, valid: true, reason: "" };
       } catch {
-        return { ...plan, valid: false, reason: "Stripe price nao encontrado nesta conta." };
+        return { ...plan, valid: false, reason: "Stripe price não encontrado nesta conta." };
       }
     }),
   );
@@ -165,7 +165,7 @@ export async function getStripeSetupStatus(originFallback?: string): Promise<Str
   };
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    baseStatus.account.error = "STRIPE_SECRET_KEY nao configurada.";
+    baseStatus.account.error = "STRIPE_SECRET_KEY não configurada.";
     return baseStatus;
   }
 
@@ -196,7 +196,7 @@ export async function getStripeSetupStatus(originFallback?: string): Promise<Str
       baseStatus.plans.remote_validation_error = "Falha ao validar price IDs no Stripe.";
     }
   } catch {
-    baseStatus.account.error = "Nao foi possivel conectar ao Stripe com a chave atual.";
+    baseStatus.account.error = "Não foi possível conectar ao Stripe com a chave atual.";
     return baseStatus;
   }
 

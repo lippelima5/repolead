@@ -158,7 +158,7 @@ export default function InvitePage() {
       case "owner":
         return "Owner";
       default:
-        return "Usuario";
+        return "Usuário";
     }
   }, [invite]);
 
@@ -177,8 +177,8 @@ export default function InvitePage() {
       <main className="min-h-screen grid place-items-center p-6 bg-muted/30">
         <Card className="w-full max-w-lg">
           <CardHeader>
-            <CardTitle>Convite invalido</CardTitle>
-            <CardDescription>Este link nao foi encontrado ou nao esta mais disponivel.</CardDescription>
+            <CardTitle>Convite inválido</CardTitle>
+            <CardDescription>Este link não foi encontrado ou não esta mais disponível.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
@@ -199,7 +199,7 @@ export default function InvitePage() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Convite para workspace</CardTitle>
-          <CardDescription>Voce foi convidado para participar de um workspace.</CardDescription>
+          <CardDescription>Você foi convidado para participar de um workspace.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -216,10 +216,10 @@ export default function InvitePage() {
           </div>
 
           {inviteExpired && <p className="text-sm text-destructive">Este convite expirou.</p>}
-          {!inviteExpired && inviteNotPending && <p className="text-sm text-destructive">Este convite nao esta mais pendente.</p>}
+          {!inviteExpired && inviteNotPending && <p className="text-sm text-destructive">Este convite não esta mais pendente.</p>}
           {wrongEmailLogged && (
             <p className="text-sm text-destructive">
-              Voce esta logado com outro e-mail. Entre com <strong>{invite.email}</strong> para aceitar este convite.
+              Você esta logado com outro e-mail. Entre com <strong>{invite.email}</strong> para aceitar este convite.
             </p>
           )}
 
@@ -257,7 +257,7 @@ export default function InvitePage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setAcceptDialogOpen(false)} disabled={isAccepting}>
-              Agora nao
+              Agora não
             </Button>
             <Button onClick={acceptInvite} disabled={isAccepting}>
               {isAccepting ? "Entrando..." : "Aceitar e entrar"}

@@ -92,7 +92,7 @@ export const phpFormHandlerSourceModule: SourceIntegrationModule = {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 gap-3">
           <div className="space-y-1.5">
-            <label className="text-[12px] font-medium text-foreground">{localeText(locale, "Versao minima do PHP", "Minimum PHP version")}</label>
+            <label className="text-[12px] font-medium text-foreground">{localeText(locale, "Versão mínima do PHP", "Minimum PHP version")}</label>
             <Input
               value={formValues.php_min_version}
               onChange={(event) => update({ php_min_version: event.target.value })}

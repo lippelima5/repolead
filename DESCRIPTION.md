@@ -4,18 +4,18 @@
 
 RepoLead
 
-## Descricao curta
+## Descrição curta
 
-Plataforma API-first para captura, dedupe e distribuicao confiavel de leads por workspace.
+Plataforma API-first para captura, dedupe e distribuição confiável de leads por workspace.
 
-## Descricao longa
+## Descrição longa
 
-RepoLead centraliza a captura, armazenamento e orquestracao de leads para equipes que recebem dados de varias origens (formularios, automacoes, webhooks e integracoes customizadas).
+RepoLead centraliza a captura, armazenamento e orquestracao de leads para equipes que recebem dados de varias origens (formularios, automações, webhooks e integrações customizadas).
 
-Em vez de cada sistema manter logica propria de deduplicacao, historico e entrega, o RepoLead atua como camada canonica:
+Em vez de cada sistema manter logica própria de deduplicação, histórico e entrega, o RepoLead atua como camada canônica:
 
-- recebe eventos em endpoint unico de captura;
-- aplica idempotencia e normalizacao de identidades;
+- recebe eventos em endpoint único de captura;
+- aplica idempotência e normalização de identidades;
 - faz merge de duplicados por workspace;
 - registra timeline de auditoria append-only;
 - distribui eventos para destinations com assinatura, retry e DLQ.
@@ -29,7 +29,7 @@ Produto SaaS B2B de Lead Operations com foco em confiabilidade, rastreabilidade 
 - times de Marketing Ops e Revenue Ops;
 - SaaS que precisam padronizar captura de leads entre canais;
 - equipes de engenharia que querem desacoplar origem e destino de dados;
-- operacoes com necessidade de auditoria e replay de falhas.
+- operações com necessidade de auditoria e replay de falhas.
 
 ## Identidade da ferramenta
 
@@ -40,7 +40,7 @@ Produto SaaS B2B de Lead Operations com foco em confiabilidade, rastreabilidade 
 ## Tipografia adotada
 
 - familia principal: `Inter`;
-- estilo: leitura tecnica limpa, hierarquia forte em dashboards e tabelas;
+- estilo: leitura técnica limpa, hierarquia forte em dashboards e tabelas;
 - uso predominante: pesos 400, 500, 600 e 700.
 
 ## Cores e design system
@@ -58,4 +58,4 @@ Produto SaaS B2B de Lead Operations com foco em confiabilidade, rastreabilidade 
   - warning: `hsl(38 92% 50%)`
   - destructive: `hsl(0 84% 60%)`
 
-Esse conjunto define a identidade visual atual do RepoLead em interface web e comunicacoes por email.
+Esse conjunto define a identidade visual atual do RepoLead em interface web e comunicações por email.

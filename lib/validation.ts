@@ -30,5 +30,28 @@ export const paginationSchema = z.object({
   search: z.string().trim().min(1).max(120).optional(),
 });
 
+type ParseQueryIntOptions = {
+  defaultValue: number;
+  min?: number;
+  max?: number;
+};
+
+export function parseQueryInt(
+  value: string | null | undefined,
+  { defaultValue, min = 0, max = Number.MAX_SAFE_INTEGER }: ParseQueryIntOptions,
+) {
+  if (value == null) {
+    return defaultValue;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return defaultValue;
+  }
+
+  const integer = Math.trunc(parsed);
+  return Math.min(max, Math.max(min, integer));
+}
+
 
 

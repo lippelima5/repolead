@@ -25,12 +25,12 @@ export default function ResetPasswordPage() {
     e.preventDefault();
 
     if (!token) {
-      logger.error("Link de redefinicao invalido.");
+      logger.error("Link de redefinicao inválido.");
       return;
     }
 
     if (password !== confirmPassword) {
-      logger.error("As senhas nao conferem.");
+      logger.error("As senhas não conferem.");
       return;
     }
 
@@ -60,9 +60,9 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md">
           <Card className="overflow-hidden p-0">
             <CardContent className="p-6 md:p-8 space-y-4 text-center">
-              <h1 className="text-2xl font-bold">Link invalido</h1>
+              <h1 className="text-2xl font-bold">Link inválido</h1>
               <p className="text-sm text-muted-foreground">
-                O link de redefinicao esta incompleto ou invalido.
+                O link de redefinicao esta incompleto ou inválido.
               </p>
               <Button asChild className="w-full">
                 <Link href="/forgot-password">Solicitar novo link</Link>
@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
                       required
                     />
                     <FieldDescription>
-                      Minimo de 8 caracteres, com letra maiuscula, minuscula e numero.
+                      Mínimo de 8 caracteres, com letra maiuscula, minuscula e numero.
                     </FieldDescription>
                   </Field>
 

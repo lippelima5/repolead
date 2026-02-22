@@ -176,6 +176,24 @@ async function fetchWithTimeout(input: string, init: RequestInit, timeoutMs: num
 }
 
 async function buildPayload(deliveryItem: delivery) {
+  if (!deliveryItem.lead_id && !deliveryItem.ingest_id) {
+    const seededAttempt = await prisma.delivery_attempt.findFirst({
+      where: {
+        delivery_id: deliveryItem.id,
+        workspace_id: deliveryItem.workspace_id,
+      },
+      orderBy: [{ attempt_number: "asc" }, { started_at: "asc" }],
+      select: {
+        request_payload_json: true,
+      },
+    });
+
+    const seededPayload = getUnknownRecord(seededAttempt?.request_payload_json);
+    if (seededPayload) {
+      return seededPayload;
+    }
+  }
+
   const [leadItem, ingestionItem] = await Promise.all([
     deliveryItem.lead_id
       ? prisma.lead.findUnique({

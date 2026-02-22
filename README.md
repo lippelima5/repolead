@@ -1,14 +1,14 @@
 # RepoLead
 
-RepoLead e uma plataforma API-first para captura, deduplicacao e distribuicao de leads por workspace (multi-tenant), com trilha de auditoria e entregas resilientes.
+RepoLead e uma plataforma API-first para captura, deduplicação e distribuição de leads por workspace (multi-tenant), com trilha de auditoria e entregas resilientes.
 
 ## Objetivo
 
-Centralizar todo o ciclo de Lead Operations em um fluxo unico:
+Centralizar todo o ciclo de Lead Operations em um fluxo único:
 
 1. Captura de payloads por webhook/API.
-2. Idempotencia e deduplicacao por identidades.
-3. Timeline auditavel por lead.
+2. Idempotência e deduplicação por identidades.
+3. Timeline auditável por lead.
 4. Fan-out para destinations com retry e DLQ.
 
 ## Stack Oficial
@@ -19,21 +19,21 @@ Centralizar todo o ciclo de Lead Operations em um fluxo unico:
 - PostgreSQL
 - Prisma 7 (`prisma/generated`)
 - Auth JWT (`bcryptjs` + `jose`)
-- Zod para validacao
+- Zod para validação
 - Axios no frontend (`lib/api.ts`)
 - Stripe (checkout, portal e webhook)
 
 ## Arquitetura Obrigatoria
 
-- Nao usar Server Actions.
-- Toda operacao protegida deve estar em `app/api/**`.
+- Não usar Server Actions.
+- Toda operação protegida deve estar em `app/api/**`.
 - Frontend deve consumir backend via `lib/api.ts`.
-- Validacao de body com `parseJsonBody` + `lib/schemas.ts`.
+- Validação de body com `parseJsonBody` + `lib/schemas.ts`.
 - Respostas com `apiSuccess`, `apiError`, `apiRateLimit`.
 - Tratamento centralizado com `onError`.
 - Multi-tenant estrito por `workspace_id`.
 
-## Modulos do Produto
+## Módulos do Produto
 
 ### Painel autenticado
 
@@ -51,7 +51,7 @@ Centralizar todo o ciclo de Lead Operations em um fluxo unico:
 - `/admin`
 - `/admin/billing`
 
-### Publico
+### Público
 
 - `/` (landing)
 - `/docs`, `/docs/[lang]/[slug]`
@@ -95,7 +95,7 @@ Centralizar todo o ciclo de Lead Operations em um fluxo unico:
 
 ### Leads, Ingestions, Deliveries
 
-- `POST /api/v1/leads/ingest` (ingestao publica)
+- `POST /api/v1/leads/ingest` (ingestão pública)
 - `GET /api/v1/leads`
 - `GET /api/v1/leads/[id]`
 - `GET /api/v1/leads/[id]/timeline`
@@ -112,7 +112,7 @@ Centralizar todo o ciclo de Lead Operations em um fluxo unico:
 - `POST /api/deliveries/replay-bulk`
 - `POST /api/deliveries/send-all-leads`
 
-### Metricas, alertas e operacao
+### Métricas, alertas e operação
 
 - `GET /api/metrics/overview`
 - `GET/POST/PATCH/DELETE /api/alerts/rules`
@@ -130,30 +130,30 @@ Centralizar todo o ciclo de Lead Operations em um fluxo unico:
 - `POST /api/stripe/webhook`
 - Admin: `/api/admin/billing-plan`, `/api/admin/stripe/setup`
 
-## Integracoes Modulares
+## Integrações Modulares
 
-Catalogo unico em `lib/integrations/catalog.ts`.
+Catálogo único em `lib/integrations/catalog.ts`.
 
-Modulos ativos em arquivo unico:
+Módulos ativos em arquivo único:
 
 - `lib/integrations/source/<id>.tsx`
 - `lib/integrations/destination/<id>.tsx`
 
-Cada modulo exporta schema, defaults, formulario e mapeadores de payload.
+Cada módulo exporta schema, defaults, formulario e mapeadores de payload.
 
-## Estrutura do Repositorio
+## Estrutura do Repositório
 
 - `app/`: rotas App Router e Route Handlers
 - `components/`: UI e componentes de dominio
 - `contexts/`: auth, i18n e tema
-- `lib/`: dominio, seguranca, auth, integracoes e utilitarios
+- `lib/`: dominio, segurança, auth, integrações e utilitarios
 - `prisma/`: schema e migrations
 - `emails/`: templates e envio
 - `scripts/`: bootstrap prod, worker e healthcheck
-- `content/`: docs publicas PT/EN
-- `stack.env`: catalogo canonico de variaveis de ambiente
+- `content/`: docs públicas PT/EN
+- `stack.env`: catálogo canônico de variáveis de ambiente
 
-## Configuracao de Ambiente
+## Configuração de Ambiente
 
 1. Copie o arquivo de base:
 
@@ -161,7 +161,7 @@ Cada modulo exporta schema, defaults, formulario e mapeadores de payload.
 cp stack.env .env
 ```
 
-2. Ajuste valores obrigatorios no `.env`:
+2. Ajuste valores obrigatórios no `.env`:
 
 - `DATABASE_URL`
 - `JWT_SECRET`
@@ -184,20 +184,20 @@ npx prisma migrate dev
 npm run dev
 ```
 
-## Qualidade Minima
+## Qualidade Mínima
 
 ```bash
 npm run lint
 npm run build
 ```
 
-## Execucao em Producao (container)
+## Execucao em Produção (container)
 
 `npm run start` executa:
 
 - `prisma migrate deploy`
 - processo web Next.js
-- worker de deliveries/resumo diario (se habilitado)
+- worker de deliveries/resumo diário (se habilitado)
 
 Com Docker Compose:
 
@@ -205,9 +205,9 @@ Com Docker Compose:
 docker compose up -d --build
 ```
 
-## Governanca de Documentacao
+## Governança de Documentação
 
-- Arquivos estaveis: `README.md`, `DESCRIPTION.md`, `AGENTS.md`.
+- Arquivos estáveis: `README.md`, `DESCRIPTION.md`, `AGENTS.md`.
 - Arquivos vivos: `ROADMAP.md`, `CHANGELOG.md`.
 - Regras detalhadas em `AGENTS.md`.
 

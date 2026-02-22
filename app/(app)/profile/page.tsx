@@ -59,7 +59,7 @@ export default function ProfilePage() {
       }
 
       if (password !== confirmPassword) {
-        logger.error("As senhas nao coincidem");
+        logger.error("As senhas não coincidem");
         return;
       }
 
@@ -85,7 +85,7 @@ export default function ProfilePage() {
       <div className="p-4 md:p-6 space-y-5">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Perfil</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Visualize e atualize suas informacoes pessoais.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Visualize e atualize suas informações pessoais.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-6">
@@ -101,7 +101,7 @@ export default function ProfilePage() {
                     <AvatarFallback className="text-2xl">{user?.name ? getInitials(user.name) : "U"}</AvatarFallback>
                   </Avatar>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">{user?.name || "Usuario"}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{user?.name || "Usuário"}</h3>
                 <p className="text-[13px] text-muted-foreground">{user?.email}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Membro desde {user?.created_at ? formatDate(String(user.created_at)) : ""}
@@ -115,7 +115,7 @@ export default function ProfilePage() {
                   <User className="mt-0.5 h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="text-[12px] font-medium text-foreground">Nome</p>
-                    <p className="text-[12px] text-muted-foreground">{user?.name || "Nao informado"}</p>
+                    <p className="text-[12px] text-muted-foreground">{user?.name || "Não informado"}</p>
                   </div>
                 </div>
 

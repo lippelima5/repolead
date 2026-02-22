@@ -22,7 +22,7 @@ export const integrationsCatalog: IntegrationCatalogItem[] = [
     },
     full_description_md: {
       pt: `## Overview
-Conector universal para qualquer sistema que consiga enviar HTTP POST para o endpoint de ingestao.
+Conector universal para qualquer sistema que consiga enviar HTTP POST para o endpoint de ingestão.
 
 ## Requisitos
 - Possuir endpoint de origem que envie JSON.
@@ -32,7 +32,7 @@ Conector universal para qualquer sistema que consiga enviar HTTP POST para o end
 ## Passo a passo
 1. Crie a source no RepoLead.
 2. Gere a API key (aparece uma unica vez).
-3. Configure sua aplicacao para enviar payloads para \`POST /api/v1/leads/ingest\`.
+3. Configure sua aplicação para enviar payloads para \`POST /api/v1/leads/ingest\`.
 4. Valide o lead no Lead Store e timeline.`,
       en: `## Overview
 Universal connector for any system able to send HTTP POST to the ingestion endpoint.
@@ -58,7 +58,7 @@ Universal connector for any system able to send HTTP POST to the ingestion endpo
     direction: "source",
     availability: "active",
     short_description: {
-      pt: "Capture leads de formularios frontend direto no endpoint de ingestao.",
+      pt: "Capture leads de formularios frontend direto no endpoint de ingestão.",
       en: "Capture leads from frontend forms directly through the ingestion endpoint.",
     },
     full_description_md: {
@@ -67,7 +67,7 @@ Use o RepoLead como backend de captura para formularios web no frontend.
 
 ## Requisitos
 - Formulario frontend enviando \`POST\`.
-- Mapeamento minimo para \`email\` ou \`phone\`.
+- Mapeamento mínimo para \`email\` ou \`phone\`.
 - API key da source (header ou campo \`api_key\` no body).
 - Controle de duplicidade com \`idempotency_key\`.
 
@@ -106,7 +106,7 @@ Use RepoLead as a capture backend for frontend web forms.
     },
     full_description_md: {
       pt: `## Overview
-Integracao de entrada com n8n para centralizar leads no RepoLead.
+Integração de entrada com n8n para centralizar leads no RepoLead.
 
 ## Requisitos
 - Workflow no n8n com node HTTP Request.
@@ -152,7 +152,7 @@ Conector de destination webhook generico para fan-out de eventos do RepoLead.
 
 ## Requisitos
 - Endpoint HTTP ativo para receber eventos.
-- Validacao de assinatura HMAC no receptor (recomendado).
+- Validação de assinatura HMAC no receptor (recomendado).
 - Resposta HTTP 2xx para confirmar entrega.
 
 ## Passo a passo
@@ -189,11 +189,11 @@ Generic outbound webhook connector for RepoLead event fan-out.
     },
     full_description_md: {
       pt: `## Overview
-Integracao de saida para disparar workflows n8n com eventos do RepoLead.
+Integração de saida para disparar workflows n8n com eventos do RepoLead.
 
 ## Requisitos
 - Endpoint webhook ativo no n8n.
-- Validacao de assinatura HMAC no receptor (recomendado).
+- Validação de assinatura HMAC no receptor (recomendado).
 - Resposta HTTP 2xx para confirmar entrega.
 
 ## Passo a passo
@@ -230,11 +230,11 @@ Outbound integration to trigger n8n workflows from RepoLead events.
     },
     full_description_md: {
       pt: `## Overview
-Integracao de saida para enviar leads do RepoLead para o endpoint \`/subscribe\` do Sendy.
+Integração de saida para enviar leads do RepoLead para o endpoint \`/subscribe\` do Sendy.
 
 ## Requisitos
 - URL do endpoint \`/subscribe\` no Sendy.
-- \`api_key\` valida (Settings no Sendy).
+- \`api_key\` válida (Settings no Sendy).
 - \`list id\` da lista alvo no Sendy.
 - Lead com \`email\` valido.
 
@@ -274,7 +274,7 @@ Outbound integration to send RepoLead leads to the Sendy \`/subscribe\` endpoint
     },
     full_description_md: {
       pt: `## Em breve
-Conector nativo para ingestao direta de leads de campanhas Meta Lead Ads.`,
+Conector nativo para ingestão direta de leads de campanhas Meta Lead Ads.`,
       en: `## Coming soon
 Native connector for direct ingestion from Meta Lead Ads campaigns.`,
     },
@@ -293,7 +293,7 @@ Native connector for direct ingestion from Meta Lead Ads campaigns.`,
     },
     full_description_md: {
       pt: `## Em breve
-Integracao dedicada para formularios Elementor com setup guiado.`,
+Integração dedicada para formularios Elementor com setup guiado.`,
       en: `## Coming soon
 Dedicated integration for Elementor Forms with guided setup.`,
     },
@@ -330,7 +330,7 @@ SDK for strongly typed lead capture instrumentation in React apps.`,
     },
     full_description_md: {
       pt: `## Overview
-Integracao para projetos PHP que enviam formulario no backend.
+Integração para projetos PHP que enviam formulario no backend.
 
 ## Requisitos
 - PHP 7.4+ com cURL habilitado.

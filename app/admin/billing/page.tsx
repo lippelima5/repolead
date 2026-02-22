@@ -241,7 +241,7 @@ export default function AdminBillingPage() {
           <Button asChild variant="outline">
             <Link href="/admin">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para usuarios
+              Voltar para usuários
             </Link>
           </Button>
           <Button
@@ -262,7 +262,7 @@ export default function AdminBillingPage() {
           <CardHeader>
             <CardTitle>Stripe setup</CardTitle>
             <CardDescription>
-              Valide a conexao, webhook e eventos obrigatorios antes de cadastrar price IDs.
+              Valide a conexão, webhook e eventos obrigatórios antes de cadastrar price IDs.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -278,10 +278,10 @@ export default function AdminBillingPage() {
                     {stripeSetup.ready ? "Setup pronto" : "Setup pendente"}
                   </Badge>
                   <Badge variant={stripeSetup.account.connected ? "outline" : "destructive"}>
-                    {stripeSetup.account.connected ? "Conectado no Stripe" : "Sem conexao Stripe"}
+                    {stripeSetup.account.connected ? "Conectado no Stripe" : "Sem conexão Stripe"}
                   </Badge>
                   <Badge variant={stripeSetup.webhook.endpoint_found ? "outline" : "destructive"}>
-                    {stripeSetup.webhook.endpoint_found ? "Webhook encontrado" : "Webhook nao encontrado"}
+                    {stripeSetup.webhook.endpoint_found ? "Webhook encontrado" : "Webhook não encontrado"}
                   </Badge>
                   <Badge variant={stripeSetup.webhook.has_required_events ? "outline" : "destructive"}>
                     {stripeSetup.webhook.has_required_events ? "Eventos OK" : "Eventos pendentes"}
@@ -307,7 +307,7 @@ export default function AdminBillingPage() {
                   <p>
                     Conta Stripe:{" "}
                     <span className="font-mono text-foreground">
-                      {stripeSetup.account.id || "nao identificada"} (
+                      {stripeSetup.account.id || "não identificada"} (
                       {stripeSetup.account.livemode === null ? "unknown" : stripeSetup.account.livemode ? "live" : "test"})
                     </span>
                   </p>
@@ -332,7 +332,7 @@ export default function AdminBillingPage() {
                 ) : (
                   <div className="rounded-md border border-green-500/30 bg-green-500/10 p-3 text-sm inline-flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4" />
-                    Eventos obrigatorios configurados.
+                    Eventos obrigatórios configurados.
                   </div>
                 )}
 
@@ -362,7 +362,7 @@ export default function AdminBillingPage() {
                     <p className="font-medium">Novo webhook secret gerado:</p>
                     <p className="mt-2 font-mono break-all text-xs">{latestWebhookSecret}</p>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Atualize o `.env` com este valor em `STRIPE_WEBHOOK_SECRET` e reinicie a aplicacao.
+                      Atualize o `.env` com este valor em `STRIPE_WEBHOOK_SECRET` e reinicie a aplicação.
                     </p>
                   </div>
                 ) : null}
@@ -383,7 +383,7 @@ export default function AdminBillingPage() {
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground">Nao foi possivel carregar o setup da Stripe.</p>
+              <p className="text-sm text-muted-foreground">Não foi possível carregar o setup da Stripe.</p>
             )}
           </CardContent>
         </Card>
@@ -392,7 +392,7 @@ export default function AdminBillingPage() {
           <CardHeader>
             <CardTitle>Novo plano</CardTitle>
             <CardDescription>
-              Informe apenas o `price_id` e a chave interna. Nome, valor, intervalo e descricao sao carregados automaticamente da Stripe.
+              Informe apenas o `price_id` e a chave interna. Nome, valor, intervalo e descrição são carregados automaticamente da Stripe.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">

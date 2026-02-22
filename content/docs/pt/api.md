@@ -1,6 +1,6 @@
-# API publica de leitura
+# API pública de leitura
 
-A API publica permite consultar leads a partir de outras plataformas.
+A API pública permite consultar leads a partir de outras plataformas.
 
 ## Gerar chave de leitura
 
@@ -9,7 +9,7 @@ A API publica permite consultar leads a partir de outras plataformas.
 3. Crie uma `Read API key`.
 4. Copie a chave no momento da criacao (ela aparece uma vez).
 
-## Autenticacao
+## Autenticação
 
 Use uma das opcoes:
 
@@ -54,6 +54,6 @@ curl "https://seu-dominio.com/api/v1/leads/cld123" \
 ## Limites e respostas
 
 - rate limit inicial: 120 req/min por chave
-- `401`: chave ausente/invalida
-- `404`: lead nao encontrada no workspace da chave
+- `401`: chave ausente/inválida
+- `404`: lead não encontrada no workspace da chave
 - `429`: limite excedido

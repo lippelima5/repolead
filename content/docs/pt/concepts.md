@@ -2,7 +2,7 @@
 
 ## Captura
 
-A captura acontece via endpoint unico:
+A captura acontece via endpoint único:
 
 - `POST /api/v1/leads/ingest`
 - aceita JSON e form-urlencoded
@@ -13,17 +13,17 @@ A captura acontece via endpoint unico:
 Cada registro e isolado por `workspace_id`.
 
 - Sources, leads, deliveries e alertas sempre ficam no escopo do workspace.
-- Chaves de leitura da API publica tambem sao por workspace.
+- Chaves de leitura da API pública também são por workspace.
 
 ## Dedupe e identidade
 
-RepoLead faz normalizacao minima de identidades:
+RepoLead faz normalização mínima de identidades:
 
 - email
 - phone
 - external_id
 
-Se a identidade ja existir no workspace, o lead e mesclado no mesmo `lead_id`.
+Se a identidade já existir no workspace, o lead e mesclado no mesmo `lead_id`.
 
 ## Timeline append-only
 

@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { requireWorkspace } from "@/lib/repolead/workspace";
+import { parseQueryInt } from "@/lib/validation";
 
 function parseDate(value: string | null) {
   if (!value) return null;
@@ -17,8 +18,15 @@ export async function GET(request: NextRequest) {
     const query = request.nextUrl.searchParams.get("query")?.trim();
     const from = parseDate(request.nextUrl.searchParams.get("from"));
     const to = parseDate(request.nextUrl.searchParams.get("to"));
-    const limit = Math.min(200, Number(request.nextUrl.searchParams.get("limit") || 20));
-    const offset = Math.max(0, Number(request.nextUrl.searchParams.get("offset") || 0));
+    const limit = parseQueryInt(request.nextUrl.searchParams.get("limit"), {
+      defaultValue: 20,
+      min: 1,
+      max: 200,
+    });
+    const offset = parseQueryInt(request.nextUrl.searchParams.get("offset"), {
+      defaultValue: 0,
+      min: 0,
+    });
 
     const where = {
       workspace_id: workspaceId,

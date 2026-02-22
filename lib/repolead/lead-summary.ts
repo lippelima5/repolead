@@ -213,7 +213,7 @@ export async function runDailyLeadSummaryCron(now = new Date()): Promise<DailyLe
       });
 
       attemptedEmail = true;
-      await mail.send(`Resumo diario RepoLead - ${workspace.name}`);
+      await mail.send(`Resumo diário RepoLead - ${workspace.name}`);
 
       await prisma.workspace.update({
         where: { id: workspace.id },

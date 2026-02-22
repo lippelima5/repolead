@@ -52,7 +52,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
         daily_lead_summary_enabled: dailyLeadSummaryEnabled,
       });
       if (data.success) {
-        // Redireciona para o workspace manager para padrao unico de rotas.
+        // Redireciona para o workspace manager para padrão único de rotas.
         window.location.href = "/workspaces";
       }
     } catch (error) {
@@ -67,7 +67,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
     setIsSending(true);
     try {
       if (!workspace?.id || !name) {
-        logger.error("Workspace id ou name nao encontrado");
+        logger.error("Workspace id ou name não encontrado");
         return;
       }
 
@@ -94,7 +94,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
     <form onSubmit={workspace && workspace.id ? handleUpdateWorkspace : handleCreateWorkspace}>
       <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-[14px]">Informacoes do workspace</CardTitle>
+          <CardTitle className="text-[14px]">Informações do workspace</CardTitle>
           <CardDescription className="text-[12px]">Configure os dados principais do workspace</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -117,8 +117,8 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descricao</Label>
-            <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} className="text-[13px]" placeholder="Digite uma descricao para o workspace" rows={4} disabled={isSending} />
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} className="text-[13px]" placeholder="Digite uma descrição para o workspace" rows={4} disabled={isSending} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -160,7 +160,7 @@ export default function WorkspaceModal({ workspace }: { workspace: workspace | u
               className="h-4 w-4 rounded border-border bg-background"
               disabled={isSending}
             />
-            Enviar resumo diario de leads por email para membros do workspace
+            Enviar resumo diário de leads por email para membros do workspace
           </label>
         </CardContent>
         <CardFooter className="flex justify-end">

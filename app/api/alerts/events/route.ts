@@ -3,11 +3,16 @@ import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { requireWorkspace } from "@/lib/repolead/workspace";
+import { parseQueryInt } from "@/lib/validation";
 
 export async function GET(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request);
-    const limit = Math.min(200, Number(request.nextUrl.searchParams.get("limit") || 50));
+    const limit = parseQueryInt(request.nextUrl.searchParams.get("limit"), {
+      defaultValue: 50,
+      min: 1,
+      max: 200,
+    });
 
     const events = await prisma.alert_event.findMany({
       where: {

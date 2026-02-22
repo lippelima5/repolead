@@ -90,7 +90,7 @@ export default function AdminPage() {
         setUsers(data.data || []);
       }
     } catch (error) {
-      logger.error("Erro ao carregar usuarios", error);
+      logger.error("Erro ao carregar usuários", error);
       setUsers([]);
     } finally {
       setIsLoadingUsers(false);
@@ -107,7 +107,7 @@ export default function AdminPage() {
         setSelectedUser(data.data);
       }
     } catch (error) {
-      logger.error("Erro ao carregar detalhes do usuario", error);
+      logger.error("Erro ao carregar detalhes do usuário", error);
       setSelectedUser(null);
     } finally {
       setIsLoadingDetails(false);
@@ -170,7 +170,7 @@ export default function AdminPage() {
         }
       }
     }).catch((error) => {
-      logger.error("Erro ao atualizar status do usuario", error);
+      logger.error("Erro ao atualizar status do usuário", error);
     });
   };
 
@@ -206,7 +206,7 @@ export default function AdminPage() {
 
   return (
     <AppLayout
-      title="Admin - Usuarios"
+      title="Admin - Usuários"
       requireWorkspace={false}
       rightComponent={
         <div className="flex gap-2">
@@ -234,8 +234,8 @@ export default function AdminPage() {
       <div className="p-4 space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Gestao global de usuarios</CardTitle>
-            <CardDescription>Liste, suspenda, reative e execute acoes de acesso e convite.</CardDescription>
+            <CardTitle>Gestao global de usuários</CardTitle>
+            <CardDescription>Liste, suspenda, reative e execute ações de acesso e convite.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative max-w-md">
@@ -252,18 +252,18 @@ export default function AdminPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Usuarios</CardTitle>
+            <CardTitle>Usuários</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Usuario</TableHead>
+                  <TableHead>Usuário</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Global role</TableHead>
                   <TableHead>Membros</TableHead>
                   <TableHead>Invites pendentes</TableHead>
-                  <TableHead className="w-[420px]">Acoes</TableHead>
+                  <TableHead className="w-[420px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -272,14 +272,14 @@ export default function AdminPage() {
                     <TableCell colSpan={6} className="h-20 text-center">
                       <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Carregando usuarios...
+                        Carregando usuários...
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-20 text-center text-muted-foreground">
-                      Nenhum usuario encontrado.
+                      Nenhum usuário encontrado.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -367,7 +367,7 @@ export default function AdminPage() {
         {selectedUserId ? (
           <Card>
             <CardHeader>
-              <CardTitle>Detalhes do usuario</CardTitle>
+              <CardTitle>Detalhes do usuário</CardTitle>
               <CardDescription>
                 {activeSelectedUser ? `${activeSelectedUser.name || "Sem nome"} - ${activeSelectedUser.email}` : "Carregando..."}
               </CardDescription>
@@ -443,7 +443,7 @@ export default function AdminPage() {
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground">Nao foi possivel carregar os detalhes.</p>
+                <p className="text-sm text-muted-foreground">Não foi possível carregar os detalhes.</p>
               )}
             </CardContent>
           </Card>

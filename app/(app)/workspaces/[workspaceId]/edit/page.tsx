@@ -59,7 +59,7 @@ export default function EditWorkspacePage() {
         {workspace && canManage ? <WorkspaceForm workspace={workspace} /> : null}
         {workspace && !canManage ? (
           <div className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-            Voce nao tem permissao para editar este workspace.
+            Você não tem permissao para editar este workspace.
             <div className="mt-3">
               <Button variant="outline" className="h-8 text-[12px]" onClick={() => router.push(`/workspaces/${workspaceId}`)}>
                 Voltar para detalhes

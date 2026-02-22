@@ -68,7 +68,7 @@ export default async function DocsArticlePage({
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6">
         <aside className="lg:sticky lg:top-20 self-start bg-card border border-border rounded-xl p-3">
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2">
-            {lang === "pt" ? "Documentacao" : "Documentation"}
+            {lang === "pt" ? "Documentação" : "Documentation"}
           </p>
           <nav className="space-y-1">
             {navItems.map((item) => {

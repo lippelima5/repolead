@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     await verifyUser(request, true);
 
     if (!process.env.STRIPE_SECRET_KEY) {
-      return apiError("STRIPE_SECRET_KEY nao configurada.", 400);
+      return apiError("STRIPE_SECRET_KEY não configurada.", 400);
     }
 
     const setupResult = await ensureStripeWebhookSetup(request.nextUrl.origin);
@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
 
     const actionMessage =
       setupResult.action === "created"
-        ? "Webhook criado no Stripe com os eventos obrigatorios."
+        ? "Webhook criado no Stripe com os eventos obrigatórios."
         : setupResult.action === "updated_events"
-          ? "Webhook atualizado com os eventos obrigatorios."
-          : "Webhook ja estava configurado com os eventos obrigatorios.";
+          ? "Webhook atualizado com os eventos obrigatórios."
+          : "Webhook já estava configurado com os eventos obrigatórios.";
 
     return apiSuccess(
       {

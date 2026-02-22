@@ -1,6 +1,6 @@
-# Exportacao de dados
+# Exportação de dados
 
-RepoLead oferece dois fluxos de exportacao de leads.
+RepoLead oferece dois fluxos de exportação de leads.
 
 ## 1) Baixar CSV na hora
 
@@ -8,7 +8,7 @@ Tela `Leads` -> botao `Baixar CSV`.
 
 - aplica filtros atuais de busca/status
 - gera arquivo CSV no browser
-- colunas padrao:
+- colunas padrão:
   - `id`
   - `name`
   - `email`
@@ -27,9 +27,9 @@ Endpoint usado:
 
 Tela `Leads` -> botao `Enviar por email`.
 
-- envia para o email do usuario logado
+- envia para o email do usuário logado
 - gera link assinado com expiracao de 24h
-- nao envia anexo para evitar limite de SMTP
+- não envia anexo para evitar limite de SMTP
 
 Endpoint usado:
 
@@ -37,6 +37,6 @@ Endpoint usado:
 
 ## Observacoes
 
-- exportacao sincronica limitada a 10.000 linhas por requisicao
-- payload bruto nao entra no CSV por padrao
+- exportação sincronica limitada a 10.000 linhas por requisição
+- payload bruto não entra no CSV por padrão
 - escopo sempre restrito ao workspace ativo

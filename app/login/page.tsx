@@ -111,7 +111,7 @@ export default function Page() {
   if (checkingSession) {
     return (
       <div className="bg-muted flex min-h-svh items-center justify-center p-6">
-        <p className="text-sm text-muted-foreground">Verificando sessao...</p>
+        <p className="text-sm text-muted-foreground">Verificando sessão...</p>
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function Page() {
 
                   {magicToken ? (
                     <FieldDescription className="text-center">
-                      {magicLoading ? "Validando link de acesso..." : "Se o link for valido, voce sera redirecionado automaticamente."}
+                      {magicLoading ? "Validando link de acesso..." : "Se o link for valido, você sera redirecionado automaticamente."}
                     </FieldDescription>
                   ) : null}
 
@@ -174,16 +174,16 @@ export default function Page() {
                   </Field>
 
                   <FieldDescription className="text-center">
-                    Nao tem uma conta? <a href="/register">Cadastre-se</a>
+                    Não tem uma conta? <a href="/register">Cadastre-se</a>
                   </FieldDescription>
                 </FieldGroup>
               </form>
             </CardContent>
           </Card>
           <FieldDescription className="px-6 text-center">
-            Ao clicar em continuar, voce concorda com nossos <a href="/terms">Termos de Servico</a>{" "}
-            , <a href="/privacy">Politica de Privacidade</a> e{" "}
-            <a href="/acceptable-use">Politica de Uso Aceitavel</a>.
+            Ao clicar em continuar, você concorda com nossos <a href="/terms">Termos de Serviço</a>{" "}
+            , <a href="/privacy">Política de Privacidade</a> e{" "}
+            <a href="/acceptable-use">Política de Uso Aceitável</a>.
           </FieldDescription>
         </div>
       </div>

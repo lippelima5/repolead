@@ -1,4 +1,4 @@
-# Integracoes e exemplos
+# Integrações e exemplos
 
 ## Exemplo n8n (consulta de leads)
 

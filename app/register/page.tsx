@@ -83,7 +83,7 @@ export default function Page() {
     if (checkingSession) {
         return (
             <div className="bg-muted flex min-h-svh items-center justify-center p-6">
-                <p className="text-sm text-muted-foreground">Verificando sessao...</p>
+                <p className="text-sm text-muted-foreground">Verificando sessão...</p>
             </div>
         );
     }
@@ -150,7 +150,7 @@ export default function Page() {
                                     <Field>
                                         <Button disabled={loading} type="submit">Criar uma conta</Button>
                                         <FieldDescription className="text-center">
-                                            Ja possui uma conta? <a href="/login">Faça login</a>
+                                            Já possui uma conta? <a href="/login">Faça login</a>
                                         </FieldDescription>
                                     </Field>
                                 </FieldGroup>

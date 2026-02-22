@@ -62,7 +62,7 @@ export default function WorkspaceDetailsPage() {
 
   const openPortal = async () => {
     if (!canManage) {
-      logger.error("Voce nao tem permissao para gerenciar billing deste workspace");
+      logger.error("Você não tem permissao para gerenciar billing deste workspace");
       return;
     }
 
@@ -73,7 +73,7 @@ export default function WorkspaceDetailsPage() {
       const redirectUrl = data?.data?.url;
       if (redirectUrl) window.location.href = redirectUrl;
     } catch (error) {
-      logger.error("Erro ao abrir portal de cobranca", error);
+      logger.error("Erro ao abrir portal de cobrança", error);
     }
   };
 
@@ -103,7 +103,7 @@ export default function WorkspaceDetailsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5 text-muted-foreground" />
-                  Informacoes
+                  Informações
                 </CardTitle>
                 <CardDescription className="text-[12px]">Detalhes do workspace</CardDescription>
               </CardHeader>
@@ -115,15 +115,15 @@ export default function WorkspaceDetailsPage() {
 
                 <div>
                   <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">DESCRICAO</h3>
-                  <p className="text-[13px] text-foreground">{workspace.description || "Sem descricao"}</p>
+                  <p className="text-[13px] text-foreground">{workspace.description || "Sem descrição"}</p>
                 </div>
 
                 <div>
                   <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">CONFIGURACOES</h3>
-                  <p className="text-[13px] text-foreground">Retencao: {workspace.retention_days} dias</p>
-                  <p className="text-[13px] text-foreground">Janela de idempotencia: {workspace.idempotency_window_hours} horas</p>
+                  <p className="text-[13px] text-foreground">Retenção: {workspace.retention_days} dias</p>
+                  <p className="text-[13px] text-foreground">Janela de idempotência: {workspace.idempotency_window_hours} horas</p>
                   <p className="text-[13px] text-foreground">
-                    Resumo diario por email: {workspace.daily_lead_summary_enabled ? "habilitado" : "desabilitado"}
+                    Resumo diário por email: {workspace.daily_lead_summary_enabled ? "habilitado" : "desabilitado"}
                   </p>
                   <p className="text-[13px] text-foreground">
                     Ultimo resumo enviado:{" "}

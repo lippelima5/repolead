@@ -30,7 +30,7 @@ export function LegalPageLayout({ title, effectiveDate, children }: LegalPageLay
               href="/acceptable-use"
               className="rounded-md border border-border px-2 py-1 text-muted-foreground hover:text-foreground"
             >
-              Uso Aceitavel
+              Uso Aceitável
             </Link>
           </div>
         </div>
@@ -38,7 +38,7 @@ export function LegalPageLayout({ title, effectiveDate, children }: LegalPageLay
         <article className="rounded-xl border border-border bg-card p-5 sm:p-7">
           <header className="mb-6 border-b border-border pb-4">
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Data de vigencia: {effectiveDate}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Data de vigência: {effectiveDate}</p>
           </header>
 
           <div className="space-y-6 text-sm leading-7 text-foreground">{children}</div>

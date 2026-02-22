@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_APP_NAME || "RepoLead",
-  description: "Plataforma API-first para captura, dedupe e distribuicao confiavel de leads por workspace.",
+  description: "Plataforma API-first para captura, dedupe e distribuição confiável de leads por workspace.",
   links: {
     home: "/",
     login: "/login",

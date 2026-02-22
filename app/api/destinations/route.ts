@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { apiSuccess } from "@/lib/api-response";
 import { onError } from "@/lib/helper";
 import { CustomError } from "@/lib/errors";
-import { parseJsonBody } from "@/lib/validation";
+import { parseJsonBody, parseQueryInt } from "@/lib/validation";
 import { destinationCreateBodySchema } from "@/lib/schemas";
 import { requireWorkspace } from "@/lib/repolead/workspace";
 import { createSigningSecret, hashValue } from "@/lib/repolead/security";
@@ -15,8 +15,15 @@ export async function GET(request: NextRequest) {
   try {
     const { workspaceId } = await requireWorkspace(request, { requireAdmin: true });
     const search = request.nextUrl.searchParams.get("search")?.trim();
-    const limit = Math.min(200, Number(request.nextUrl.searchParams.get("limit") || 20));
-    const offset = Math.max(0, Number(request.nextUrl.searchParams.get("offset") || 0));
+    const limit = parseQueryInt(request.nextUrl.searchParams.get("limit"), {
+      defaultValue: 20,
+      min: 1,
+      max: 200,
+    });
+    const offset = parseQueryInt(request.nextUrl.searchParams.get("offset"), {
+      defaultValue: 0,
+      min: 0,
+    });
 
     const where = {
       workspace_id: workspaceId,

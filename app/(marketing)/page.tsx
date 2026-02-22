@@ -347,7 +347,7 @@ X-Source-Key: sk_live_...
                 <p className="font-semibold text-foreground">{t("lp.footer.company")}</p>
                 <Link href="/privacy" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.privacy")}</Link>
                 <Link href="/terms" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.terms")}</Link>
-                <Link href="/acceptable-use" className="block text-muted-foreground hover:text-foreground transition-colors">Politica de Uso Aceitavel (AUP)</Link>
+                <Link href="/acceptable-use" className="block text-muted-foreground hover:text-foreground transition-colors">Política de Uso Aceitável (AUP)</Link>
                 <a href="mailto:contato@repoleads.com" className="block text-muted-foreground hover:text-foreground transition-colors">{t("lp.footer.contact")}</a>
               </div>
             </div>

@@ -129,7 +129,7 @@ export default function WorkspacesPage() {
                         <Building className="h-5 w-5 text-muted-foreground" />
                         {workspace.workspace?.name}
                       </CardTitle>
-                      <CardDescription>{workspace.workspace?.description || "Sem descricao"}</CardDescription>
+                      <CardDescription>{workspace.workspace?.description || "Sem descrição"}</CardDescription>
                     </div>
 
                     <DropdownMenu>
@@ -140,7 +140,7 @@ export default function WorkspacesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acoes</DropdownMenuLabel>
+                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleViewWorkspace(workspace)}>
                           <Building className="mr-2 h-4 w-4" />
@@ -213,7 +213,7 @@ export default function WorkspacesPage() {
 
       <ConfirmDialog
         title="Excluir Workspace"
-        description="Tem certeza que deseja excluir este workspace? Esta acao nao pode ser desfeita."
+        description="Tem certeza que deseja excluir este workspace? Esta ação não pode ser desfeita."
         isOpen={openDeleteDialog}
         onConfirm={handleDeleteWorkspace}
         onCancel={() => setOpenDeleteDialog(false)}

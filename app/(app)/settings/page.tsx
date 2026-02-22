@@ -91,7 +91,7 @@ export default function SettingsPage() {
           <h1 className="text-xl font-semibold text-foreground">{t("settings.title")}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {locale === "pt"
-              ? "Central de configuracoes do workspace ativo. Todos os campos abaixo sao somente leitura."
+              ? "Central de configuracoes do workspace ativo. Todos os campos abaixo são somente leitura."
               : "Settings center for the active workspace. All fields below are read-only."}
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function SettingsPage() {
               </div>
             ) : (
               <p className="text-[13px] text-muted-foreground">
-                {locale === "pt" ? "Workspace nao encontrado." : "Workspace not found."}
+                {locale === "pt" ? "Workspace não encontrado." : "Workspace not found."}
               </p>
             )}
           </section>

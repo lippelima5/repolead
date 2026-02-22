@@ -24,7 +24,7 @@ const docsPages: LocalizedDocsPage[] = [
       en: "Getting Started",
     },
     description: {
-      pt: "Setup rapido e primeiros passos.",
+      pt: "Setup rápido e primeiros passos.",
       en: "Quick setup and first steps.",
     },
   },
@@ -42,7 +42,7 @@ const docsPages: LocalizedDocsPage[] = [
   {
     slug: "exports",
     title: {
-      pt: "Exportacao de dados",
+      pt: "Exportação de dados",
       en: "Data Exports",
     },
     description: {
@@ -53,7 +53,7 @@ const docsPages: LocalizedDocsPage[] = [
   {
     slug: "api",
     title: {
-      pt: "API publica",
+      pt: "API pública",
       en: "Public API",
     },
     description: {
@@ -64,7 +64,7 @@ const docsPages: LocalizedDocsPage[] = [
   {
     slug: "integrations",
     title: {
-      pt: "Integracoes e exemplos",
+      pt: "Integrações e exemplos",
       en: "Integrations and examples",
     },
     description: {
