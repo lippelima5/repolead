@@ -1,6 +1,37 @@
 # RepoLead - Regras de Engenharia
 
-Este arquivo define as regras de referencia para evolucao do projeto.
+Este arquivo define as regras canonicas para evolucao do projeto.
+
+## 0) Governanca documental (obrigatorio)
+
+### 0.1 Arquivos estaveis (nao atualizar com frequencia)
+
+Os arquivos abaixo sao estruturais e devem ser alterados somente quando realmente necessario:
+
+- `README.md`
+- `DESCRIPTION.md`
+- `AGENTS.md`
+
+So atualizar quando houver:
+
+- nova regra de engenharia/processo;
+- mudanca relevante de branding/posicionamento;
+- mudanca estrutural real de arquitetura ou produto.
+
+### 0.2 Arquivos vivos (atualizacao continua)
+
+Os arquivos abaixo devem refletir sempre o estado atual:
+
+- `ROADMAP.md`
+- `CHANGELOG.md`
+
+Regras:
+
+- toda entrega relevante deve atualizar `ROADMAP.md` e `CHANGELOG.md`;
+- `ROADMAP.md` deve usar secoes padrao: `Concluido`, `Em andamento`, `Proximas`, `Macro v2`;
+- `CHANGELOG.md` deve registrar entradas no formato:
+  - titulo: `# YYYY-MM-DD HH:mm:ss`
+  - secoes: `Adicionado`, `Atualizado`, `Removido`.
 
 ## 1) Arquitetura obrigatoria
 
@@ -40,6 +71,7 @@ Este arquivo define as regras de referencia para evolucao do projeto.
 - `/dashboard`
 - `/sources`, `/destinations`, `/leads`, `/ingestions`, `/deliveries`
 - `/settings` (readonly com atalhos)
+- `/settings/api-access`
 - `/workspaces`, `/workspaces/create`, `/workspaces/[workspaceId]`, `/workspaces/[workspaceId]/edit`, `/workspaces/[workspaceId]/billing`
 - `/profile`
 - `/alerts` (acesso via Settings)
@@ -74,7 +106,20 @@ Este arquivo define as regras de referencia para evolucao do projeto.
 - Evitar duplicidade de regras de negocio em multiplos lugares.
 - Nao remover nada de `components/ui`.
 
-## 10) Qualidade minima antes de entrega
+## 10) Variaveis de ambiente (stack.env)
+
+`stack.env` e o inventario canonico de envs do projeto.
+
+Regras obrigatorias:
+
+- toda env usada no codigo deve existir em `stack.env`;
+- env removida do codigo deve ser removida de `stack.env`;
+- env nova deve ser adicionada no mesmo PR da implementacao;
+- `stack.env` deve refletir estado atual (adicionado/atualizado/removido);
+- nao versionar segredo real: manter placeholders seguros;
+- organizar por blocos (app, db, smtp, stripe, worker, healthcheck).
+
+## 11) Qualidade minima antes de entrega
 
 1. `npm run lint`
 2. `npm run build`
@@ -83,4 +128,4 @@ Se houver mudanca de Prisma schema:
 
 1. gerar migration versionada
 2. validar build
-3. atualizar documentacao
+3. atualizar documentacao (`README.md`, `DESCRIPTION.md`, `ROADMAP.md`, `CHANGELOG.md` se aplicavel)

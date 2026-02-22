@@ -1,93 +1,76 @@
 # RepoLead
 
-RepoLead e uma plataforma API-first para captura, normalizacao, dedupe e distribuicao de leads por workspace.
+RepoLead e uma plataforma API-first para captura, deduplicacao e distribuicao de leads por workspace (multi-tenant), com trilha de auditoria e entregas resilientes.
 
-## Stack
+## Objetivo
+
+Centralizar todo o ciclo de Lead Operations em um fluxo unico:
+
+1. Captura de payloads por webhook/API.
+2. Idempotencia e deduplicacao por identidades.
+3. Timeline auditavel por lead.
+4. Fan-out para destinations com retry e DLQ.
+
+## Stack Oficial
 
 - Next.js 16 (App Router)
-- React 19 + TypeScript strict
-- PostgreSQL + Prisma 7 (`prisma/generated`)
-- Auth JWT em cookie httpOnly
+- React 19
+- TypeScript strict
+- PostgreSQL
+- Prisma 7 (`prisma/generated`)
+- Auth JWT (`bcryptjs` + `jose`)
 - Zod para validacao
-- Stripe (checkout/portal/webhook)
+- Axios no frontend (`lib/api.ts`)
+- Stripe (checkout, portal e webhook)
 
-## Regras de arquitetura
+## Arquitetura Obrigatoria
 
 - Nao usar Server Actions.
-- Toda leitura/mutacao protegida via Route Handlers em `app/api/**`.
-- Frontend deve consumir API via `lib/api.ts` (axios).
-- Sempre aplicar escopo de workspace em endpoints de tenant.
+- Toda operacao protegida deve estar em `app/api/**`.
+- Frontend deve consumir backend via `lib/api.ts`.
+- Validacao de body com `parseJsonBody` + `lib/schemas.ts`.
+- Respostas com `apiSuccess`, `apiError`, `apiRateLimit`.
+- Tratamento centralizado com `onError`.
+- Multi-tenant estrito por `workspace_id`.
 
-## Setup local
+## Modulos do Produto
 
-1. Instalar dependencias:
-
-```bash
-npm install
-```
-
-2. Configurar ambiente:
-
-```bash
-cp .env.example .env
-```
-
-3. Prisma:
-
-```bash
-npx prisma generate
-npx prisma migrate dev
-```
-
-4. Rodar app:
-
-```bash
-npm run dev
-```
-
-5. Validacao:
-
-```bash
-npm run lint
-npm run build
-```
-
-## Execucao em container (producao)
-
-- A imagem sobe dois processos no mesmo container:
-  - app Next.js (`next start`)
-  - worker de deliveries e resumos diarios (cron interno autenticado por `CRON_SECRET`)
-- O bootstrap aplica `prisma migrate deploy` antes de iniciar os processos.
-- Healthcheck interno: `GET /api/internal/health`.
-
-Com Docker Compose:
-
-```bash
-docker compose up -d --build
-```
-
-## Rotas principais (app)
+### Painel autenticado
 
 - `/dashboard`
-- `/sources`
-- `/destinations`
-- `/leads`
-- `/ingestions`
-- `/deliveries`
-- `/settings` (readonly + atalhos)
-- `/settings/api-access`
-- `/workspaces`
-- `/workspaces/create`
-- `/workspaces/[workspaceId]`
-- `/workspaces/[workspaceId]/edit`
-- `/workspaces/[workspaceId]/billing`
+- `/sources`, `/destinations`
+- `/leads`, `/ingestions`, `/deliveries`
+- `/alerts`
+- `/settings`, `/settings/api-access`
+- `/workspaces`, `/workspaces/create`, `/workspaces/[workspaceId]`, `/workspaces/[workspaceId]/edit`, `/workspaces/[workspaceId]/billing`
 - `/profile`
-- `/alerts` (acesso via Settings)
-- `/docs` (publico, PT/EN)
+- `/feedback`
 
-## Endpoints principais (API)
+### Painel administrativo
 
-Workspace:
+- `/admin`
+- `/admin/billing`
+
+### Publico
+
+- `/` (landing)
+- `/docs`, `/docs/[lang]/[slug]`
+- `/blog`, `/changelog`, `/terms`, `/privacy`
+- `/invite/[token]`
+
+## APIs Principais
+
+### Auth
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+- `POST /api/auth/magic`
+- `POST /api/auth/magic/consume`
+
+### Workspace
 
 - `GET/POST /api/workspaces`
 - `GET/PATCH/DELETE /api/workspaces/[id]`
@@ -96,13 +79,10 @@ Workspace:
 - `GET/POST /api/workspaces/[id]/read-keys`
 - `POST /api/workspaces/[id]/read-keys/[keyId]/rotate`
 - `POST /api/workspaces/[id]/read-keys/[keyId]/revoke`
-
-Convites:
-
 - `GET /api/workspaces/invite/[token]`
 - `POST /api/workspaces/invite/[token]/accept`
 
-Fontes e destinos:
+### Sources e Destinations
 
 - `GET/POST /api/sources`
 - `GET/PATCH/DELETE /api/sources/[id]`
@@ -113,74 +93,121 @@ Fontes e destinos:
 - `GET/PATCH/DELETE /api/destinations/[id]`
 - `POST /api/destinations/[id]/test`
 
-RepoLead pipeline:
+### Leads, Ingestions, Deliveries
 
-- `POST /api/v1/leads/ingest`
+- `POST /api/v1/leads/ingest` (ingestao publica)
 - `GET /api/v1/leads`
 - `GET /api/v1/leads/[id]`
 - `GET /api/v1/leads/[id]/timeline`
 - `GET /api/ingestions`
 - `GET /api/ingestions/[id]`
 - `GET /api/leads`
-- `GET /api/leads/export.csv`
-- `POST /api/leads/export/email`
 - `GET/PATCH /api/leads/[id]`
 - `GET /api/leads/[id]/timeline`
+- `GET /api/leads/export.csv`
+- `POST /api/leads/export/email`
 - `GET /api/deliveries`
 - `GET /api/deliveries/[id]`
 - `POST /api/deliveries/[id]/replay`
 - `POST /api/deliveries/replay-bulk`
+- `POST /api/deliveries/send-all-leads`
+
+### Metricas, alertas e operacao
+
 - `GET /api/metrics/overview`
 - `GET/POST/PATCH/DELETE /api/alerts/rules`
 - `GET /api/alerts/events`
-
-Cron interno:
-
 - `GET|POST /api/internal/cron/deliveries`
 - `GET|POST /api/internal/cron/lead-summaries`
-- alias publicos internos: `/api/cron/deliveries` e `/api/cron/lead-summaries`
+- Alias: `/api/cron/deliveries`, `/api/cron/lead-summaries`
+- `GET /api/internal/health`
 
-## Convites de workspace
+### Billing (Stripe)
 
-- Convite cria token com hash em banco (`workspace_invite.token`).
-- O link enviado e `/invite/[token]`.
-- Se SMTP nao estiver configurado, a URL do convite e registrada em log do servidor.
+- `GET /api/billing-plan`
+- `POST /api/stripe/checkout`
+- `POST /api/stripe/portal`
+- `POST /api/stripe/webhook`
+- Admin: `/api/admin/billing-plan`, `/api/admin/stripe/setup`
 
-## Billing
+## Integracoes Modulares
 
-- Setup Stripe em `/admin/billing`.
-- Checkout: `POST /api/stripe/checkout`.
-- Portal: `POST /api/stripe/portal`.
-- Retornos de billing usam rotas `/workspaces/[workspaceId]` e `/workspaces/[workspaceId]/billing`.
+Catalogo unico em `lib/integrations/catalog.ts`.
 
-## Integracoes modulares
+Modulos ativos em arquivo unico:
 
-- Catalogo central: `lib/integrations/catalog.ts`.
-- Cada integracao ativa e um arquivo unico em:
-  - `lib/integrations/source/<id>.tsx`
-  - `lib/integrations/destination/<id>.tsx`
-- Cada modulo contem: schema Zod, defaults, formulario e mapeadores de payload.
+- `lib/integrations/source/<id>.tsx`
+- `lib/integrations/destination/<id>.tsx`
 
-## Exportacao e API publica
+Cada modulo exporta schema, defaults, formulario e mapeadores de payload.
 
-- Exportacao CSV imediata na tela `Leads`.
-- Exportacao por email com link assinado (24h).
-- API publica de leitura autenticada por `Read API key` (workspace-scoped):
-  - header `Authorization: Bearer lv_rk_xxx` ou `X-Api-Key`.
-  - limite inicial: 120 req/min por chave.
+## Estrutura do Repositorio
 
-## Resumo diario por email
+- `app/`: rotas App Router e Route Handlers
+- `components/`: UI e componentes de dominio
+- `contexts/`: auth, i18n e tema
+- `lib/`: dominio, seguranca, auth, integracoes e utilitarios
+- `prisma/`: schema e migrations
+- `emails/`: templates e envio
+- `scripts/`: bootstrap prod, worker e healthcheck
+- `content/`: docs publicas PT/EN
+- `stack.env`: catalogo canonico de variaveis de ambiente
 
-- Cada workspace tem a flag `daily_lead_summary_enabled` (default: `true`).
-- O envio diario vai para todos os membros do workspace.
-- O resumo so e enviado quando existem leads novos no dia.
-- O toggle pode ser alterado em `/workspaces/[workspaceId]/edit`.
+## Configuracao de Ambiente
 
-## Documentacao publica
+1. Copie o arquivo de base:
 
-- Centro publico em `/docs` com conteudo PT/EN:
-  - getting started
-  - conceitos
-  - exportacao
-  - API publica
-  - exemplos de integracao
+```bash
+cp stack.env .env
+```
+
+2. Ajuste valores obrigatorios no `.env`:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `CRON_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_BASE_URL`
+
+3. Configure opcionais conforme uso:
+
+- SMTP (`SMTP_*`) para envio de emails
+- Stripe (`STRIPE_*`) para billing
+- Worker (`DELIVERY_WORKER_*`, `LEAD_SUMMARY_*`) para processamento assinado
+
+## Execucao Local
+
+```bash
+npm install
+npx prisma generate
+npx prisma migrate dev
+npm run dev
+```
+
+## Qualidade Minima
+
+```bash
+npm run lint
+npm run build
+```
+
+## Execucao em Producao (container)
+
+`npm run start` executa:
+
+- `prisma migrate deploy`
+- processo web Next.js
+- worker de deliveries/resumo diario (se habilitado)
+
+Com Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+## Governanca de Documentacao
+
+- Arquivos estaveis: `README.md`, `DESCRIPTION.md`, `AGENTS.md`.
+- Arquivos vivos: `ROADMAP.md`, `CHANGELOG.md`.
+- Regras detalhadas em `AGENTS.md`.
+
